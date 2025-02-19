@@ -1,10 +1,12 @@
 package com.coffeebean.domain.user.user.controller;
 
+import com.coffeebean.domain.user.user.dto.EmailVerificationRequest;
 import com.coffeebean.domain.user.user.dto.SignupReqBody;
 import com.coffeebean.domain.user.user.enitity.User;
+import com.coffeebean.domain.user.user.service.EmailVerificationService;
 import com.coffeebean.domain.user.user.service.UserService;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +22,10 @@ public class UserController {
 
     private final UserService userService;
 
-    // 회원가입
-    @PostMapping("signup")
-    public ResponseEntity<String> signup(@RequestBody @Valid SignupReqBody signupReqBody, BindingResult bindingResult) {
-        // 입력 값 유효성 검사
+    // 회원가입 처리
+    @PostMapping("/signup")
+    public ResponseEntity<String> signup(@RequestBody @Valid SignupReqBody signupRequest, BindingResult bindingResult) {
+        // 유효성 검사
         if (bindingResult.hasErrors()) {
             StringBuilder errorMessage = new StringBuilder();
             bindingResult.getAllErrors().forEach(error -> errorMessage.append(error.getDefaultMessage()).append("\n"));
@@ -31,17 +33,21 @@ public class UserController {
         }
 
         // 이메일 중복 확인
-        userService.findByEmail(signupReqBody.getEmail())
-                .ifPresent(user -> {
-                    throw new IllegalStateException("이미 존재하는 회원입니다.");
-                });
+        Optional<User> existingUser = userService.findByEmail(signupRequest.getEmail());
+        if (existingUser.isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 존재하는 이메일입니다.");
+        }
 
-        // user 저장
-        userService.create(signupReqBody);
+        userService.create(signupRequest);
 
-        // 회원가입 성공
-        return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 완료되었습니다.");
+        return ResponseEntity.status(HttpStatus.OK).body("인증번호가 이메일로 전송되었습니다.");
     }
 
+    // 이메일 인증: 사용자가 이메일로 받은 인증 코드를 제출하여 이메일 인증을 완료
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestBody EmailVerificationRequest emailVerificationRequest) {
+        boolean result = userService.verifyEmail(emailVerificationRequest.getEmail(), emailVerificationRequest.getCode());
+        return ResponseEntity.ok(result ? "이메일 인증 성공" : "이메일 인증 실패");
+    }
 
 }

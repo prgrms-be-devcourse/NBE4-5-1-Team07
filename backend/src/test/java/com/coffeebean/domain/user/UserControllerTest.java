@@ -55,6 +55,7 @@ public class UserControllerTest {
 
         // 이메일 중복 없음
         when(userService.findByEmail("test@example.com")).thenReturn(Optional.empty());
+
         // 회원가입 성공
         doNothing().when(userService).create(any(SignupReqBody.class));
 

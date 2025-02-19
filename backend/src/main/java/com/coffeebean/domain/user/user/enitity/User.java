@@ -17,12 +17,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
+@Setter
 @Entity
 @Builder
 @AllArgsConstructor
@@ -49,6 +47,14 @@ public class User {
 	private Address address;
 
 	private Integer totalPoints = 0; // (초기값 0)
+
+	// 이메일 인증 코드
+	@Column(name = "verification_code")
+	private String verificationCode;
+
+	// 이메일 인증 확인
+	@Column(name = "verified", nullable = false, columnDefinition = "boolean default false")
+	private boolean verified;
 
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "user_id")
