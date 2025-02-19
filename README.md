@@ -84,4 +84,4 @@
 <br/>
 
 ## 컨벤션
-[🎯 Commit Convention]([https://github.com/prgrms-be-devcourse/NBE4-5-1-Team07/wiki/Git-Commit-Message-Convention](https://github.com/prgrms-be-devcourse/NBE4-5-1-Team07/wiki/%F0%9F%93%8C-Git-Commit-Message-Convention#6-%EC%97%AC%EB%9F%AC%EA%B0%80%EC%A7%80-%ED%95%AD%EB%AA%A9%EC%9D%B4-%EC%9E%88%EB%8B%A4%EB%A9%B4-%EA%B8%80%EB%A8%B8%EB%A6%AC-%EA%B8%B0%ED%98%B8%EB%A5%BC-%ED%86%B5%ED%95%B4-%EA%B0%80%EB%8F%85%EC%84%B1-%EB%86%92%EC%9D%B4%EA%B8%B0))
+[🎯 Commit Convention](https://github.com/prgrms-be-devcourse/NBE4-5-1-Team07/wiki/%F0%9F%93%8C-Git-Commit-Message-Convention#6-%EC%97%AC%EB%9F%AC%EA%B0%80%EC%A7%80-%ED%95%AD%EB%AA%A9%EC%9D%B4-%EC%9E%88%EB%8B%A4%EB%A9%B4-%EA%B8%80%EB%A8%B8%EB%A6%AC-%EA%B8%B0%ED%98%B8%EB%A5%BC-%ED%86%B5%ED%95%B4-%EA%B0%80%EB%8F%85%EC%84%B1-%EB%86%92%EC%9D%B4%EA%B8%B0)
