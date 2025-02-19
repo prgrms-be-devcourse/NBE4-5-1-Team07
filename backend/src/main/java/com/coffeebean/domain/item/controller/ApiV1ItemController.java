@@ -4,8 +4,10 @@ import com.coffeebean.domain.item.dto.ItemDto;
 import com.coffeebean.domain.item.entity.Item;
 import com.coffeebean.domain.item.service.ItemService;
 import com.coffeebean.global.dto.RsData;
+import com.coffeebean.global.exception.ServiceException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -51,7 +53,9 @@ public class ApiV1ItemController {
     @GetMapping("/{id}")
     public RsData<ItemDto> getItem(@PathVariable long id) {
 
-        Item item = itemService.getItem(id).get();
+        Item item = itemService.getItem(id).orElseThrow(
+                ()-> new ServiceException("404-1", "존재하지 않는 상품입니다.")
+        );
 
         return new RsData<>(
                 "200-1",
@@ -62,10 +66,18 @@ public class ApiV1ItemController {
 
     // 상품 삭제
     @DeleteMapping("/{id}")
-    public void deleteItem(@PathVariable long id) {
-        Item item = itemService.getItem(id).get();
+    @Transactional
+    public RsData<Void> deleteItem(@PathVariable long id) {
+        Item item = itemService.getItem(id).orElseThrow(
+                ()-> new ServiceException("404-1", "존재하지 않는 상품입니다.")
+        );
 
         itemService.deleteItem(item);
+
+        return new RsData<>(
+                "200-1",
+                "%d번 상품 삭제가 완료되었습니다.".formatted(id)
+                );
 
     }
 
