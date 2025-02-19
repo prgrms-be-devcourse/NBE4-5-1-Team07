@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/items")
@@ -50,8 +49,15 @@ public class ApiV1ItemController {
 
     // 상품 단건 조회
     @GetMapping("/{id}")
-    public Optional<Item> getItem(@PathVariable long id) {
-        return itemService.getItem(id);
+    public RsData<ItemDto> getItem(@PathVariable long id) {
+
+        Item item = itemService.getItem(id).get();
+
+        return new RsData<>(
+                "200-1",
+                "%s가 조회 되었습니다.".formatted(item.getName()),
+                new ItemDto(item)
+        );
     }
 
     // 상품 삭제
