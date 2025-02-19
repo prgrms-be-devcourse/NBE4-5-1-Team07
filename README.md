@@ -62,7 +62,6 @@
    | 김경래 | <img src="" alt="김경래" width="100">                                                      | <ul><li>관리자 관리 페이지 개발</li><li>관리자 기능 개발 </li></ul> |
 
 <br/>
-
 <br/>
 
 
@@ -80,6 +79,9 @@
 - 테스트가 완료되면, Pull Request를 생성하여 Review를 요청합니다. 이 때 타겟은 ```main``` 브랜치입니다.
 - Review가 완료되고, 피드백이 모두 반영돠면 해당 ```feature```브랜치를 ```main```브랜치로 **Merge**합니다.
 
+  
 <br/>
+<br/>
+
 ## 컨벤션
-[🎯 Commit Convention](https://github.com/prgrms-be-devcourse/NBE4-5-1-Team07/wiki/%F0%9F%93%8C-Git-Commit-Message-Convention#6-%EC%97%AC%EB%9F%AC%EA%B0%80%EC%A7%80-%ED%95%AD%EB%AA%A9%EC%9D%B4-%EC%9E%88%EB%8B%A4%EB%A9%B4-%EA%B8%80%EB%A8%B8%EB%A6%AC-%EA%B8%B0%ED%98%B8%EB%A5%BC-%ED%86%B5%ED%95%B4-%EA%B0%80%EB%8F%85%EC%84%B1-%EB%86%92%EC%9D%B4%EA%B8%B0)
+[🎯 Commit Convention](https://github.com/prgrms-be-devcourse/NBE4-5-1-Team07/wiki/Git-Commit-Message-Convention)
