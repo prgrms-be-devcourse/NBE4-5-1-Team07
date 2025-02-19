@@ -36,10 +36,19 @@ public class ApiV1ItemController {
         return itemService.getItems();
     }
 
+    // 상품 단건 조회
     @GetMapping("/{id}")
     public Optional<Item> getItem(@PathVariable long id){
         return itemService.getItem(id);
     }
 
+    // 상품 삭제
+    @DeleteMapping("/{id}")
+    public void deleteItem(@PathVariable long id){
+        Item item = itemService.getItem(id).get();
+
+        itemService.deleteItem(item);
+
+    }
 
 }
