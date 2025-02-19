@@ -5,14 +5,19 @@ import com.coffeebean.domain.item.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class ItemService {
 
     private final ItemRepository itemRepository;
 
+    // 상품 추가 로직
     public Item addItem(String name, int price, int stockQuantity, String description) {
-        return ItemRepository.save(
+
+        return itemRepository.save(
                 Item.builder()
                         .name(name)
                         .price(price)
@@ -20,5 +25,15 @@ public class ItemService {
                         .description(description)
                         .build()
         );
+    }
+
+    // 전체 조회
+    public List<Item> getItems() {
+        return itemRepository.findAll();
+    }
+
+    // 단건 조회
+    public Optional<Item> getItem(long id) {
+        return itemRepository.findById(id);
     }
 }
