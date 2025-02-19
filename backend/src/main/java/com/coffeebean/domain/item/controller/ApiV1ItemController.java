@@ -30,8 +30,14 @@ public class ApiV1ItemController {
 
     // 상품 등록
     @PostMapping
-    public void addItem(@RequestBody @Valid AddReqBody reqBody) {
-        itemService.addItem(reqBody.name(), reqBody.price(), reqBody.stockQuantity(), reqBody.description());
+    public RsData<Item> addItem(@RequestBody @Valid AddReqBody reqBody) {
+        Item item = itemService.addItem(reqBody.name(), reqBody.price(), reqBody.stockQuantity(), reqBody.description());
+
+        return new RsData<>(
+                "200-1",
+                "'%s' 상품이 정상적으로 등록되었습니니다.".formatted(item.getName()),
+                item
+        );
     }
 
     // 상품 전체 조회
@@ -91,9 +97,18 @@ public class ApiV1ItemController {
 
     // 상품 수정
     @PutMapping("/{id}")
-    public void modifyItem(@PathVariable long id, @RequestBody ModifyReqBody reqBody) {
-        Item item = itemService.getItem(id).get();
-        itemService.modifyItem(item, reqBody.name(), reqBody.price(), reqBody.stockQuantity(), reqBody.description());
+    @Transactional
+    public RsData<Void> modifyItem(@PathVariable long id, @RequestBody ModifyReqBody reqBody) {
+        Item item = itemService.getItem(id).orElseThrow(
+                ()-> new ServiceException("404-1", "존재하지 않는 상품입니다.")
+        );
+
+        Item modifyItem= itemService.modifyItem(item, reqBody.name(), reqBody.price(), reqBody.stockQuantity(), reqBody.description());
+
+        return new RsData<>(
+                "200-1",
+                "'%S' 상품이 수정완료 되었습니다.".formatted(modifyItem.getName())
+        );
 
     }
 }
