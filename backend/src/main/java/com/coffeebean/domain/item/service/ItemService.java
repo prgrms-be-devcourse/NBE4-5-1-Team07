@@ -37,7 +37,14 @@ public class ItemService {
         return itemRepository.findById(id);
     }
 
+    // 아이템 삭제
     public void deleteItem(Item item) {
         itemRepository.delete(item);
     }
+
+    // test를 위한 count
+    public long count() {
+        return itemRepository.count();
+    }
+
 }
