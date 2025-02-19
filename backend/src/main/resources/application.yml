@@ -24,3 +24,12 @@ spring:
     properties:
       hibernate:
         default_batch_fetch_size: 100
+
+  mail:
+    username: [exam@mail.com]
+    password: [password]
+    host: smtp.gmail.com
+    port: 587
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
