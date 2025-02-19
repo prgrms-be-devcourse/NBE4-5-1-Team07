@@ -4,6 +4,7 @@ import com.coffeebean.domain.item.entity.Item;
 import com.coffeebean.domain.item.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class ItemService {
         return itemRepository.findById(id);
     }
 
-    // 아이템 삭제
+    // 상품 삭제
     public void deleteItem(Item item) {
         itemRepository.delete(item);
     }
@@ -47,4 +48,11 @@ public class ItemService {
         return itemRepository.count();
     }
 
+    @Transactional
+    public void modifyItem(Item item, String name, int price, int stockQuantity, String description) {
+        item.setName(name);
+        item.setPrice(price);
+        item.setStockQuantity(stockQuantity);
+        item.setDescription(description);
+    }
 }
