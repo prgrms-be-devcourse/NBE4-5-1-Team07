@@ -95,7 +95,7 @@ public class UserService {
 			throw new IllegalArgumentException("잘못된 인증 정보입니다.");
 		}
 
-		String email = (String)payload.get("email");
+		String email = (String)payload.get("sub"); // email
 
 		// 이메일만 담겨있는 User 반환
 		return User.builder()
