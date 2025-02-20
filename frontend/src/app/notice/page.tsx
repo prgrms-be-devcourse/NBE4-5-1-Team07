@@ -1,4 +1,4 @@
-import ClientPage from "./items/ClientPage";
+import ClientPage from "./ClientPage";
 
 export default function Page() {
   return (
