@@ -107,4 +107,25 @@ public class ApiV1CartController {
         );
     }
 
+    // 자신의 장바구니 상품 삭제
+    @DeleteMapping("/{id}")
+    @Transactional
+    public RsData<Void> deleteCartItem(
+            @RequestBody @Valid AuthReqBody authReqBody,
+            @PathVariable(name = "id") Long itemId
+    ) {
+        User actor = userService.getUserByAuthToken(authReqBody.authToken());
+        User realActor = userService.findByEmail(actor.getEmail())
+                .orElseThrow(() -> new ServiceException("401", "인증 정보가 잘못되었습니다."));
+        Cart cart = cartService.getMyCart(realActor);
+
+        cartItemService.deleteCartItem(cart, itemId);
+
+        return new RsData<>(
+                "200-1",
+                "장바구니의 상품이 삭제되었습니다."
+        );
+    }
+
+
 }
