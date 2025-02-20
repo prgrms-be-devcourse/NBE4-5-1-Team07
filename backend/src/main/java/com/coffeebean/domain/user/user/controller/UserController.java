@@ -4,13 +4,10 @@ import com.coffeebean.domain.user.user.dto.EmailVerificationRequest;
 import com.coffeebean.domain.user.user.dto.SignupReqBody;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.service.UserService;
-import com.coffeebean.global.util.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
