@@ -39,4 +39,8 @@ public class OrderItem {
 
 	private int count; // 주문 수량
 
+	// 조회 로직 주문 상품 전체 가격
+	public int getTotalPrice() {
+		return getOrderPrice() * getCount();
+	}
 }
