@@ -3,16 +3,18 @@ package com.coffeebean.domain.user.user.controller;
 import com.coffeebean.domain.user.user.dto.EmailVerificationRequest;
 import com.coffeebean.domain.user.user.dto.SignupReqBody;
 import com.coffeebean.domain.user.user.enitity.User;
-import com.coffeebean.domain.user.user.service.EmailVerificationService;
 import com.coffeebean.domain.user.user.service.UserService;
-import jakarta.mail.MessagingException;
+import com.coffeebean.global.util.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -41,6 +43,34 @@ public class UserController {
         userService.create(signupRequest);
 
         return ResponseEntity.status(HttpStatus.OK).body("인증번호가 이메일로 전송되었습니다.");
+    }
+
+    // 관리자 로그인
+    @PostMapping("/admin/login")
+    public ResponseEntity<?> adminLogin(@RequestBody Map<String, String> credentials) {
+        String email = credentials.get("email");
+        String password = credentials.get("password");
+
+        try {
+            String token = userService.loginAdmin(email, password); // 이메일을 기준으로 로그인
+            return ResponseEntity.ok(Map.of("token", token));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+
+    // 일반 회원 로그인
+    @PostMapping("/login")
+    public ResponseEntity<?> userLogin(@RequestBody Map<String, String> credentials) {
+        String email = credentials.get("email");
+        String password = credentials.get("password");
+
+        try {
+            String token = userService.login(email, password); // 이메일을 기준으로 로그인
+            return ResponseEntity.ok(Map.of("token", token));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
     }
 
     // 이메일 인증: 사용자가 이메일로 받은 인증 코드를 제출하여 이메일 인증을 완료
