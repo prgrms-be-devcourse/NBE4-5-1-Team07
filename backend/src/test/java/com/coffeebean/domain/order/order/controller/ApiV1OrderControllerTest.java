@@ -40,8 +40,8 @@ class ApiV1OrderControllerTest {
 	}
 
 	@Test
-	@DisplayName("회원, 비회원은 주문을 등록할 수 있다")
-	void createOrder() throws Exception {
+	@DisplayName("회원은 주문을 등록할 수 있다")
+	void createOrderByUser() throws Exception {
 		ResultActions resultActions = mvc.perform(
 				post("/api/v1/orders")
 					.content("""
@@ -65,6 +65,50 @@ class ApiV1OrderControllerTest {
 						  "authToken": "%s"
 						}
 						""".formatted(authToken).trim().stripIndent())
+					.contentType(
+						new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+					)
+			)
+			.andDo(print());
+
+		resultActions
+			.andExpect(status().isCreated())
+			.andExpect(handler().handlerType(ApiV1OrderController.class))
+			.andExpect(handler().methodName("createOrder"))
+			.andExpect(jsonPath("$.deliveryAddress.city").value("서울"))
+			.andExpect(jsonPath("$.deliveryAddress.street").value("원두아파트 100동 1201호"))
+			.andExpect(jsonPath("$.deliveryAddress.zipcode").value("23578"))
+			.andExpect(jsonPath("$.deliveryStatus").value("READY"))
+			.andExpect(jsonPath("$.orderStatus").value("ORDER"))
+			.andExpect(jsonPath("$.orderDate").isNotEmpty());
+	}
+
+	@Test
+	@DisplayName("비회원은 주문을 등록할 수 있다")
+	void createOrderByNotUser() throws Exception {
+		ResultActions resultActions = mvc.perform(
+				post("/api/v1/orders")
+					.content("""
+						{
+						  "items": [
+						    {
+						      "id": 1,
+						      "count": 2
+						    },
+						    {
+						      "id": 2,
+						      "count": 3
+						    }
+						  ],
+						  "address": {
+						    "city": "서울",
+						    "street": "원두아파트 100동 1201호",
+						    "zipcode": "23578"
+						  },
+						  "email": "example@exam.com",
+						  "authToken": null
+						}
+						""".trim().stripIndent())
 					.contentType(
 						new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
 					)
