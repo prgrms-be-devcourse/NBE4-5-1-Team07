@@ -27,4 +27,9 @@ public class CartService {
         return opCart.get();
     }
 
+    @Transactional
+    public void deleteCart(Cart cart) {
+        cart.deleteAllCartItems();
+        cartRepository.save(cart);
+    }
 }
