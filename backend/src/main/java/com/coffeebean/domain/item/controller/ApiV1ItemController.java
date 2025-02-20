@@ -1,6 +1,7 @@
 package com.coffeebean.domain.item.controller;
 
 import com.coffeebean.domain.item.dto.ItemDto;
+import com.coffeebean.domain.item.dto.ItemListResponseDto;
 import com.coffeebean.domain.item.entity.Item;
 import com.coffeebean.domain.item.service.ItemService;
 import com.coffeebean.global.dto.RsData;
@@ -42,7 +43,7 @@ public class ApiV1ItemController {
 
     // 상품 전체 조회
     @GetMapping
-    public RsData<List<ItemDto>> getItems() {
+    public RsData<ItemListResponseDto> getItems() {
 
         List<ItemDto> items = itemService.getItems().stream()
                 .map(ItemDto::new)
@@ -51,7 +52,7 @@ public class ApiV1ItemController {
         return new RsData<>(
                 "200-1",
                 "전체 상품이 조회 되었습니다.",
-                items
+                new ItemListResponseDto(items)
         );
     }
 
