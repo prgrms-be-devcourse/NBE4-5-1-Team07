@@ -11,8 +11,6 @@ import {
   MenubarSeparator,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import ClientPage from "./notice/ClientPage";
-import { Button } from "@/components/ui/button";
 
 export default function ClinetLayout({
   children,
@@ -80,16 +78,8 @@ export default function ClinetLayout({
             </MenubarMenu>
           </Menubar>
         </header>
-        <div className="flex-grow bg-gray-200 p-4">{children}</div>
-        <footer className="bg-gray-300 rounded-b-2xl p-4 flex flex-col gap-2">
-          <div>
-            <div className="pl-4 flex flex-row gap-4">
-              <Button className="bg-blue-300 w-[100px] ">공지사항</Button>
-              <Button className="bg-blue-300 w-[100px] ">FAQ</Button>
-            </div>
-            <ClientPage />
-          </div>
-        </footer>
+        <div className="flex-grow bg-gray-200 rounded-b-2xl">{children}</div>
+        <footer></footer>
       </body>
     </html>
   );
