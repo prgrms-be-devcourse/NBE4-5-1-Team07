@@ -1,5 +1,7 @@
 package com.coffeebean.domain.cart.cart.controller;
 
+import com.coffeebean.domain.cart.cart.dto.CartItemDto;
+import com.coffeebean.domain.cart.cart.dto.CartListResponseDto;
 import com.coffeebean.domain.cart.cart.entity.Cart;
 import com.coffeebean.domain.cart.cart.service.CartService;
 import com.coffeebean.domain.cart.cartItem.service.CartItemService;
@@ -12,10 +14,12 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
+
+import java.util.List;
+
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -52,5 +56,28 @@ public class ApiV1CartController {
         );
     }
 
+    record AuthReqBody(@NotBlank(message = "인증 정보가 없습니다.") String authToken) {
+    }
+
+    // 자신의 장바구니 전체 조회
+    @GetMapping
+    @Transactional(readOnly = true)
+    public RsData<CartListResponseDto> getCarts(@RequestBody @Valid AuthReqBody authReqBody) {
+
+        User actor = userService.getUserByAuthToken(authReqBody.authToken());
+        User realActor = userService.findByEmail(actor.getEmail())
+                .orElseThrow(() -> new ServiceException("401", "인증 정보가 잘못되었습니다."));
+        Cart cart = cartService.getMyCart(realActor);
+
+        List<CartItemDto> cartItems = cartItemService.getCartItems(cart).stream()
+                .map(CartItemDto::new)
+                .toList();
+
+        return new RsData<>(
+                "200-1",
+                "내 장바구니 조회가 완료되었습니다.",
+                new CartListResponseDto(cartItems)
+        );
+    }
 
 }
