@@ -46,6 +46,7 @@ public class User {
 	@Embedded
 	private Address address;
 
+	@Builder.Default
 	private Integer totalPoints = 0; // (초기값 0)
 
 	// 이메일 인증 코드
