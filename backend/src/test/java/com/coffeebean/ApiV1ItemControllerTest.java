@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-public class ApiV1ItemcontrollerTest {
+public class ApiV1ItemControllerTest {
 
     @Autowired
     private ItemService itemService;
@@ -48,5 +48,13 @@ public class ApiV1ItemcontrollerTest {
                 .containsExactly("브라질 원두", "미국 원두", "케냐 원두", "이탈리아 원두", "가나 원두");
     }
 
+    @Test
+    @DisplayName("단건 조회")
+    void getItem() {
+
+        Item item = itemService.getItem(1).get();
+
+        assertThat(item.getName()).isEqualTo("커피1");
+    }
 }
 
