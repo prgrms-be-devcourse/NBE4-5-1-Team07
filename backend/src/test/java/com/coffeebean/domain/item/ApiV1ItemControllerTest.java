@@ -1,4 +1,4 @@
-package com.coffeebean;
+package com.coffeebean.domain.item;
 
 import com.coffeebean.domain.item.entity.Item;
 import com.coffeebean.domain.item.service.ItemService;
