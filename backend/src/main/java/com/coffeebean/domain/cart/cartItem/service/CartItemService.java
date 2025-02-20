@@ -59,4 +59,11 @@ public class CartItemService {
         cartItemRepository.save(cartItem);
     }
 
+    @Transactional
+    public void deleteCartItem(Cart cart, Long itemId) {
+        CartItem cartItem = cartItemRepository.findByCartIdAndItemId(cart.getId(), itemId)
+                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 상품입니다."));
+
+        cartItemRepository.delete(cartItem);
+    }
 }
