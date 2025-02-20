@@ -1,22 +1,18 @@
 package com.coffeebean.domain.cart.cart.entity;
 
-import org.springframework.boot.autoconfigure.web.WebProperties;
+import com.coffeebean.domain.cart.cartItem.entity.CartItem;
+import jakarta.persistence.*;
 
 import com.coffeebean.domain.user.user.enitity.User;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -33,4 +29,12 @@ public class Cart {
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
+
+	@Builder.Default
+	@OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<CartItem> cartItems = new ArrayList<>();
+
+	public void deleteAllCartItems() {
+		cartItems.clear();
+	}
 }
