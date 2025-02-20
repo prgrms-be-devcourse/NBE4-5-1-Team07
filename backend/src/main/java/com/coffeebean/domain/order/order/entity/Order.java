@@ -3,6 +3,7 @@ package com.coffeebean.domain.order.order.entity;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.coffeebean.domain.order.order.DeliveryStatus;
 import com.coffeebean.domain.order.order.OrderStatus;
@@ -11,6 +12,7 @@ import com.coffeebean.domain.user.user.Address;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -31,6 +33,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "orders")
+@EntityListeners(AuditingEntityListener.class)
 public class Order {
 
 	@Id
