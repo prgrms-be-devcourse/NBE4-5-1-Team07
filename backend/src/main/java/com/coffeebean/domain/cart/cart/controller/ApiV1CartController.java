@@ -80,4 +80,31 @@ public class ApiV1CartController {
         );
     }
 
+    record CartItemModifyReqBody(
+            @NotNull(message = "상품 수량이 입력되지 않았습니다.")
+            @Min(value = 1, message = "잘못된 상품 수량입니다.")
+            int quantity,
+            @NotBlank(message = "인증 정보가 없습니다.")
+            String authToken
+    ) {
+    }
+
+    // 자신의 장바구니 상품 수량 변경
+    @PutMapping("/{id}")
+    @Transactional
+    public RsData<Void> modifyCartItem(@RequestBody @Valid CartItemModifyReqBody cartModifyReqBody, @PathVariable(name = "id") Long itemId) {
+
+        User actor = userService.getUserByAuthToken(cartModifyReqBody.authToken());
+        User realActor = userService.findByEmail(actor.getEmail())
+                .orElseThrow(() -> new ServiceException("401", "인증 정보가 잘못되었습니다."));
+        Cart cart = cartService.getMyCart(realActor);
+
+        cartItemService.modifyCartItem(cart, itemId, cartModifyReqBody.quantity());
+
+        return new RsData<>(
+                "200-1",
+                "장바구니의 상품 수량이 변경되었습니다."
+        );
+    }
+
 }

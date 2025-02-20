@@ -49,5 +49,14 @@ public class CartItemService {
         return cartItemRepository.findByCart(cart);
     }
 
+    @Transactional
+    public void modifyCartItem(Cart cart, Long itemId, Integer quantity) {
+        CartItem cartItem = cartItemRepository.findByCartIdAndItemId(cart.getId(), itemId)
+                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 상품입니다."));
+
+        cartItem.updateQuantity(quantity);
+
+        cartItemRepository.save(cartItem);
+    }
 
 }
