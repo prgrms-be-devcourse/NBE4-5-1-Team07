@@ -23,6 +23,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -51,6 +52,7 @@ public class Order {
 	private OrderStatus orderStatus; // 주문 상태
 
 	@CreatedDate
+	@Setter(AccessLevel.PRIVATE)
 	private LocalDateTime orderDate; // 주문 시간
 
 }
