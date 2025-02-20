@@ -1,10 +1,10 @@
 package com.coffeebean.global.util;
 
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 import java.util.Date;
+import java.util.Map;
 
 import javax.crypto.SecretKey;
 
@@ -25,4 +25,13 @@ public class JwtUtil {
                 .compact();
     }
 
+    public static Map<String, Object> getPayload(String jwtStr) {
+        SecretKey secretKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        return (Map<String, Object>) Jwts
+            .parser()
+            .verifyWith(secretKey)
+            .build()
+            .parse(jwtStr)
+            .getPayload();
+    }
 }
