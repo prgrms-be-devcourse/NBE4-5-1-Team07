@@ -44,5 +44,10 @@ public class CartItemService {
         cartItemRepository.save(cartItem);
     }
 
+    @Transactional(readOnly = true)
+    public List<CartItem> getCartItems(Cart cart) {
+        return cartItemRepository.findByCart(cart);
+    }
+
 
 }
