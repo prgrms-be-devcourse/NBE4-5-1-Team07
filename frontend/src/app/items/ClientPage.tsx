@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import ClientPage from "../notice/ClientPage";
 import { useEffect, useState } from "react";
@@ -15,13 +14,10 @@ interface ItemDto {
   description: string;
 }
 
-export default function ClinetLayout() {
+export default function ItemsPage() {
   const [items, setItems] = useState<ItemDto[]>([]);
-  // const itmes = Array.from({ length: 8 }, (_, i) => ({
-  //   id: i + 1,
-  //   name: `상품 ${i + 1}`,
-  //   price: (i + 1) * 1000,
-  // }));
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch("http://localhost:8080/api/v1/items")
@@ -33,11 +29,17 @@ export default function ClinetLayout() {
       })
       .then((data) => {
         setItems(data.data.items); // 백엔드 응답 구조에 맞게 설정
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching items:", error);
+        setError("상품 목록을 불러올 수 없습니다.");
+        setLoading(false);
       });
   }, []);
+
+  if (loading) return <div className="text-center p-6">로딩 중...</div>;
+  if (error) return <div className="text-center p-6 text-red-500">{error}</div>;
 
   return (
     <>
