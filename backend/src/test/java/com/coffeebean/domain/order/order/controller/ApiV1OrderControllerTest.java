@@ -75,12 +75,14 @@ class ApiV1OrderControllerTest {
 			.andExpect(status().isCreated())
 			.andExpect(handler().handlerType(ApiV1OrderController.class))
 			.andExpect(handler().methodName("createOrder"))
-			.andExpect(jsonPath("$.deliveryAddress.city").value("서울"))
-			.andExpect(jsonPath("$.deliveryAddress.street").value("원두아파트 100동 1201호"))
-			.andExpect(jsonPath("$.deliveryAddress.zipcode").value("23578"))
-			.andExpect(jsonPath("$.deliveryStatus").value("READY"))
-			.andExpect(jsonPath("$.orderStatus").value("ORDER"))
-			.andExpect(jsonPath("$.orderDate").isNotEmpty());
+			.andExpect(jsonPath("$.code").value("201-1"))
+			.andExpect(jsonPath("$.msg").value("주문이 등록되었습니다."))
+			.andExpect(jsonPath("$.data.deliveryAddress.city").value("서울"))
+			.andExpect(jsonPath("$.data.deliveryAddress.street").value("원두아파트 100동 1201호"))
+			.andExpect(jsonPath("$.data.deliveryAddress.zipcode").value("23578"))
+			.andExpect(jsonPath("$.data.deliveryStatus").value("READY"))
+			.andExpect(jsonPath("$.data.orderStatus").value("ORDER"))
+			.andExpect(jsonPath("$.data.orderDate").isNotEmpty());
 	}
 
 	@Test
@@ -119,11 +121,13 @@ class ApiV1OrderControllerTest {
 			.andExpect(status().isCreated())
 			.andExpect(handler().handlerType(ApiV1OrderController.class))
 			.andExpect(handler().methodName("createOrder"))
-			.andExpect(jsonPath("$.deliveryAddress.city").value("서울"))
-			.andExpect(jsonPath("$.deliveryAddress.street").value("원두아파트 100동 1201호"))
-			.andExpect(jsonPath("$.deliveryAddress.zipcode").value("23578"))
-			.andExpect(jsonPath("$.deliveryStatus").value("READY"))
-			.andExpect(jsonPath("$.orderStatus").value("ORDER"))
-			.andExpect(jsonPath("$.orderDate").isNotEmpty());
+			.andExpect(jsonPath("$.code").value("201-1"))
+			.andExpect(jsonPath("$.msg").value("주문이 등록되었습니다."))
+			.andExpect(jsonPath("$.data.deliveryAddress.city").value("서울"))
+			.andExpect(jsonPath("$.data.deliveryAddress.street").value("원두아파트 100동 1201호"))
+			.andExpect(jsonPath("$.data.deliveryAddress.zipcode").value("23578"))
+			.andExpect(jsonPath("$.data.deliveryStatus").value("READY"))
+			.andExpect(jsonPath("$.data.orderStatus").value("ORDER"))
+			.andExpect(jsonPath("$.data.orderDate").isNotEmpty());
 	}
 }

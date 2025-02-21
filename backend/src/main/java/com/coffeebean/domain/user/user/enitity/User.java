@@ -49,14 +49,6 @@ public class User {
 	@Builder.Default
 	private Integer totalPoints = 0; // (초기값 0)
 
-	// 이메일 인증 코드
-	@Column(name = "verification_code")
-	private String verificationCode;
-
-	// 이메일 인증 확인
-	@Column(name = "verified", nullable = false, columnDefinition = "boolean default false")
-	private boolean verified;
-
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "user_id")
 	private List<PointHistory> pointHistories = new ArrayList<>();
