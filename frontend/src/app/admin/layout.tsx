@@ -34,7 +34,7 @@ export default function AdminLayout({
             </MenubarItem>
             <MenubarSeparator />
             <MenubarItem>
-              <Link href="/admin/modifyItems">상품 변경</Link>
+              <Link href="/admin/modifyItems">상품 목록</Link>
             </MenubarItem>
           </MenubarContent>
         </MenubarMenu>
