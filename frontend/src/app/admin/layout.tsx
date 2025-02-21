@@ -1,27 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Menubar,
   MenubarContent,
   MenubarItem,
   MenubarMenu,
   MenubarSeparator,
-  MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar";
 
-export default function ClinetLayout() {
-  const products = Array.from({ length: 8 }, (_, i) => ({
-    id: i + 1,
-    name: `상품 ${i + 1}`,
-    price: (i + 1) * 1000,
-  }));
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <>
+    <div>
       <Menubar className="flex w-full box-content">
         <MenubarMenu>
           <MenubarTrigger>상품 관리</MenubarTrigger>
@@ -61,17 +60,19 @@ export default function ClinetLayout() {
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
-      <div className="flex w-full justify-end">
-        <div className="flex w-full max-w-sm items-center space-x-2">
-          <Input
-            type="items"
-            placeholder="상품명"
-            className="bg-white text-black"
-          />
-          <Button type="submit">검색</Button>
-        </div>
+
+      <div className="flex w-full justify-end p-4">
+        <input
+          type="text"
+          placeholder="상품명 검색"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="border p-2 rounded"
+        />
+        <Button className="ml-2">검색</Button>
       </div>
-      <div>관리자 페이지</div>
-    </>
+
+      <div className="p-4">{children}</div>
+    </div>
   );
 }
