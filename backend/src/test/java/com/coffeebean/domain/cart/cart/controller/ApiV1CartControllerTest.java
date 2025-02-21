@@ -39,7 +39,7 @@ class ApiV1CartControllerTest {
 
     @BeforeEach
     void setUp() {
-        authToken = userService.login("example@exam.com", "password");
+        //  authToken = userService.login("example@exam.com", "password");
     }
 
     @Test
