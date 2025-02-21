@@ -56,4 +56,17 @@ public class JwtUtil {
                 .parse(token)
                 .getPayload();
     }
+
+    // JWT를 쿠키에 저장
+    public static void setJwtCookie(String jwt, HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("token", jwt)
+                .httpOnly(true)  // 클라이언트에서 JS로 접근 불가
+                .secure(true)    // HTTPS에서만 전달
+                .path("/")       // 모든 경로에서 사용 가능
+                .maxAge(EXPIRATION_TIME / 1000) // 만료 시간 (초 단위)
+                .sameSite("Strict") // SameSite 설정 (CSRF 방어)
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
 }
