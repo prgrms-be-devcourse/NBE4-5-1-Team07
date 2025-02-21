@@ -54,4 +54,11 @@ public class QuestionService {
 			.orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 질문입니다."));
 		questionRepository.delete(question);
 	}
+
+	@Transactional
+	public void deleteAnswer(Long questionId) {
+		Question question = questionRepository.findById(questionId)
+			.orElseThrow(() -> new DataNotFoundException("존재하지 않는 질문입니다."));
+		question.deleteAnswer();
+	}
 }

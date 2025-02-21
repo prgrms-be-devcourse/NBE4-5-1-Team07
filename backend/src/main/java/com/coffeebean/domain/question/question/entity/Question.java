@@ -48,7 +48,7 @@ public class Question {
 	@Column(columnDefinition = "TEXT")
 	private String content; // 질문 내용
 
-	@OneToOne(mappedBy = "question", cascade = CascadeType.ALL)
+	@OneToOne(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Answer answer;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -66,4 +66,8 @@ public class Question {
 	@LastModifiedDate
 	@Setter(AccessLevel.PRIVATE)
 	private LocalDateTime modifyDate;
+
+	public void deleteAnswer() {
+		answer = null;
+	}
 }

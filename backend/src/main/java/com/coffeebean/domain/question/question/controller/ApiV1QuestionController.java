@@ -95,22 +95,22 @@ public class ApiV1QuestionController {
 	@DeleteMapping("/{id}")
 	public RsData<Void> deleteQuestion(
 		@RequestBody @Valid AuthReqBody authReqBody,
-		@PathVariable(name = "id") Long id) {
-		if (canDeleteQuestion(id, authReqBody.authToken())) {
-			questionService.deleteQuestion(id);
+		@PathVariable(name = "id") Long questionId) {
+		if (canDeleteQuestion(questionId, authReqBody.authToken())) {
+			questionService.deleteQuestion(questionId);
 			return new RsData<>("200-1", "질문이 삭제되었습니다.");
 		}
 		return new RsData<>("403-1", "질문을 삭제할 권한이 없습니다.");
 	}
 
-	private boolean canDeleteQuestion(Long id, String authToken) {
+	private boolean canDeleteQuestion(Long questionId, String authToken) {
 		// 관리자인 경우
 		if (userService.isAdminByAuthToken(authToken)) {
 			return true;
 		}
 		// 작성자인 경우
 		User actor = userService.getUserByAuthToken(authToken);
-		Question question = questionService.findQuestionById(id);
+		Question question = questionService.findQuestionById(questionId);
 		return question.getAuthor().getEmail().equals(actor.getEmail());
 	}
 
@@ -137,5 +137,19 @@ public class ApiV1QuestionController {
 			"200-1",
 			"답변이 작성되었습니다."
 		);
+	}
+
+	// 질문에 대한 답변 삭제
+	@DeleteMapping("/{id}/answers")
+	public RsData<Void> deleteAnswer(
+		@RequestBody @Valid AuthReqBody authReqBody,
+		@PathVariable(name = "id") Long questionId) {
+		if (!userService.isAdminByAuthToken(authReqBody.authToken())) {
+			throw new ServiceException("403-1", "답변 삭제는 관리자만 가능합니다.");
+		}
+
+		questionService.deleteAnswer(questionId);
+
+		return new RsData<>("200-1", "답변이 삭제되었습니다.");
 	}
 }
