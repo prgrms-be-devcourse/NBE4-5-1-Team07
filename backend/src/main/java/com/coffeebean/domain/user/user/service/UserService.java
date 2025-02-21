@@ -1,19 +1,15 @@
 package com.coffeebean.domain.user.user.service;
 
-import com.coffeebean.domain.user.user.Address;
 import com.coffeebean.domain.user.user.dto.SignupReqBody;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.repository.UserRepository;
-import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.exception.ServiceException;
 import com.coffeebean.global.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -80,7 +76,7 @@ public class UserService {
 	// 일반 사용자 로그인
 	public Map<String, String> loginUser(String email, String password, HttpServletResponse response) {
 		User user = userRepository.findByEmail(email)
-				.orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 이메일입니다."));
+			.orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 이메일입니다."));
 
 		if (!passwordEncoder.matches(password, user.getPassword())) {
 			throw new ServiceException("401-2", "비밀번호가 올바르지 않습니다.");
@@ -102,7 +98,6 @@ public class UserService {
 		return result;
 	}
 
-
 	public User getUserByAuthToken(String token) {
 		Map<String, Object> payload = JwtUtil.getPayload(token);
 		if (payload == null) {
@@ -113,9 +108,22 @@ public class UserService {
 
 		// 이메일만 담겨있는 User 반환
 		return User.builder()
-				.email(email)
-				.build();
+			.email(email)
+			.build();
 	}
 
+	public boolean isAdminByAuthToken(String token) {
+		Map<String, Object> payload = JwtUtil.getPayload(token);
+		if (payload == null) {
+			throw new IllegalArgumentException("잘못된 인증 정보입니다.");
+		}
 
+		if (payload.keySet().contains("role")) {
+			String role = (String)payload.get("role");
+			if (role.equals(ADMIN_ROLE)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
