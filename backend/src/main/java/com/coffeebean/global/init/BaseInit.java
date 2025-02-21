@@ -41,7 +41,6 @@ public class BaseInit {
 					.password(encodedPassword) // 암호화 생략
 					.name("user1")
 					.address(new Address("서울", "관악구 원두아파트", "12345"))
-					.verified(true) // 이메일 인증 완료되었다고 가정
 					.build();
 
 				// User 엔티티를 DB에 저장
