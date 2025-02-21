@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import com.coffeebean.domain.item.entity.Item;
 import com.coffeebean.domain.question.answer.entity.Answer;
+import com.coffeebean.domain.user.user.enitity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,6 +47,10 @@ public class Question {
 	@OneToOne
 	@JoinColumn(name = "answer_id")
 	private Answer answer;
+
+	@OneToOne
+	@JoinColumn(name = "author_id")
+	private User author;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "item_id", nullable = false)
