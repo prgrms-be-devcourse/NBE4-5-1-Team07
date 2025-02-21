@@ -7,5 +7,5 @@ export default async function Page({
     id: number;
   };
 }) {
-  return <ClientPage />;
+  return <ClientPage id={params.id} />;
 }
