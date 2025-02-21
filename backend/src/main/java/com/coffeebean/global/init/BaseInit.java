@@ -30,20 +30,18 @@ public class BaseInit {
 	private final CartItemService cartItemService;
 	private final CartRepository cartRepository;
 
+	@Transactional
 	@Bean
 	@Order(1)
 	public ApplicationRunner initUser() {
 		return args -> {
 			if (userRepository.count() == 0) {
-				String encodedPassword = passwordEncoder.encode("password");
 				User user = User.builder()
 					.email("example@exam.com")
-					.password(encodedPassword) // 암호화 생략
+					.password(passwordEncoder.encode("password")) // 암호화 생략
 					.name("user1")
 					.address(new Address("서울", "관악구 원두아파트", "12345"))
 					.build();
-
-				// User 엔티티를 DB에 저장
 				userRepository.save(user);
 			}
 		};
