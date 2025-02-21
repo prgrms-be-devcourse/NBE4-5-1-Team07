@@ -7,6 +7,7 @@ import com.coffeebean.domain.user.user.repository.UserRepository;
 import com.coffeebean.global.util.JwtUtil;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,6 @@ public class UserService {
 
 	@Autowired
 	private final UserRepository userRepository;
-
 	private final PasswordEncoder passwordEncoder;
 	private final EmailVerificationService emailVerificationService;
 
@@ -33,60 +33,25 @@ public class UserService {
 		return userRepository.findByEmail(email);
 	}
 
-	// 유저 정보 저장 및 인즏
+	// 이메일 인증이 완료된 경우 회원가입 허용
 	public User create(@Valid SignupReqBody signupRequest) {
+		if (!emailVerificationService.isEmailVerified(signupRequest.getEmail())) {
+			throw new IllegalArgumentException("이메일 인증이 완료되지 않았습니다.");
+		}
+
 		// 비밀번호 암호화
 		String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
-
-		// SignupReqBody를 User 엔티티로 변환
-		Address address = signupRequest.toAddress();
 
 		// User 엔티티 생성
 		User user = User.builder()
 			.email(signupRequest.getEmail())
 			.password(encodedPassword)
 			.name(signupRequest.getName())
-			.address(address)
-			.verified(false)  // 기본 값 설정
+			.address(signupRequest.toAddress())
 			.build();
 
 		// User 엔티티를 DB에 저장
-		userRepository.save(user);
-		try {
-			emailVerificationService.sendVerificationEmail(user);
-		} catch (Exception e) {
-			throw new RuntimeException("이메일 발송 실패: " + e.getMessage());
-		}
-		return user;
-	}
-
-	public String login(String email, String password) {
-		// 사용자 검증 로직 (DB에서 이메일 및 비밀번호 확인)
-		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new IllegalArgumentException("회원 정보가 없습니다."));
-
-		if (!passwordEncoder.matches(password, user.getPassword())) {
-			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-		}
-
-		if (!user.isVerified()) {
-			throw new IllegalArgumentException("본인인증이 완료되지 않았습니다.");
-		}
-
-		return JwtUtil.createToken(email); // 이메일을 기준으로 토큰 발급
-	}
-
-	// 관리자 로그인
-	public String loginAdmin(String email, String password) {
-		if (ADMIN_EMAIL.equals(email) && "admin1234".equals(password)) {
-			return JwtUtil.createToken(email); // 이메일을 기준으로 토큰 발급
-		} else {
-			throw new IllegalArgumentException("잘못된 아이디 혹은 비밀번호입니다.");
-		}
-	}
-
-	public boolean verifyEmail(String email, String code) {
-		return emailVerificationService.verifyEmail(email, code);
+		return userRepository.save(user);
 	}
 
 	public User getUserByAuthToken(String token) {
@@ -99,7 +64,28 @@ public class UserService {
 
 		// 이메일만 담겨있는 User 반환
 		return User.builder()
-			.email(email)
-			.build();
+				.email(email)
+				.build();
 	}
+
+//	public String login(String email, String password) {
+//		// 사용자 검증 로직 (DB에서 이메일 및 비밀번호 확인)
+//		User user = userRepository.findByEmail(email)
+//			.orElseThrow(() -> new IllegalArgumentException("회원 정보가 없습니다."));
+//
+//		if (!passwordEncoder.matches(password, user.getPassword())) {
+//			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+//		}
+//
+//		return JwtUtil.createToken(email); // 이메일을 기준으로 토큰 발급
+//	}
+//
+//	// 관리자 로그인
+//	public String loginAdmin(String email, String password) {
+//		if (ADMIN_EMAIL.equals(email) && "admin1234".equals(password)) {
+//			return JwtUtil.createToken(email); // 이메일을 기준으로 토큰 발급
+//		} else {
+//			throw new IllegalArgumentException("잘못된 아이디 혹은 비밀번호입니다.");
+//		}
+//	}
 }
