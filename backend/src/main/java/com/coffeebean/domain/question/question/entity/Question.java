@@ -2,6 +2,7 @@ package com.coffeebean.domain.question.question.entity;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import com.coffeebean.domain.item.entity.Item;
@@ -50,8 +51,11 @@ public class Question {
 	@JoinColumn(name = "item_id", nullable = false)
 	private Item item;
 
+	@CreatedDate
+	@Setter(AccessLevel.PRIVATE)
 	private LocalDateTime createDate;
 
 	@LastModifiedDate
+	@Setter(AccessLevel.PRIVATE)
 	private LocalDateTime modifyDate;
 }
