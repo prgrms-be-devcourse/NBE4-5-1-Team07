@@ -7,44 +7,33 @@ interface CartItem {
   name: string;
   price: number;
   quantity: number;
-  imageUrl: string;
 }
 
 export default function ClientLayout() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-
-  // API 없이 테스트용 데이터 보여줄 때 코드
-  // const [cartItems, setCartItems] = useState<CartItem[]>([
-  //   {
-  //     id: 1,
-  //     name: "상품 A",
-  //     price: 10000,
-  //     quantity: 1,
-  //     imageUrl: "/images/product-a.jpg",
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "상품 B",
-  //     price: 20000,
-  //     quantity: 2,
-  //     imageUrl: "/images/product-b.jpg",
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "상품 C",
-  //     price: 30000,
-  //     quantity: 1,
-  //     imageUrl: "/images/product-c.jpg",
-  //   },
-  // ]);
-
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
-  // 🛒 장바구니 데이터 불러오기
+  // API 요청을 위한 authToken
+  const authToken =
+    "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlQGV4YW0uY29tIiwiaWF0IjoxNzQwMTAxODYzLCJleHAiOjE3NDAxODgyNjN9._GSZpw5wIYr9QsxLgBjRe0OsnyY6BBEbXzlxm3Inv1A";
+
+  // 장바구니 데이터 불러오기
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/carts") // 백엔드 API 엔드포인트 호출
+    fetch("http://localhost:8080/api/v1/carts", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${authToken}`, // 인증 토큰 추가
+        "Content-Type": "application/json",
+      },
+    })
       .then((res) => res.json())
-      .then((data: CartItem[]) => setCartItems(data))
+      .then((data) => {
+        if (data.code === "200-1") {
+          setCartItems(data.data.items);
+        } else {
+          console.error("장바구니 조회 실패:", data.msg);
+        }
+      })
       .catch((err) =>
         console.error("장바구니 데이터를 불러오는 중 오류 발생:", err)
       );
@@ -113,12 +102,6 @@ export default function ClientLayout() {
                 checked={selectedItems.includes(item.id)}
                 onChange={() => toggleSelection(item.id)}
                 className="w-5 h-5"
-              />
-              {/* 상품 이미지 */}
-              <img
-                src={item.imageUrl}
-                alt={item.name}
-                className="w-16 h-16 object-cover rounded"
               />
               {/* 상품 정보 */}
               <div className="flex-1">
