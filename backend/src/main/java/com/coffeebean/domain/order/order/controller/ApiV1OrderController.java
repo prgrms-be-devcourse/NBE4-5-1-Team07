@@ -1,7 +1,5 @@
 package com.coffeebean.domain.order.order.controller;
 
-import java.rmi.UnexpectedException;
-
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,8 +27,7 @@ public class ApiV1OrderController {
 	private final UserService userService;
 
 	@PostMapping
-	public RsData<OrderCreateResponse> createOrder(@RequestBody @Valid OrderCreateRequest orderCreateRequest) throws
-		UnexpectedException {
+	public RsData<OrderCreateResponse> createOrder(@RequestBody @Valid OrderCreateRequest orderCreateRequest) {
 		String email = orderCreateRequest.getEmail();
 
 		// 회원이 주문을 등록하는 경우
