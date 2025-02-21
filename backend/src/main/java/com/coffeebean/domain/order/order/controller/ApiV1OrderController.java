@@ -1,21 +1,18 @@
 package com.coffeebean.domain.order.order.controller;
 
-import java.rmi.UnexpectedException;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.coffeebean.domain.order.order.dto.OrderCreateRequest;
+import com.coffeebean.domain.order.order.dto.OrderCreateResponse;
 import com.coffeebean.domain.order.order.entity.Order;
 import com.coffeebean.domain.order.order.service.OrderService;
 import com.coffeebean.domain.order.orderItem.service.OrderItemService;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.service.UserService;
+import com.coffeebean.global.dto.RsData;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,16 +27,10 @@ public class ApiV1OrderController {
 	private final UserService userService;
 
 	@PostMapping
-	public ResponseEntity createOrder(@RequestBody @Valid OrderCreateRequest orderCreateRequest,
-		BindingResult bindingResult) throws UnexpectedException {
-		if (bindingResult.hasErrors()) {
-			StringBuilder errorMessage = new StringBuilder();
-			bindingResult.getAllErrors().forEach(error -> errorMessage.append(error.getDefaultMessage()).append("\n"));
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage.toString().trim());
-		}
-
+	public RsData<OrderCreateResponse> createOrder(@RequestBody @Valid OrderCreateRequest orderCreateRequest) {
 		String email = orderCreateRequest.getEmail();
 
+		// 회원이 주문을 등록하는 경우
 		if (orderCreateRequest.getAuthToken() != null) {
 			User actor = userService.getUserByAuthToken(orderCreateRequest.getAuthToken());
 			email = actor.getEmail();
@@ -54,6 +45,10 @@ public class ApiV1OrderController {
 		// Order의 세부 상품 항목들 OderItem 저장
 		orderItemService.createOrderItem(order, orderCreateRequest.getItems());
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(order);
+		return new RsData<>(
+			"201-1",
+			"주문이 등록되었습니다.",
+			new OrderCreateResponse(order)
+		);
 	}
 }

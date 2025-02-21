@@ -14,6 +14,7 @@ import com.coffeebean.domain.order.order.OrderStatus;
 import com.coffeebean.domain.order.order.entity.Order;
 import com.coffeebean.domain.order.order.repository.OrderRepository;
 import com.coffeebean.domain.user.user.Address;
+import com.coffeebean.global.exception.ServiceException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +26,7 @@ public class OrderService {
 	private final OrderRepository orderRepository;
 
 	@Transactional
-	public Order createOrder(String email, String city, String street, String zipcode) throws UnexpectedException {
+	public Order createOrder(String email, String city, String street, String zipcode) {
 		Order order = Order.builder()
 			.email(email)
 			.deliveryAddress(new Address(city, street, zipcode))
@@ -36,7 +37,7 @@ public class OrderService {
 		orderRepository.save(order);
 		orderRepository.flush();
 		return orderRepository.findById(order.getId())
-			.orElseThrow(() -> new UnexpectedException("주문이 등록되지 않았습니다."));
+			.orElseThrow(() -> new ServiceException("500-1", "주문이 등록되지 않았습니다."));
 	}
 
 	/**
