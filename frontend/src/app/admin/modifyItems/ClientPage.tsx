@@ -1,8 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import Image from "next/image"; // ✅ next/image import
+import Image from "next/image";
 
 export type Item = {
   id: number;
@@ -13,59 +13,81 @@ export type Item = {
   imageUrl?: string;
 };
 
-const initialItems: Item[] = [
-  {
-    id: 1,
-    name: "상품 1",
-    price: 1000,
-    stockQuantity: 10,
-    description: "설명 1",
-    imageUrl: "/images/columbia.jpg",
-  },
-  {
-    id: 2,
-    name: "상품 2",
-    price: 2000,
-    stockQuantity: 20,
-    description: "설명 2",
-    imageUrl: "/images/columbia.jpg",
-  },
-  {
-    id: 3,
-    name: "상품 3",
-    price: 3000,
-    stockQuantity: 30,
-    description: "설명 3",
-    imageUrl: "/images/columbia.jpg",
-  },
-];
-
 export default function ModifyItemsClientPage() {
-  const [items] = useState<Item[]>(initialItems);
+  const [items, setItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  // 백엔드 API에서 상품 목록 가져오기
+  useEffect(() => {
+    async function fetchItems() {
+      try {
+        const response = await fetch("http://localhost:8080/api/v1/items");
+        if (!response.ok) {
+          throw new Error(
+            `상품 목록을 불러오는 데 실패했습니다. (HTTP ${response.status})`
+          );
+        }
+
+        const data = await response.json();
+        setItems(data.data.items);
+      } catch (error) {
+        console.error("상품을 불러오는 중 오류 발생:", error);
+        setError("상품 목록을 불러오는 중 오류가 발생했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchItems();
+  }, []);
+
+  if (loading) {
+    return <p className="p-4 text-gray-500">상품 목록을 불러오는 중...</p>;
+  }
+
+  if (error) {
+    return <p className="p-4 text-red-500">{error}</p>;
+  }
+
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">상품 목록</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">상품 목록</h1>
       <ul className="space-y-4">
-        {items.map((item) => (
-          <li
-            key={item.id}
-            className="border rounded p-4 flex items-center cursor-pointer hover:bg-gray-200"
-            onClick={() => router.push(`/admin/modifyItems/${item.id}`)}
-          >
-            {item.imageUrl && (
-              <Image
-                src={item.imageUrl}
-                alt={item.name}
-                width={64} // ✅ 가로 크기 설정
-                height={64} // ✅ 세로 크기 설정
-                className="rounded"
-              />
-            )}
-            <span className="font-semibold text-lg">{item.name}</span>
-          </li>
-        ))}
+        {items.length > 0 ? (
+          items.map((item) => (
+            <li
+              key={item.id}
+              className="flex items-center justify-between bg-white p-4 border rounded-lg shadow-sm hover:bg-gray-100 transition cursor-pointer"
+              onClick={() => router.push(`/admin/modifyItems/${item.id}`)}
+            >
+              {/* 좌측: 상품 이미지 + 상품명 */}
+              <div className="flex items-center gap-4">
+                {item.imageUrl && (
+                  <Image
+                    src="/images/columbia.jpg"
+                    alt={item.name}
+                    width={64}
+                    height={64}
+                    className="rounded"
+                  />
+                )}
+                <span className="font-semibold text-lg">{item.name}</span>
+              </div>
+
+              {/* 우측: 가격 + 재고 */}
+              <div className="text-right">
+                <p className="text-gray-600">
+                  💰 가격: {item.price.toLocaleString()}원
+                </p>
+                <p className="text-gray-600">📦 재고: {item.stockQuantity}개</p>
+              </div>
+            </li>
+          ))
+        ) : (
+          <p className="text-gray-500">등록된 상품이 없습니다.</p>
+        )}
       </ul>
     </div>
   );

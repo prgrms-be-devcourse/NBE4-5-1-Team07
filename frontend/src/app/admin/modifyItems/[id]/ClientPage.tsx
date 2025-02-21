@@ -13,45 +13,39 @@ type Item = {
   imageUrl?: string;
 };
 
-const initialItems: Item[] = [
-  {
-    id: 1,
-    name: "상품 1",
-    price: 1000,
-    stockQuantity: 10,
-    description: "설명 1",
-    imageUrl: "/images/columbia.jpg",
-  },
-  {
-    id: 2,
-    name: "상품 2",
-    price: 2000,
-    stockQuantity: 20,
-    description: "설명 2",
-    imageUrl: "/images/columbia.jpg",
-  },
-  {
-    id: 3,
-    name: "상품 3",
-    price: 3000,
-    stockQuantity: 30,
-    description: "설명 3",
-    imageUrl: "/images/columbia.jpg",
-  },
-];
-
 export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
   const router = useRouter();
   const [item, setItem] = useState<Item | null>(null);
   const [editData, setEditData] = useState<Partial<Item>>({});
+  const [loading, setLoading] = useState<boolean>(true);
 
+  // 백엔드에서 상품 정보 불러오기
   useEffect(() => {
-    const foundItem = initialItems.find((item) => item.id === Number(itemId));
-    if (foundItem) setItem(foundItem);
-  }, [itemId]);
+    async function fetchItem() {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v1/items/${itemId}`
+        );
+        if (!response.ok) {
+          throw new Error("상품 정보를 불러오는 데 실패했습니다.");
+        }
 
+        const data = await response.json();
+        setItem(data.data); // 최신 데이터로 불러오기
+      } catch (error) {
+        console.error("상품을 불러오는 중 오류 발생:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchItem();
+  }, [itemId]); // itemId가 변경될 때마다 최신 데이터 불러오기
+
+  if (loading) return <p className="p-4">상품을 불러오는 중...</p>;
   if (!item) return <p className="p-4">상품을 찾을 수 없습니다.</p>;
 
+  // 입력 필드 변경 핸들러
   const handleInputChange = (field: keyof Item, value: string | number) => {
     setEditData((prev) => ({
       ...prev,
@@ -62,15 +56,54 @@ export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
     }));
   };
 
-  const handleUpdate = () => {
-    setItem((prev) => (prev ? { ...prev, ...editData } : prev));
-    alert(`${item.name}이(가) 수정되었습니다.`);
+  // 상품 수정 후 목록으로 이동
+  const handleUpdate = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v1/items/${item.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ...item, ...editData }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("상품 수정에 실패했습니다.");
+      }
+
+      alert(`${item.name}이(가) 수정되었습니다.`);
+      router.push("/admin/modifyItems"); // 수정 후 목록으로 이동
+    } catch (error) {
+      console.error("상품 수정 중 오류 발생:", error);
+      alert("상품 수정 중 오류가 발생했습니다.");
+    }
   };
 
-  const handleDelete = () => {
+  // 상품 삭제 후 목록으로 이동
+  const handleDelete = async () => {
     if (!confirm("정말 삭제하시겠습니까?")) return;
-    alert(`${item.name}이(가) 삭제되었습니다.`);
-    router.push("/admin/modifyItems");
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v1/items/${item.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("상품 삭제에 실패했습니다.");
+      }
+
+      alert(`${item.name}이(가) 삭제되었습니다.`);
+      router.push("/admin/modifyItems"); //삭제 후 목록으로 이동
+    } catch (error) {
+      console.error("상품 삭제 중 오류 발생:", error);
+      alert("상품 삭제 중 오류가 발생했습니다.");
+    }
   };
 
   return (
