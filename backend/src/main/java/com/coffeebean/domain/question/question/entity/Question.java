@@ -51,7 +51,7 @@ public class Question {
 	@OneToOne(mappedBy = "question", cascade = CascadeType.ALL)
 	private Answer answer;
 
-	@OneToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "author_id")
 	private User author;
 
