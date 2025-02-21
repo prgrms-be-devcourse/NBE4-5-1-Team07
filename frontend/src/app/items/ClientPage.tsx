@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import ClientPage from "../notice/ClientPage";
 import { useEffect, useState } from "react";
