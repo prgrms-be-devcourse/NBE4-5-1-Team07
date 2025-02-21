@@ -7,6 +7,7 @@ import com.coffeebean.domain.user.user.service.EmailVerificationService;
 import com.coffeebean.domain.user.user.service.UserService;
 import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.exception.ServiceException;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -69,31 +70,27 @@ public class UserController {
 
 
 
-//    // 관리자 로그인
-//    @PostMapping("/admin/login")
-//    public ResponseEntity<?> adminLogin(@RequestBody Map<String, String> credentials) {
-//        String email = credentials.get("email");
-//        String password = credentials.get("password");
-//
-//        try {
-//            String token = userService.loginAdmin(email, password); // 이메일을 기준으로 로그인
-//            return ResponseEntity.ok(Map.of("token", token));
-//        } catch (IllegalArgumentException e) {
-//            return ResponseEntity.status(401).body(e.getMessage());
-//        }
-//    }
-//
-//    // 일반 회원 로그인
-//    @PostMapping("/login")
-//    public ResponseEntity<?> userLogin(@RequestBody Map<String, String> credentials) {
-//        String email = credentials.get("email");
-//        String password = credentials.get("password");
-//
-//        try {
-//            String token = userService.login(email, password); // 이메일을 기준으로 로그인
-//            return ResponseEntity.ok(Map.of("token", token));
-//        } catch (IllegalArgumentException e) {
-//            return ResponseEntity.status(401).body(e.getMessage());
-//        }
-//    }
+    // 관리자 로그인
+    @PostMapping("/admin/login")
+    public RsData<String> adminLogin(@RequestBody Map<String, String> credentials, HttpServletResponse response) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
+
+        String token = userService.loginAdmin(username, password, response);
+
+        return new RsData<>("200-1", "관리자 로그인 성공", token);
+    }
+
+    // 일반 회원 로그인
+    @PostMapping("/login")
+    public RsData<String> userLogin(@RequestBody Map<String, String> credentials, HttpServletResponse response) {
+        String email = credentials.get("email");
+        String password = credentials.get("password");
+
+        Map<String, String> loginResult = userService.loginUser(email, password, response); // ✅ 사용자 이름과 토큰 반환
+        String message = String.format("%s님 반갑습니다.", loginResult.get("userName"));
+        String token = loginResult.get("token");
+
+        return new RsData<>("200-2", message, token);
+    }
 }
