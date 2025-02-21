@@ -1,7 +1,9 @@
 package com.coffeebean.domain.user.user.service;
 
+import com.coffeebean.domain.user.user.dto.VerificationData;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +14,10 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class EmailVerificationService {
 
-    private final UserRepository  userRepository;
+    private final HttpSession httpSession;
     private final MailService mailService;
+
+    private static final String SESSION_KEY = "email_verification";
 
     // 8자리 랜덤 인증 코드 생성 (영문 대소문자와 숫자)
     public String generateVerificationCode() {
@@ -30,30 +34,37 @@ public class EmailVerificationService {
         return key.toString();
     }
 
-    // 회원가입 후, 이메일 인증 코드 전송 및 DB 업데이트
-    public void sendVerificationEmail(User user) throws Exception {
+    // 이메일 인증 요청 (세션에 인증 정보 저장)
+    public void sendVerificationEmail(String email) throws Exception {
+        // 인증 코드 생성
         String code = generateVerificationCode();
-        user.setVerificationCode(code);
-        user.setVerified(false);
-        userRepository.save(user);
-        // 실제 이메일 발송 (메일 전송 실패 시 예외 발생)
-        mailService.sendSimpleMessage(user.getEmail(), code);
+
+        // 인증 코드 전송
+        mailService.sendSimpleMessage(email, code);
+
+        httpSession.setAttribute(SESSION_KEY, new VerificationData(email, code, false));
     }
 
-    // 사용자가 제출한 인증 코드를 검증하여, 일치하면 verified 상태 업데이트
+    // 인증 코드 확인 후 세션 상태 변경
     public boolean verifyEmail(String email, String inputCode) {
-        Optional<User> optionalMember =userRepository.findByEmail(email);
-        if (optionalMember.isEmpty()) {
-            throw new IllegalArgumentException("회원 정보가 없습니다.");
+        VerificationData verificationData = (VerificationData) httpSession.getAttribute(SESSION_KEY);
+
+        if (verificationData == null || !verificationData.getEmail().equals(email)) {
+            throw new IllegalArgumentException("이메일 인증 요청이 없습니다.");
         }
-        User user = optionalMember.get();
-        if (user.getVerificationCode() != null && user.getVerificationCode().equals(inputCode)) {
-            user.setVerified(true);
-            user.setVerificationCode(null); // 인증 후 코드 제거
-            userRepository.save(user);
-            return true;
-        } else {
+
+        if (!verificationData.getCode().equals(inputCode)) {
             throw new IllegalArgumentException("인증 코드가 일치하지 않습니다.");
         }
+
+        verificationData.setVerified(true);
+        httpSession.setAttribute(SESSION_KEY, verificationData);
+        return true;
+    }
+
+    // 세션으로 이메일 인증 여부 확인
+    public boolean isEmailVerified(String email) {
+        VerificationData verificationData = (VerificationData) httpSession.getAttribute(SESSION_KEY);
+        return verificationData != null && verificationData.getEmail().equals(email);
     }
 }
