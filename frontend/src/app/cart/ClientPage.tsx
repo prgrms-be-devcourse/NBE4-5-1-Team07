@@ -10,8 +10,17 @@ interface CartItem {
 }
 
 export default function ClientLayout() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([
+    { id: 1, name: "상품 A", price: 10000, quantity: 1 },
+    { id: 2, name: "상품 B", price: 20000, quantity: 2 },
+    { id: 3, name: "상품 C", price: 30000, quantity: 1 },
+  ]);
+
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+
+  // 장바구니 조회 API 연동은 쿠키로 authToken 전달 필요
+  /*
+  //const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   // API 요청을 위한 authToken
   const authToken =
@@ -38,6 +47,7 @@ export default function ClientLayout() {
         console.error("장바구니 데이터를 불러오는 중 오류 발생:", err)
       );
   }, []);
+*/
 
   // 개별 상품 선택/해제 핸들러
   const toggleSelection = (id: number) => {
