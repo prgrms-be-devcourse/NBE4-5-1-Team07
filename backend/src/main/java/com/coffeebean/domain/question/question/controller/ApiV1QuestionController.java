@@ -83,7 +83,7 @@ public class ApiV1QuestionController {
 
 		return new RsData<>(
 			"200-1",
-			"질문 목록 조회가 완료되었습니다",
+			"질문 목록 조회가 완료되었습니다.",
 			questionLists
 		);
 	}
