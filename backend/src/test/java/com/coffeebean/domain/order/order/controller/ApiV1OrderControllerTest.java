@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.coffeebean.domain.user.user.service.UserService;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @Transactional
 @SpringBootTest
 @ActiveProfiles("test")
@@ -33,10 +35,12 @@ class ApiV1OrderControllerTest {
 	private UserService userService;
 
 	private String authToken;
+	@Autowired
+	private HttpServletResponse httpServletResponse;
 
 	@BeforeEach
 	void setUp() {
-		authToken = userService.login("example@exam.com", "password");
+		authToken = userService.loginUser("example@exam.com", "password", httpServletResponse).get("token");
 	}
 
 	@Test
