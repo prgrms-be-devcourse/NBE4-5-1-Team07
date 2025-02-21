@@ -2,6 +2,7 @@ package com.coffeebean.domain.question.question.controller;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.coffeebean.domain.question.answer.service.AnswerService;
 import com.coffeebean.domain.question.question.dto.QuestionDto;
 import com.coffeebean.domain.question.question.entity.Question;
 import com.coffeebean.domain.question.question.service.QuestionService;
@@ -29,6 +31,7 @@ public class ApiV1QuestionController {
 
 	private final QuestionService questionService;
 	private final UserService userService;
+	private final AnswerService answerService;
 
 	record WriteQuestionReqBody(
 		@NotNull(message = "질문할 상품이 선택되지 않았습니다.")
@@ -117,5 +120,22 @@ public class ApiV1QuestionController {
 		@NotNull(message = "인증 정보가 없습니다.")
 		String authToken
 	) {
+	}
+
+	// 질문에 대한 답변 작성
+	@PostMapping("/{id}")
+	public RsData<Void> writeAnswer(@RequestBody @Valid WriteAnswerReqBody writeAnswerReqBody,
+		@PathVariable(name = "id") long questionId) {
+		if (!userService.isAdminByAuthToken(writeAnswerReqBody.authToken())) {
+			throw new ServiceException("403-1", "답변 작성은 관리자만 가능합니다.");
+		}
+
+		Question question = questionService.findQuestionById(questionId);
+		answerService.writeAnswer(question, writeAnswerReqBody.content());
+
+		return new RsData<>(
+			"200-1",
+			"답변이 작성되었습니다."
+		);
 	}
 }
