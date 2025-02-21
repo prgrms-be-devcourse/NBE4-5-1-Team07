@@ -69,4 +69,20 @@ public class ApiV1QuestionController {
 			new QuestionDto(question)
 		);
 	}
+
+
+	// 질문 목록 조회
+	@GetMapping
+	public RsData<List<QuestionDto>> getQuestions() {
+
+		List<QuestionDto> questionLists = questionService.getQuestions().stream()
+			.map(QuestionDto::new)
+			.toList();
+
+		return new RsData<>(
+			"200-1",
+			"질문 목록 조회가 완료되었습니다",
+			questionLists
+		);
+	}
 }

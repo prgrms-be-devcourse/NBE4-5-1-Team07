@@ -41,4 +41,9 @@ public class QuestionService {
 		return questionRepository.findById(id)
 			.orElseThrow(() -> new DataNotFoundException("존재하지 않는 질문입니다."));
 	}
+
+	@Transactional(readOnly = true)
+	public List<Question> getQuestions() {
+		return questionRepository.findAll();
+	}
 }
