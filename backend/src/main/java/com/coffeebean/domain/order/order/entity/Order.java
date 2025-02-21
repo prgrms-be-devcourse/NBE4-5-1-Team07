@@ -1,7 +1,12 @@
 package com.coffeebean.domain.order.order.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.coffeebean.domain.order.orderItem.entity.OrderItem;
+import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -9,16 +14,6 @@ import com.coffeebean.domain.order.order.DeliveryStatus;
 import com.coffeebean.domain.order.order.OrderStatus;
 import com.coffeebean.domain.user.user.Address;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -26,6 +21,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import static jakarta.persistence.CascadeType.ALL;
 
 @Entity
 @Getter
@@ -58,4 +55,18 @@ public class Order {
 	@Setter(AccessLevel.PRIVATE)
 	private LocalDateTime orderDate; // 주문 시간
 
+	@OneToMany(mappedBy = "order")
+	@Builder.Default
+	private List<OrderItem> orderItems = new ArrayList<>();
+
+	/**
+	 * 비즈니스 로직 추가: 주문 취소
+	 */
+	public void cancel() {
+		if (orderStatus != OrderStatus.ORDER || deliveryStatus != DeliveryStatus.READY) {
+			throw new IllegalArgumentException("주문을 취소할 수 없는 상태입니다.");
+		}
+		orderStatus = OrderStatus.CANCELED;
+		deliveryStatus = DeliveryStatus.CANCELLED;
+	}
 }

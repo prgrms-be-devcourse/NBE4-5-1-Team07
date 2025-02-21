@@ -2,6 +2,9 @@ package com.coffeebean.global.exception;
 
 import com.coffeebean.global.app.AppConfig;
 import com.coffeebean.global.dto.RsData;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -48,6 +52,39 @@ public class GlobalExceptionHandler {
                                 ex.getMsg()
                         )
                 );
+    }
+
+    @ExceptionHandler(DataNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleDataNotFound(DataNotFoundException exception) {
+        ErrorResponse errorResponse = ErrorResponse.of(
+                "DATA_NOT_FOUND", exception.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException exception) {
+        ErrorResponse errorResponse = ErrorResponse.of("INVALID_STATUS",
+                exception.getMessage());
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    static class ErrorResponse {
+        private String errorCode;
+        private String message;
+        private LocalDateTime timestamp;
+
+        public static ErrorResponse of(String errorCode, String message) {
+            return ErrorResponse.builder()
+                    .errorCode(errorCode)
+                    .message(message)
+                    .timestamp(LocalDateTime.now())
+                    .build();
+        }
     }
 
 }
