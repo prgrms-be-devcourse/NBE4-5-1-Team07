@@ -10,11 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
@@ -28,12 +24,20 @@ public class CartItem {
 	private Long id; // PK
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "cart_id")
+	@JoinColumn(name = "cart_id", nullable = false)
 	private Cart cart;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "item_id")
+	@JoinColumn(name = "item_id", nullable = false)
 	private Item item;
 
 	private int quantity;    // 장바구니 상품 수량
+
+	public void updateQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+	public void addQuantity(int quantity) {
+		this.quantity += quantity;
+	}
 }
