@@ -20,10 +20,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // ✅ 관리자 계정 정보 (직접 지정)
-    private static final String ADMIN_USERNAME = "admin";
-    private static final String ADMIN_PASSWORD = "admin123";
-
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
