@@ -134,30 +134,43 @@ public class UserService {
 		return false;
 	}
 
-	public Long getUserIdFromEmail(String email) {
-		return userRepository.findByEmail(email).orElseThrow(() ->
-				new DataNotFoundException("존재하지 않는 회원입니다."))
-				.getId();
-	}
-
-	@Transactional(readOnly = true)
-	public List<PointHistoryDto> getPointHistories(Long userId) {
-		User user = userRepository.findById(userId).orElseThrow(() ->
-				new DataNotFoundException("사용자를 찾을 수 없습니다."));
-		log.info("user={}", user);
-
-		User userWithHistories = userRepository.findByIdWithPointHistories(userId).orElse(user);
-		List<PointHistory> pointHistories = userWithHistories.getPointHistories();
-		log.info("pointHistories={}", pointHistories);
-
-		if (userWithHistories.getPointHistories().isEmpty()) {
-			throw new DataNotFoundException("포인트 적립 내역이 없습니다.");
+	public boolean isAdminByAuthToken(String token) {
+		Map<String, Object> payload = JwtUtil.getPayload(token);
+		if (payload == null) {
+			throw new IllegalArgumentException("잘못된 인증 정보입니다.");
 		}
 
-		return pointHistories.stream().map(pointHistory -> new PointHistoryDto(
-				pointHistory.getAmount(),
-				pointHistory.getDescription(),
-				pointHistory.getCreateDate())).toList();
+		if (payload.keySet().contains("role")) {
+			String role = (String)payload.get("role");
+			if (role.equals(ADMIN_ROLE)) {
+				return true;
+			}
+		}
+		return false;
 	}
+    public Long getUserIdFromEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() ->
+                        new DataNotFoundException("존재하지 않는 회원입니다."))
+                .getId();
+    }
 
+    @Transactional(readOnly = true)
+    public List<PointHistoryDto> getPointHistories(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new DataNotFoundException("사용자를 찾을 수 없습니다."));
+        log.info("user={}", user);
+
+        User userWithHistories = userRepository.findByIdWithPointHistories(userId).orElse(user);
+        List<PointHistory> pointHistories = userWithHistories.getPointHistories();
+        log.info("pointHistories={}", pointHistories);
+
+        if (userWithHistories.getPointHistories().isEmpty()) {
+            throw new DataNotFoundException("포인트 적립 내역이 없습니다.");
+        }
+
+        return pointHistories.stream().map(pointHistory -> new PointHistoryDto(
+                pointHistory.getAmount(),
+                pointHistory.getDescription(),
+                pointHistory.getCreateDate())).toList();
+    }
 }
