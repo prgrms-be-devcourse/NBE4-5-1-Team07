@@ -10,6 +10,7 @@ import com.coffeebean.domain.item.entity.Item;
 import com.coffeebean.domain.question.answer.entity.Answer;
 import com.coffeebean.domain.user.user.enitity.User;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -47,8 +48,7 @@ public class Question {
 	@Column(columnDefinition = "TEXT")
 	private String content; // 질문 내용
 
-	@OneToOne
-	@JoinColumn(name = "answer_id")
+	@OneToOne(mappedBy = "question", cascade = CascadeType.ALL)
 	private Answer answer;
 
 	@OneToOne
