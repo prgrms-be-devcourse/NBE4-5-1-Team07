@@ -1,11 +1,16 @@
 package com.coffeebean.domain.question.question.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.coffeebean.domain.question.question.dto.QuestionDto;
+import com.coffeebean.domain.question.question.entity.Question;
 import com.coffeebean.domain.question.question.service.QuestionService;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.service.UserService;
@@ -37,6 +42,7 @@ public class ApiV1QuestionController {
 	) {
 	}
 
+	// 질문 작성
 	@PostMapping
 	public RsData<Void> writeQuestion(@RequestBody @Valid WriteQuestionReqBody writeQuestionReqBody) {
 		User actor = userService.getUserByAuthToken(writeQuestionReqBody.authToken());
@@ -49,6 +55,18 @@ public class ApiV1QuestionController {
 		return new RsData<>(
 			"200-1",
 			"질문 작성이 완료되었습니다."
+		);
+	}
+
+	// 질문 단건 조회
+	@GetMapping("/{id}")
+	public RsData<QuestionDto> findById(@PathVariable long id) {
+		Question question = questionService.findQuestionById(id);
+
+		return new RsData<>(
+			"200-1",
+			"질문에 대한 조회가 완료되었습니다.",
+			new QuestionDto(question)
 		);
 	}
 }

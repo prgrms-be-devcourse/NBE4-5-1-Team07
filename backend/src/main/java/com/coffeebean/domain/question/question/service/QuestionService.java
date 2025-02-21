@@ -1,6 +1,9 @@
 package com.coffeebean.domain.question.question.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.coffeebean.domain.item.entity.Item;
 import com.coffeebean.domain.item.service.ItemService;
@@ -18,6 +21,7 @@ public class QuestionService {
 	private final QuestionRepository questionRepository;
 	private final ItemService itemService;
 
+	@Transactional
 	public void writeQuestion(User author, long itemId, String subject, String content) {
 		Item item = itemService.getItem(itemId)
 			.orElseThrow(() -> new DataNotFoundException("존제하지 않는 상품에 질문을 작성할 수 없습니다."));
@@ -30,5 +34,11 @@ public class QuestionService {
 			.build();
 
 		questionRepository.save(question);
+	}
+
+	@Transactional(readOnly = true)
+	public Question findQuestionById(long id) {
+		return questionRepository.findById(id)
+			.orElseThrow(() -> new DataNotFoundException("존재하지 않는 질문입니다."));
 	}
 }
