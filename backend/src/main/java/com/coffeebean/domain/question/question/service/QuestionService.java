@@ -11,6 +11,7 @@ import com.coffeebean.domain.question.question.entity.Question;
 import com.coffeebean.domain.question.question.repository.QuestionRepository;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.global.exception.DataNotFoundException;
+import com.coffeebean.global.exception.ServiceException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -45,5 +46,12 @@ public class QuestionService {
 	@Transactional(readOnly = true)
 	public List<Question> getQuestions() {
 		return questionRepository.findAll();
+	}
+
+	@Transactional
+	public void deleteQuestion(Long id) {
+		Question question = questionRepository.findById(id)
+			.orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 질문입니다."));
+		questionRepository.delete(question);
 	}
 }

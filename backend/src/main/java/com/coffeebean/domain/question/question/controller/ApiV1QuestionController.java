@@ -70,7 +70,6 @@ public class ApiV1QuestionController {
 		);
 	}
 
-
 	// 질문 목록 조회
 	@GetMapping
 	public RsData<List<QuestionDto>> getQuestions() {
@@ -84,5 +83,39 @@ public class ApiV1QuestionController {
 			"질문 목록 조회가 완료되었습니다",
 			questionLists
 		);
+	}
+
+	record AuthReqBody(@NotBlank(message = "인증 정보가 없습니다.") String authToken) {
+	}
+
+	// 질문 삭제
+	@DeleteMapping("/{id}")
+	public RsData<Void> deleteQuestion(
+		@RequestBody @Valid AuthReqBody authReqBody,
+		@PathVariable(name = "id") Long id) {
+		if (canDeleteQuestion(id, authReqBody.authToken())) {
+			questionService.deleteQuestion(id);
+			return new RsData<>("200-1", "질문이 삭제되었습니다.");
+		}
+		return new RsData<>("403-1", "질문을 삭제할 권한이 없습니다.");
+	}
+
+	private boolean canDeleteQuestion(Long id, String authToken) {
+		// 관리자인 경우
+		if (userService.isAdminByAuthToken(authToken)) {
+			return true;
+		}
+		// 작성자인 경우
+		User actor = userService.getUserByAuthToken(authToken);
+		Question question = questionService.findQuestionById(id);
+		return question.getAuthor().getEmail().equals(actor.getEmail());
+	}
+
+	record WriteAnswerReqBody(
+		@NotBlank(message = "답변 내용은 공백일 수 없습니다.")
+		String content,
+		@NotNull(message = "인증 정보가 없습니다.")
+		String authToken
+	) {
 	}
 }
