@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.coffeebean.domain.user.user.service.UserService;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @Transactional
 @SpringBootTest
 @ActiveProfiles("test")
