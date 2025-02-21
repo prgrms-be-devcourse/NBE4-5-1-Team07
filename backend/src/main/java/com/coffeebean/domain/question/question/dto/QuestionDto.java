@@ -12,6 +12,7 @@ import lombok.Setter;
 @Setter
 public class QuestionDto {
 	long id;
+	long itemId;
 	String name;
 	String subject;
 	String content;
@@ -36,6 +37,7 @@ public class QuestionDto {
 
 	public QuestionDto(Question question) {
 		this.id = question.getId();
+		this.itemId = question.getItem().getId();
 		this.name = question.getAuthor().getName();
 		this.subject = question.getSubject();
 		this.content = question.getContent();
