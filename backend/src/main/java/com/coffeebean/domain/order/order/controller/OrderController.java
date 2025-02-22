@@ -21,7 +21,6 @@ public class OrderController {
      * 1. 전체 주문 내역 조회
      * GET /api/users/{email}/orders
      */
-    // @PreAuthorize("isAuthenticated()")
     @GetMapping("/user/{email}/orders")
     public ResponseEntity<List<OrderDto>> getAllOrders(@PathVariable("email") String email) {
         List<OrderDto> orders = orderService.getOrdersByEmail(email);
