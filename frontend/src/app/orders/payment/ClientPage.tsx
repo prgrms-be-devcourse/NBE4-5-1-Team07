@@ -61,7 +61,7 @@ export default function PaymentPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">결제 페이지</h2>
+      <h2 className="text-2xl font-bold mb-4">결제</h2>
 
       {/* 상품 목록 */}
       <div className="mb-6">
