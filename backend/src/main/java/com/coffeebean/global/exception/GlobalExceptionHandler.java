@@ -69,6 +69,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errorResponse);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> IllegalState(IllegalStateException exception) {
+        ErrorResponse errorResponse = ErrorResponse.of("INVALID_STATE",
+                exception.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
 
     @Getter
     @Builder

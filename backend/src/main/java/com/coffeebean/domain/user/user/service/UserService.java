@@ -6,6 +6,7 @@ import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.repository.UserRepository;
 import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.exception.ServiceException;
+import com.coffeebean.global.exception.DataNotFoundException;
 import com.coffeebean.global.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -117,5 +118,9 @@ public class UserService {
 				.build();
 	}
 
-
+	public Long getUserIdFromEmail(String email) {
+		return userRepository.findByEmail(email).orElseThrow(() ->
+				new DataNotFoundException("존재하지 않는 회원입니다."))
+				.getId();
+	}
 }

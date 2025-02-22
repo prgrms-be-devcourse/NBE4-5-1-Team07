@@ -35,6 +35,5 @@ public class PointHistory {
 	public PointHistory(int amount, String description) {
 		this.amount = amount;
 		this.description = description;
-		this.createDate = LocalDateTime.now();
 	}
 }
