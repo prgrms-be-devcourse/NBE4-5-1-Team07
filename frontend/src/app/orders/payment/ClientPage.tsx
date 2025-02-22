@@ -68,10 +68,11 @@ export default function PaymentPage() {
         <h3 className="text-xl font-semibold mb-2">상품 목록</h3>
         {products.map((product) => (
           <div key={product.id} className="flex justify-between p-2 border-b">
+            <span>{product.name}</span>
             <span>
-              {product.name} ({product.quantity}개)
+              {product.price.toLocaleString()}원{" "}
+              <span className="text-gray-500">({product.quantity}개)</span>
             </span>
-            <span>{(product.price * product.quantity).toLocaleString()}원</span>
           </div>
         ))}
       </div>
