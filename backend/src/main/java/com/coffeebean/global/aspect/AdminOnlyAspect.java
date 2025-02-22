@@ -29,7 +29,7 @@ public class AdminOnlyAspect {
 	public void before() {
 		// Authorization 헤더 검증
 		String authHeader = request.getHeader("Authorization");
-		if (authHeader != null || authHeader.startsWith("Bearer ")) {
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 			throw new ServiceException("401-1", "인증 정보가 없거나 잘못되었습니다.");
 		}
 
