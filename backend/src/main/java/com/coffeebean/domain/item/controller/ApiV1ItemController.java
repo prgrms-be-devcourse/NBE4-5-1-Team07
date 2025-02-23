@@ -6,6 +6,8 @@ import com.coffeebean.domain.item.entity.Item;
 import com.coffeebean.domain.item.service.ItemService;
 import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.exception.ServiceException;
+import com.coffeebean.global.security.annotations.AdminOnly;
+
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +32,7 @@ public class ApiV1ItemController {
     }
 
     // 상품 등록
+    @AdminOnly
     @PostMapping
     public RsData<Item> addItem(@RequestBody @Valid AddReqBody reqBody) {
         Item item = itemService.addItem(reqBody.name(), reqBody.price(), reqBody.stockQuantity(), reqBody.description());
@@ -72,6 +75,7 @@ public class ApiV1ItemController {
     }
 
     // 상품 삭제
+    @AdminOnly
     @DeleteMapping("/{id}")
     @Transactional
     public RsData<Void> deleteItem(@PathVariable long id) {
@@ -97,6 +101,7 @@ public class ApiV1ItemController {
     }
 
     // 상품 수정
+    @AdminOnly
     @PutMapping("/{id}")
     @Transactional
     public RsData<Void> modifyItem(@PathVariable long id, @RequestBody ModifyReqBody reqBody) {
