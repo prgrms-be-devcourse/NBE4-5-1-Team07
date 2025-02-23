@@ -18,4 +18,5 @@ public class ReviewableOrderItemDto {
     private Long orderItemId; // 주문 아이템 ID
     private String itemName;  // 상품명
     private LocalDateTime orderDate; // 주문 날짜
+    private boolean isWritten;
 }
