@@ -54,4 +54,9 @@ public class ItemService {
         item.setDescription(description);
         return item;
     }
+
+    public void updateStockQuantity(Item item, int newStockQuntity) {
+        item.setStockQuantity(newStockQuntity);
+        itemRepository.save(item);
+    }
 }

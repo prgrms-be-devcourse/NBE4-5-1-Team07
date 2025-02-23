@@ -8,16 +8,8 @@ type Item = {
   stockQuantity: number;
 };
 
-// 테스트용 하드코딩 데이터
-const initialItems: Item[] = [
-  { id: 1, name: "에티오피아 원두", stockQuantity: 50 },
-  { id: 2, name: "콜롬비아 원두", stockQuantity: 30 },
-  { id: 3, name: "과테말라 원두", stockQuantity: 20 },
-  { id: 4, name: "브라질 원두", stockQuantity: 15 },
-];
-
 export default function CheckItemsPage() {
-  const [items, setItems] = useState<Item[]>(initialItems);
+  const [items, setItems] = useState<Item[]>([]); // 초기값 변경
   const [updatedStocks, setUpdatedStocks] = useState<Record<number, number>>(
     {}
   );
@@ -53,11 +45,10 @@ export default function CheckItemsPage() {
     }
 
     try {
-      // 백엔드 연동
       const response = await fetch(
-        `http://localhost:8080/api/v1/items/${itemId}`,
+        `http://localhost:8080/api/v1/items/${itemId}/stock`,
         {
-          method: "PUT",
+          method: "PATCH", // PUT->PATCH로 변경
           headers: {
             "Content-Type": "application/json",
           },
