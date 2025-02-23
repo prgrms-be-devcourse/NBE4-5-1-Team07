@@ -3,13 +3,43 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import ClientPage from "../notice/ClientPage";
+import { useEffect, useState } from "react";
 
-export default function ClinetLayout() {
-  const products = Array.from({ length: 8 }, (_, i) => ({
-    id: i + 1,
-    name: `상품 ${i + 1}`,
-    price: (i + 1) * 1000,
-  }));
+// ItemDto 객체 인터페이스 정의
+interface ItemDto {
+  id: number;
+  name: string;
+  price: number;
+  stockQuantity: number;
+  description: string;
+}
+
+export default function ItemsPage() {
+  const [items, setItems] = useState<ItemDto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("http://localhost:8080/api/v1/items")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("데이터를 불러오는 데 실패했습니다.");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setItems(data.data.items); // 백엔드 응답 구조에 맞게 설정
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching items:", error);
+        setError("상품 목록을 불러올 수 없습니다.");
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div className="text-center p-6">로딩 중...</div>;
+  if (error) return <div className="text-center p-6 text-red-500">{error}</div>;
 
   return (
     <>
@@ -19,10 +49,14 @@ export default function ClinetLayout() {
             상품 목록입니다. 상품을 누르면 상세 페이지로 이동합니다.
           </div>
           <ul className="grid grid-cols-4 gap-6 px-4 w-11/12 mx-auto">
-            {products.map((product) => (
-              <Link href={`/items/${product.id}`} key={product.id}>
-                <li className="border-2 border-blue-300 p-2 rounded-2xl  h-[200px] hover:bg-gray-100 flex items-center justify-center">
-                  {product.id}. {product.name} - {product.price}원
+            {items.map((item) => (
+              <Link href={`/items/${item.id}`} key={item.id}>
+                <li className="border-2 border-blue-300 p-2 rounded-2xl  h-[200px] hover:bg-gray-100 flex flex-col items-center justify-center">
+                  <div>상품번호-{item.id}.</div>
+
+                  <div> 상품명-{item.name}</div>
+                  <div> 가격-{item.price}원</div>
+                  <div>재고수량-{item.stockQuantity}</div>
                 </li>
               </Link>
             ))}
