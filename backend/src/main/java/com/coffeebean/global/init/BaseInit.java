@@ -67,7 +67,10 @@ public class BaseInit {
 					itemRepository.save(Item.builder()
 						.stockQuantity(3)
 						.price(10000 + i * 1000)
-						.description(i + "상품의 설명")
+						.description("이 상품은 최고급 원두를 공수해 파는 No.1 제품입니다.<br>" +
+								"이 제품은 사상 최대로 팔렸으며 지금도 월드 레코드를 갱신해 나가는 중입니다.<br>" +
+								"상품번호는 " + i + "입니다.<br>" +
+								"상품 문의는 문의사항에서 질문해주세요" )
 						.name(i + "상품")
 						.build());
 				}
@@ -114,6 +117,15 @@ public class BaseInit {
 					.subject("상품 원산지 관련 문의입니다.")
 					.content("상품 원산지 정보가 표시되어 있지 않은데 어디인가요?")
 					.build());
+
+				long item3Id = 3L;
+				Item item3 = itemRepository.findById(item3Id).get();
+				questionRepository.save(Question.builder()
+						.item(item3)
+						.author(user)
+						.subject("상품 원산지 관련 문의입니다.")
+						.content("상품 원산지 정보가 표시되어 있지 않은데 어디인가요?")
+						.build());
 			}
 		};
 	}
