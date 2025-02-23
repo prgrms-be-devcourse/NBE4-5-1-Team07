@@ -3,11 +3,16 @@ package com.coffeebean.global.util;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.crypto.SecretKey;
 
@@ -61,12 +66,26 @@ public class JwtUtil {
     public static void setJwtCookie(String jwt, HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("token", jwt)
                 .httpOnly(true)  // 클라이언트에서 JS로 접근 불가
-                .secure(true)    // HTTPS에서만 전달
+                .secure(false)    // HTTPS에서만 전달
                 .path("/")       // 모든 경로에서 사용 가능
-                .maxAge(EXPIRATION_TIME / 1000) // 만료 시간 (초 단위)
-                .sameSite("Strict") // SameSite 설정 (CSRF 방어)
+                .maxAge(EXPIRATION_TIME / 1000000) // 만료 시간 (초 단위)
+                .sameSite("None") // SameSite 설정 (CSRF 방어)
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
     }
+
+    // 쿠키에서 JWT 추출
+    public static Optional<String> getJwtFromCookies(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (request.getCookies() != null) {
+            Arrays.stream(request.getCookies())
+                    .forEach(cookie -> System.out.println("Cookie Name: " + cookie.getName() + ", Value: " + cookie.getValue()));
+        }
+
+        return Arrays.stream(cookies).filter(cookie -> "token".equals(cookie.getName()))
+                .map(Cookie::getValue).findFirst();
+    }
+
 }

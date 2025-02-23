@@ -1,9 +1,13 @@
 package com.coffeebean.global.security;
 
-import com.coffeebean.global.app.AppConfig;
+import com.coffeebean.domain.user.user.repository.UserRepository;
 
 import java.util.Arrays;
 
+import com.coffeebean.global.app.AppConfig;
+import com.coffeebean.global.util.JwtAuthenticationFilterFromHeader;
+import com.coffeebean.global.util.JwtUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,27 +16,36 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 // "/h2-console/**", "/api/v1/user/admin/login" 경로는 인증 없이 접근 가능
                                 .requestMatchers("/h2-console/**", "/api/v1/user/admin/login").permitAll()
                                 // "/api/v1/user/admin/**" 경로는 관리자만 접근 가능
                                 .requestMatchers("/api/v1/user/admin/**").hasAuthority("admin")
+                                .requestMatchers("/api/my/home").authenticated()
                                 // 그 외의 모든 경로는 인증 없이 접근 가능
                                 .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // .addFilterBefore(new JwtAuthenticationFilterFromCookie(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilterFromHeader(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
                 .headers((headers) -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(
                                 XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
