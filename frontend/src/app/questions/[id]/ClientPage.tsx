@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation"; // useRouter 추가
 
 interface AnswerDto {
   content: string;
@@ -22,6 +22,7 @@ interface QuestionDto {
 
 export default function QuestionDetailPage() {
   const { id } = useParams(); // URL에서 id 가져오기
+  const router = useRouter(); // useRouter로 리다이렉트 처리
   const [question, setQuestion] = useState<QuestionDto | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,6 +40,32 @@ export default function QuestionDetailPage() {
         setLoading(false);
       });
   }, [id]);
+
+  const handleDelete = () => {
+    if (window.confirm("정말로 이 질문을 삭제하시겠습니까?")) {
+      fetch(`http://localhost:8080/api/v1/questions/${id}`, {
+        method: "DELETE", // DELETE 메서드로 요청
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          authToken: "TEMP_AUTH_TOKEN", // 인증 토큰을 여기에 넣어주세요
+        }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            alert("질문이 삭제되었습니다.");
+            router.back(); // 이전 페이지로 돌아가기
+          } else {
+            alert("삭제에 실패했습니다.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error deleting question:", error);
+          alert("삭제 중 오류가 발생했습니다.");
+        });
+    }
+  };
 
   if (loading) {
     return <div className="text-center mt-10">Loading...</div>;
@@ -74,6 +101,14 @@ export default function QuestionDetailPage() {
       ) : (
         <p className="mt-4 text-gray-500">아직 답변이 없습니다.</p>
       )}
+
+      {/* 삭제 버튼 추가 */}
+      <button
+        onClick={handleDelete}
+        className="mt-6 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+      >
+        질문 삭제
+      </button>
     </div>
   );
 }
