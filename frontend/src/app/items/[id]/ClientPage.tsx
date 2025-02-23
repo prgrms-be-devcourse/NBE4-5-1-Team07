@@ -18,6 +18,9 @@ export default function ClientPage({ id }: { id: number }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [quantity, setQuantity] = useState(1); // 수량 상태 관리
+  const [selectedTab, setSelectedTab] = useState<
+    "info" | "review" | "question"
+  >("info"); // 선택된 탭 상태
 
   useEffect(() => {
     setLoading(true);
@@ -121,13 +124,61 @@ export default function ClientPage({ id }: { id: number }) {
           </div>
         </div>
       </div>
-      <div className="flex flex-row gap-4 justify-center py-4">
-        <div className="p-6 rounded-2xl w-[50vw] h-[50vh] flex justify-center font-bold text-2xl ">
-          상품 정보 : {item.description}
-        </div>
-        <div className="p-6 w-[50vw] h-[50vh] flex justify-center gap-4 font-bold text-2xl ">
-          <div>리뷰</div>
-        </div>
+
+      {/* 탭 UI */}
+      <div className="flex justify-center space-x-4 py-4 border-b-2">
+        <Button
+          className={`px-6 py-2 rounded-t-lg ${
+            selectedTab === "info"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-black"
+          }`}
+          onClick={() => setSelectedTab("info")}
+        >
+          상품 정보
+        </Button>
+        <Button
+          className={`px-6 py-2 rounded-t-lg ${
+            selectedTab === "review"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-black"
+          }`}
+          onClick={() => setSelectedTab("review")}
+        >
+          리뷰
+        </Button>
+        <Button
+          className={`px-6 py-2 rounded-t-lg ${
+            selectedTab === "question"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-black"
+          }`}
+          onClick={() => setSelectedTab("question")}
+        >
+          상품 문의
+        </Button>
+      </div>
+
+      {/* 선택된 탭에 따라 내용 표시 */}
+      <div className="p-6">
+        {selectedTab === "info" && (
+          <div className="text-2xl font-bold">
+            <h2>상품 정보</h2>
+            <p>{item.description}</p>
+          </div>
+        )}
+        {selectedTab === "review" && (
+          <div className="text-2xl font-bold">
+            <h2>리뷰</h2>
+            <p>여기에 리뷰 목록이 들어갑니다.</p>
+          </div>
+        )}
+        {selectedTab === "question" && (
+          <div className="text-2xl font-bold">
+            <h2>상품 문의</h2>
+            <p>여기에 상품 문의 목록이 들어갑니다.</p>
+          </div>
+        )}
       </div>
     </>
   );
