@@ -18,4 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findAllByEmail(String email); // 사용자의 이메일로 전체 주문 내역 조회
     Optional<Order> findByEmail(String email); // 사용자의 이메일로 단건 주문 조회
+
+    @Query("select o from Order o where o.email = :email order by o.orderDate desc limit 3")
+    List<Order> findTop3ByEmailOrderByOrderDateDesc(@Param("email") String email); // 사용자의 이메일로 최신순 3건 조회
 }

@@ -1,23 +1,35 @@
 package com.coffeebean.domain.user.user.controller;
 
+import com.coffeebean.domain.user.MyPageResponse;
 import com.coffeebean.domain.user.user.dto.EmailVerificationRequest;
 import com.coffeebean.domain.user.user.dto.SignupReqBody;
 import com.coffeebean.domain.user.user.enitity.User;
+import com.coffeebean.domain.user.user.repository.UserRepository;
 import com.coffeebean.domain.user.user.service.EmailVerificationService;
 import com.coffeebean.domain.user.user.service.UserService;
+import com.coffeebean.global.annotation.Login;
 import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.exception.ServiceException;
+import com.coffeebean.global.util.CustomUserDetails;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.buf.UEncoder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -67,7 +79,6 @@ public class UserController {
         User user = userService.create(signupRequest);
         return new RsData<>("200-3", "회원가입이 완료되었습니다.", user);
     }
-
 
 
     // 관리자 로그인
