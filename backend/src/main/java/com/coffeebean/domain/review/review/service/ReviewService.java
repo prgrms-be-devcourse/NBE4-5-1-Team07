@@ -9,14 +9,12 @@ import com.coffeebean.domain.review.review.entity.ReviewDetailDto;
 import com.coffeebean.domain.review.review.respository.ReviewRepository;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.repository.UserRepository;
-import jakarta.persistence.EntityListeners;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -38,9 +36,9 @@ public class ReviewService {
      * 상품 주문을 기준으로 이틀 후면 무조건 도착한다고 가정
      * 상품 주문 날짜 + 9 일 -> 리뷰 작성 가능일
      */
-    public void writeReivew(Long orderId, String content, int rating) {
+    public void writeReivew(Long orderItemId, String content, int rating) {
         // 주문 아이템 조회
-        OrderItem orderItem = orderItemRepository.findById(orderId)
+        OrderItem orderItem = orderItemRepository.findById(orderItemId)
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 주문입니다."));
 
         // 검증 로직 호출
@@ -60,10 +58,12 @@ public class ReviewService {
 
             reviewRepository.save(review);
 
+            // 주문 아이템 상태 변경
+            orderItem.markAsWritten();
+
             // 결제 금액의 10% 포인트 적립
             pointAdded(orderItem, user);
         }
-
     }
 
     private void pointAdded(OrderItem orderItem, User user) {
@@ -89,7 +89,7 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     // 작성한 리뷰 내역 전체 조회 (삭제된 리뷰 빼고)
-    public List<ReviewDetailDto> getReviewsByUser(Long userId, int page, int size) {
+    public List<ReviewDetailDto> getWrittenReviews(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
 
         // 삭제되지 않은 리뷰 페이징 조회
@@ -106,7 +106,7 @@ public class ReviewService {
 
     // 작성 가능한 리뷰만 보여 주는 용도
     @Transactional(readOnly = true)
-    public List<ReviewableOrderItemDto> getReviewableOrderItems(String email) {
+    public List<ReviewableOrderItemDto> getPendingReviews(String email) {
         // 리뷰 작성 가능 기간
         LocalDateTime cutoffDate = LocalDateTime.now().minusDays(9);
 
@@ -118,7 +118,8 @@ public class ReviewService {
                 .map(orderItem -> new ReviewableOrderItemDto(
                         orderItem.getId(),
                         orderItem.getItem().getName(),
-                        orderItem.getOrder().getOrderDate()
+                        orderItem.getOrder().getOrderDate(),
+                        orderItem.isWritten()
                 )).toList();
     }
 
