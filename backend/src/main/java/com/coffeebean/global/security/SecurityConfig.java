@@ -1,13 +1,12 @@
 package com.coffeebean.global.security;
 
 import com.coffeebean.domain.user.user.repository.UserRepository;
-import com.coffeebean.global.app.AppConfig;
 
 import java.util.Arrays;
 
-import com.coffeebean.global.util.JwtAuthenticationFilter;
+import com.coffeebean.global.app.AppConfig;
+import com.coffeebean.global.util.JwtAuthenticationFilterFromHeader;
 import com.coffeebean.global.util.JwtUtil;
-import io.jsonwebtoken.Jwt;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,18 +32,20 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 // "/h2-console/**", "/api/v1/user/admin/login" 경로는 인증 없이 접근 가능
                                 .requestMatchers("/h2-console/**", "/api/v1/user/admin/login").permitAll()
                                 // "/api/v1/user/admin/**" 경로는 관리자만 접근 가능
                                 .requestMatchers("/api/v1/user/admin/**").hasAuthority("admin")
-                                .requestMatchers("/api/v1/users/mypage").authenticated() // 인증 필요
+                                .requestMatchers("/api/my/home").authenticated()
                                 // 그 외의 모든 경로는 인증 없이 접근 가능
                                 .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
+                // .addFilterBefore(new JwtAuthenticationFilterFromCookie(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilterFromHeader(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
                 .headers((headers) -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(
                                 XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
