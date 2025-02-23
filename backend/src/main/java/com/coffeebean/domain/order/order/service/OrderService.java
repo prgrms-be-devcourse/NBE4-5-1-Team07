@@ -47,33 +47,52 @@ public class OrderService {
 	 * @return List<OrderDto> 주문 DTO 리스트
 	 */
 	public List<OrderDto> getOrdersByEmail(String email) {
-		// 이메일로 주문 엔티티 리스트 조회
 		List<Order> orders = orderRepository.findAllByEmail(email);
+		return convertToDtoList(orders);
+	}
 
-		// 주문 엔티티를 OrderDto로 변환하여 반환
+	// 최신 3건만 보여 주는 용도
+	@Transactional
+	public List<OrderDto> getRecentOrdersByEmail(String email) {
+		List<Order> orders = orderRepository.findTop3ByEmailOrderByOrderDateDesc(email);
+		return convertToDtoList(orders);
+	}
+
+	private List<OrderDto> convertToDtoList(List<Order> orders) {
 		return orders.stream()
 				.map(order -> {
 					// 주문 상품명이 없을 경우 기본값 설정
-					if (order.getOrderItems().isEmpty()) {
-						throw new IllegalStateException("주문에 상품이 없습니다.");
-					}
-
-					String itemName = order.getOrderItems().get(0).getItem().getName();
-
-					// OrderDto 생성 및 반환
-					return new OrderDto(
-							order.getId(), // 주문 ID
-							order.getOrderDate(), // 주문 시간
-							itemName, // 대표 상품명 (첫 번째 상품 또는 기본값)
-							order.getOrderStatus(), // 주문 상태
-							order.getDeliveryStatus(), // 배송 상태
-							order.getOrderItems().stream()
-									.mapToInt(OrderItem::getTotalPrice) // 각 상품의 총 가격 합산
-									.sum() // 전체 금액 계산
-					);
+					return convertToDto(order);
 				})
 				.toList();
 	}
+
+	private OrderDto convertToDto(Order order) {
+		if (order.getOrderItems().isEmpty()) {
+			throw new IllegalStateException("주문에 상품이 없습니다.");
+		}
+
+		String itemName = order.getOrderItems().get(0).getItem().getName();
+
+		// OrderDto 생성 및 반환
+		return new OrderDto(
+				order.getId(), // 주문 ID
+				order.getOrderDate(), // 주문 시간
+				itemName, // 대표 상품명 (첫 번째 상품 또는 기본값)
+				order.getOrderStatus(), // 주문 상태
+				order.getDeliveryStatus(), // 배송 상태
+				order.getOrderItems().stream()
+						.mapToInt(OrderItem::getTotalPrice) // 각 상품의 총 가격 합산
+						.sum() // 전체 금액 계산
+		);
+	}
+
+	/**
+	 * 마이 페이지 - 주문 최근 내역 3건만 보여 주기
+	 * @param email
+	 * @return
+	 */
+
 	// 주문 상세 조회 (단건)
 	public Order getOrderDetail(String email) {
 		return orderRepository.findByEmail(email)

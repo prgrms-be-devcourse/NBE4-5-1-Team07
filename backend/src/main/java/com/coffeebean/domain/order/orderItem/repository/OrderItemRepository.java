@@ -22,7 +22,8 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
             "JOIN oi.order o " +
             "WHERE o.email = :email " +
             "AND o.deliveryStatus = 'DONE' " +
-            "AND o.orderDate > :cutoffDate")
+            "AND o.orderDate > :cutoffDate " +
+            "and oi.isWritten = false")
     List<OrderItem> findReviewableOrderItems(@Param("email") String email,
                                              @Param("cutoffDate") LocalDateTime cutoffDate);
 }
