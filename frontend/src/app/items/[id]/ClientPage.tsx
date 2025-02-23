@@ -202,9 +202,7 @@ export default function ClientPage({ id }: { id: number }) {
         {selectedTab === "info" && (
           <div className="text-2xl h-[50vh]">
             <h2>상품 정보</h2>
-            <p>
-              <div dangerouslySetInnerHTML={{ __html: item.description }} />
-            </p>
+            <div dangerouslySetInnerHTML={{ __html: item.description }} />
           </div>
         )}
         {selectedTab === "review" && (
