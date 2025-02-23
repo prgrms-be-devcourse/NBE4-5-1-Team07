@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface CartItem {
   id: number;
@@ -17,37 +18,6 @@ export default function ClientLayout() {
   ]);
 
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
-
-  // 장바구니 조회 API 연동은 쿠키로 authToken 전달 필요
-  /*
-  //const [cartItems, setCartItems] = useState<CartItem[]>([]);
-
-  // API 요청을 위한 authToken
-  const authToken =
-    "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlQGV4YW0uY29tIiwiaWF0IjoxNzQwMTAxODYzLCJleHAiOjE3NDAxODgyNjN9._GSZpw5wIYr9QsxLgBjRe0OsnyY6BBEbXzlxm3Inv1A";
-
-  // 장바구니 데이터 불러오기
-  useEffect(() => {
-    fetch("http://localhost:8080/api/v1/carts", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${authToken}`, // 인증 토큰 추가
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.code === "200-1") {
-          setCartItems(data.data.items);
-        } else {
-          console.error("장바구니 조회 실패:", data.msg);
-        }
-      })
-      .catch((err) =>
-        console.error("장바구니 데이터를 불러오는 중 오류 발생:", err)
-      );
-  }, []);
-*/
 
   // 개별 상품 선택/해제 핸들러
   const toggleSelection = (id: number) => {
@@ -85,6 +55,33 @@ export default function ClientLayout() {
   const totalPrice = cartItems
     .filter((item) => selectedItems.includes(item.id))
     .reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  // 결제하기 버튼 클릭 시 세션 스토리지에 데이터 저장
+  const handleCheckout = () => {
+    const selectedProducts = cartItems.filter((item) =>
+      selectedItems.includes(item.id)
+    );
+    if (selectedProducts.length === 0) {
+      alert("선택된 상품이 없습니다.");
+      return;
+    }
+
+    const orderData = {
+      items: selectedProducts.map((item) => ({
+        itemId: item.id,
+        count: item.quantity,
+      })),
+      address: {
+        city: "서울",
+        street: "강남대로 123",
+        zipcode: "12345",
+      },
+      email: "user@example.com",
+      totalAmount: totalPrice, // 총 가격을 세션 스토리지에 저장
+    };
+
+    sessionStorage.setItem("orderData", JSON.stringify(orderData));
+  };
 
   return (
     <div className="p-4">
@@ -163,16 +160,19 @@ export default function ClientLayout() {
         <div className="mt-6 p-4 border-t text-right font-semibold text-lg">
           총 가격:{" "}
           <span className="text-blue-600">{totalPrice.toLocaleString()}원</span>
-          <button
-            disabled={selectedItems.length === 0}
-            className={`ml-4 px-4 py-2 rounded ${
-              selectedItems.length > 0
-                ? "bg-blue-500 hover:bg-blue-600 text-white"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
-          >
-            결제하기
-          </button>
+          <Link href="/orders/complete">
+            <button
+              onClick={handleCheckout}
+              disabled={selectedItems.length === 0}
+              className={`ml-4 px-4 py-2 rounded ${
+                selectedItems.length > 0
+                  ? "bg-blue-500 hover:bg-blue-600 text-white"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              결제하기
+            </button>
+          </Link>
         </div>
       )}
     </div>
