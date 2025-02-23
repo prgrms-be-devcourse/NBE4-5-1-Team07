@@ -1,13 +1,11 @@
 package com.coffeebean.domain.order.order.service;
 
-import java.rmi.UnexpectedException;
 import java.util.List;
 
 import com.coffeebean.domain.order.order.OrderDetailDto;
 import com.coffeebean.domain.order.order.OrderDto;
 import com.coffeebean.domain.order.orderItem.entity.OrderItem;
-import com.coffeebean.global.email.MailService;
-import org.aspectj.weaver.ast.Or;
+import com.coffeebean.domain.user.user.service.MailService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -152,14 +150,14 @@ public class OrderService {
                 // 배송 준비 -> 배송 중, 배송중 메일 발송
                 if (order.getDeliveryStatus() == DeliveryStatus.READY) {
                     order.setDeliveryStatus(DeliveryStatus.START);
-                    mailService.sendMail(order.getEmail(),
+                    mailService.sendMailToUser(order.getEmail(),
                             "배송이 시작되었습니다.",
                             "주문번호[%d]의 상품의 배송이 시작되었습니다.".formatted(order.getId())
                     );
                 } else if (order.getDeliveryStatus() == DeliveryStatus.START) {
                     // 배송중 -> 배송 완료, 배송 완료 메일 발송
                     order.setDeliveryStatus(DeliveryStatus.DONE);
-                    mailService.sendMail(
+                    mailService.sendMailToUser(
                             order.getEmail(),
                             "배송이 완료되었습니다.",
                             "주문번호[%d]의 상품의 배송이 완료되었습니다.".formatted(order.getId())
