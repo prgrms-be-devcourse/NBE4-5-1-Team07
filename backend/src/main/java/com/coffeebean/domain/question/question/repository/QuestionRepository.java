@@ -17,4 +17,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
 	@EntityGraph(attributePaths = {"author", "answer"})
 	List<Question> findAll();
+
+	@EntityGraph(attributePaths = {"author", "answer"})
+    List<Question> findByItemId(Long itemId);
 }

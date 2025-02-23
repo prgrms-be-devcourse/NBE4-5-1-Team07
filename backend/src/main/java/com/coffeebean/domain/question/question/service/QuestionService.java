@@ -1,5 +1,6 @@
 package com.coffeebean.domain.question.question.service;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -60,5 +61,9 @@ public class QuestionService {
 		Question question = questionRepository.findById(questionId)
 			.orElseThrow(() -> new DataNotFoundException("존재하지 않는 질문입니다."));
 		question.deleteAnswer();
+	}
+
+	public List<Question> getQuestionsByItemId(Long itemId) {
+		return questionRepository.findByItemId(itemId);
 	}
 }
