@@ -1,5 +1,7 @@
 package com.coffeebean.domain.order.order.controller;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +11,7 @@ import com.coffeebean.domain.order.order.dto.OrderCreateRequest;
 import com.coffeebean.domain.order.order.dto.OrderCreateResponse;
 import com.coffeebean.domain.order.order.entity.Order;
 import com.coffeebean.domain.order.order.service.OrderService;
+import com.coffeebean.domain.order.orderItem.entity.OrderItem;
 import com.coffeebean.domain.order.orderItem.service.OrderItemService;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.service.UserService;
@@ -43,12 +46,12 @@ public class ApiV1OrderController {
 			orderCreateRequest.getAddress().getZipcode());
 
 		// Order의 세부 상품 항목들 OderItem 저장
-		orderItemService.createOrderItem(order, orderCreateRequest.getItems());
+		List<OrderItem> orderItems = orderItemService.createOrderItem(order, orderCreateRequest.getItems());
 
 		return new RsData<>(
 			"201-1",
 			"주문이 등록되었습니다.",
-			new OrderCreateResponse(order)
+			new OrderCreateResponse(order, orderItems)
 		);
 	}
 }
