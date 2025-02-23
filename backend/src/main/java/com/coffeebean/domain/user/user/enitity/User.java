@@ -51,6 +51,7 @@ public class User {
 
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "user_id")
+	@Builder.Default
 	private List<PointHistory> pointHistories = new ArrayList<>();
 
 	// 포인트 적립 메서드

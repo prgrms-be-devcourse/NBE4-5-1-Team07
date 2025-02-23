@@ -3,11 +3,16 @@ package com.coffeebean.global.util;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.crypto.SecretKey;
 
@@ -69,4 +74,18 @@ public class JwtUtil {
 
         response.addHeader("Set-Cookie", cookie.toString());
     }
+
+    // 쿠키에서 JWT 추출
+    public static Optional<String> getJwtFromCookies(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (request.getCookies() != null) {
+            Arrays.stream(request.getCookies())
+                    .forEach(cookie -> System.out.println("Cookie Name: " + cookie.getName() + ", Value: " + cookie.getValue()));
+        }
+
+        return Arrays.stream(cookies).filter(cookie -> "token".equals(cookie.getName()))
+                .map(Cookie::getValue).findFirst();
+    }
+
 }
