@@ -229,7 +229,7 @@ export default function ClientPage({ id }: { id: number }) {
                     key={question.id}
                     className="p-4 border rounded-lg shadow"
                   >
-                    <Link href={`/question/${question.id}`} className="block">
+                    <Link href={`/questions/${question.id}`} className="block">
                       <h2 className="text-lg font-semibold">
                         {question.subject}
                       </h2>

@@ -58,8 +58,9 @@ export default function QuestionsPage() {
         <ul className="space-y-4">
           {questions.map((question) => (
             <li key={question.id} className="p-4 border rounded-lg shadow">
-              <Link href={`/question/${question.id}`} className="block">
+              <Link href={`/questions/${question.id}`} className="block">
                 <h2 className="text-lg font-semibold">{question.subject}</h2>
+                <p className="text-gray-600">상품번호: {question.itemId}</p>
                 <p className="text-gray-600">작성자: {question.name}</p>
                 <p className="text-sm text-gray-500">
                   작성일: {new Date(question.createDate).toLocaleString()}
