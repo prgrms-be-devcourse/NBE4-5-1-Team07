@@ -6,6 +6,7 @@ import java.util.List;
 import com.coffeebean.domain.order.order.OrderDetailDto;
 import com.coffeebean.domain.order.order.OrderDto;
 import com.coffeebean.domain.order.orderItem.entity.OrderItem;
+import com.coffeebean.global.email.MailService;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,9 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class OrderService {
 
-	private final OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
+    private final MailService mailService;
+    private final OrderService self;
 
     @Transactional
     public Order createOrder(String email, String city, String street, String zipcode) {
