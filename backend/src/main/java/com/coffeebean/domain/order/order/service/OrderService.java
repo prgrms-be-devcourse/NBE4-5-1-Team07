@@ -6,6 +6,7 @@ import java.util.List;
 import com.coffeebean.domain.order.order.OrderDetailDto;
 import com.coffeebean.domain.order.order.OrderDto;
 import com.coffeebean.domain.order.orderItem.entity.OrderItem;
+import com.coffeebean.global.email.MailService;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final MailService mailService;
     private final OrderService self;
 
     @Transactional
@@ -128,6 +130,7 @@ public class OrderService {
         order.cancel();
     }
 
+    // 배송 상태 변경 스케줄러
     @Scheduled(cron = "0 0 14 * * ?")// 매일 14시 실행
     public void scheduledDelivery() {
         self.updateDeliveryStatus();
@@ -136,20 +139,34 @@ public class OrderService {
     // 배송 상태 업데이트 트랜잭션처리
     @Transactional
     public void updateDeliveryStatus() {
-        List<Order> orders = orderRepository.findAll();
+        // 배송준비와 배송 중인 것만 처리
+        List<Order> orders = orderRepository.findByDeliveryStatusIn(List.of(DeliveryStatus.READY, DeliveryStatus.START));
 
         for (Order order : orders) {
-            // ORDER일 경우만 변경
-            if (order.getOrderStatus() != OrderStatus.ORDER) {
-                continue;
-            }
+            try {
+                // ORDER일 경우만 변경
+                if (order.getOrderStatus() != OrderStatus.ORDER) {
+                    continue;
+                }
 
-            // 배송 준비 -> 배송 중
-            if (order.getDeliveryStatus() == DeliveryStatus.READY) {
-                order.setDeliveryStatus(DeliveryStatus.START);
-            } else if (order.getDeliveryStatus() == DeliveryStatus.START) {
-                // 배송중 -> 배송 완료, 주문
-                order.setDeliveryStatus(DeliveryStatus.DONE);
+                // 배송 준비 -> 배송 중, 배송중 메일 발송
+                if (order.getDeliveryStatus() == DeliveryStatus.READY) {
+                    order.setDeliveryStatus(DeliveryStatus.START);
+                    mailService.sendMail(order.getEmail(),
+                            "배송이 시작되었습니다.",
+                            "주문번호[%d]의 상품의 배송이 시작되었습니다.".formatted(order.getId())
+                    );
+                } else if (order.getDeliveryStatus() == DeliveryStatus.START) {
+                    // 배송중 -> 배송 완료, 배송 완료 메일 발송
+                    order.setDeliveryStatus(DeliveryStatus.DONE);
+                    mailService.sendMail(
+                            order.getEmail(),
+                            "배송이 완료되었습니다.",
+                            "주문번호[%d]의 상품의 배송이 완료되었습니다.".formatted(order.getId())
+                    );
+                }
+            } catch (Exception e) {
+                continue; // 프로세스 중단 방지
             }
         }
     }
