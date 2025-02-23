@@ -6,7 +6,6 @@ import com.coffeebean.domain.order.order.OrderDetailDto;
 import com.coffeebean.domain.order.order.OrderDto;
 import com.coffeebean.domain.order.orderItem.entity.OrderItem;
 import com.coffeebean.domain.user.user.service.MailService;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +25,6 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final MailService mailService;
-    private final OrderService self;
 
     @Transactional
     public Order createOrder(String email, String city, String street, String zipcode) {
@@ -126,12 +124,6 @@ public class OrderService {
     public void cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId).get();
         order.cancel();
-    }
-
-    // 배송 상태 변경 스케줄러
-    @Scheduled(cron = "0 0 14 * * ?")// 매일 14시 실행
-    public void scheduledDelivery() {
-        self.updateDeliveryStatus();
     }
 
     // 배송 상태 업데이트 트랜잭션처리
