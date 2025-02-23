@@ -1,7 +1,12 @@
 package com.coffeebean.domain.cart.cart.controller;
 
-import com.coffeebean.domain.cart.cartItem.repository.CartItemRepository;
-import com.coffeebean.domain.user.user.service.UserService;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.nio.charset.StandardCharsets;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,12 +19,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
+import com.coffeebean.domain.cart.cartItem.repository.CartItemRepository;
+import com.coffeebean.domain.user.user.service.UserService;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Transactional
 @SpringBootTest
@@ -37,9 +40,12 @@ class ApiV1CartControllerTest {
     @Autowired
     private CartItemRepository cartItemRepository;
 
+    @Autowired
+    private HttpServletResponse httpServletResponse;
+
     @BeforeEach
     void setUp() {
-        //  authToken = userService.login("example@exam.com", "password");
+          authToken = userService.loginUser("example@exam.com", "password", httpServletResponse).get("token");
     }
 
     @Test
