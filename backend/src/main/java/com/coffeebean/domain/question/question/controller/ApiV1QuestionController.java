@@ -151,4 +151,19 @@ public class ApiV1QuestionController {
 
 		return new RsData<>("200-1", "답변이 삭제되었습니다.");
 	}
+
+	// 답변 수정
+	@PutMapping("/{id}/answers")
+	@Transactional
+	public RsData<Void> modifyAnswer(@PathVariable long id, @RequestBody WriteAnswerReqBody reqBody) {
+		Answer answer = answerService.findByAnswerId(id);
+
+		Answer modifyAnswer = answerService.modifyAnswer(answer, reqBody.content());
+
+		return new RsData<>(
+				"200-1",
+				"'%d'번 공지사항이 수정 되었습니다.".formatted(modifyAnswer.getId())
+		);
+
+	}
 }
