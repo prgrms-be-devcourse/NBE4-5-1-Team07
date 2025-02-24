@@ -40,6 +40,9 @@ export default function QuestionForm() {
       if (res.ok && result.code === "200-1") {
         alert("질문이 성공적으로 등록되었습니다.");
         router.back(); // 이전 페이지로 이동
+      } else if (res.status === 401) {
+        alert("로그인이 필요합니다.");
+        router.push("/user/login"); // 로그인 페이지로 이동
       } else {
         throw new Error(result.message || "질문 등록에 실패했습니다.");
       }
