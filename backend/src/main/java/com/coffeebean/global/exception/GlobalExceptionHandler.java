@@ -2,6 +2,7 @@ package com.coffeebean.global.exception;
 
 import com.coffeebean.global.app.AppConfig;
 import com.coffeebean.global.dto.RsData;
+import io.jsonwebtoken.JwtException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -56,24 +57,26 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleDataNotFound(DataNotFoundException exception) {
-        ErrorResponse errorResponse = ErrorResponse.of(
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.of(
                 "DATA_NOT_FOUND", exception.getMessage()
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        ));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException exception) {
-        ErrorResponse errorResponse = ErrorResponse.of("INVALID_STATUS",
-                exception.getMessage());
-        return ResponseEntity.badRequest().body(errorResponse);
+        return ResponseEntity.badRequest().body(ErrorResponse.of("INVALID_STATUS",
+                exception.getMessage()));
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ErrorResponse> IllegalState(IllegalStateException exception) {
-        ErrorResponse errorResponse = ErrorResponse.of("INVALID_STATE",
-                exception.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.of("INVALID_STATE",
+                exception.getMessage()));
+    }
+
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<ErrorResponse> handleSecurityException(SecurityException exception) {
+        return ResponseEntity.status(401).body(ErrorResponse.of("INVALID_TOKEN", exception.getMessage()));
     }
 
 

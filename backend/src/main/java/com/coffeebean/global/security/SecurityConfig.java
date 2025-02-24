@@ -5,6 +5,7 @@ import com.coffeebean.domain.user.user.repository.UserRepository;
 import java.util.Arrays;
 
 import com.coffeebean.global.app.AppConfig;
+import com.coffeebean.global.util.JwtAuthenticationFilterFromCookie;
 import com.coffeebean.global.util.JwtAuthenticationFilterFromHeader;
 import com.coffeebean.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -39,13 +40,15 @@ public class SecurityConfig {
                                 .requestMatchers("/h2-console/**", "/api/v1/user/admin/login").permitAll()
                                 // "/api/v1/user/admin/**" 경로는 관리자만 접근 가능
                                 .requestMatchers("/api/v1/user/admin/**").hasAuthority("admin")
-                                .requestMatchers("/api/my/home").authenticated()
+                                .requestMatchers("/api/my/home").authenticated() // 마이 페이지는 인증 받은 회원만 접근
+                                .requestMatchers("/api/reviews/**").authenticated() // 리뷰 페이지는 인증 받은 회원만 접근
+                                .requestMatchers("/api/point/history").authenticated()
                                 // 그 외의 모든 경로는 인증 없이 접근 가능
                                 .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // .addFilterBefore(new JwtAuthenticationFilterFromCookie(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new JwtAuthenticationFilterFromHeader(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilterFromCookie(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
+                //.addFilterBefore(new JwtAuthenticationFilterFromHeader(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
                 .headers((headers) -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(
                                 XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
