@@ -1,23 +1,36 @@
 package com.coffeebean.domain.user.user.controller;
 
+import com.coffeebean.domain.user.MyPageResponse;
 import com.coffeebean.domain.user.user.dto.EmailVerificationRequest;
 import com.coffeebean.domain.user.user.dto.SignupReqBody;
 import com.coffeebean.domain.user.user.enitity.User;
+import com.coffeebean.domain.user.user.repository.UserRepository;
 import com.coffeebean.domain.user.user.service.EmailVerificationService;
 import com.coffeebean.domain.user.user.service.UserService;
+import com.coffeebean.global.annotation.Login;
 import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.exception.ServiceException;
+import com.coffeebean.global.util.CustomUserDetails;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.buf.UEncoder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -69,7 +82,6 @@ public class UserController {
     }
 
 
-
     // 관리자 로그인
     @PostMapping("/admin/login")
     public RsData<String> adminLogin(@RequestBody Map<String, String> credentials, HttpServletResponse response) {
@@ -93,4 +105,22 @@ public class UserController {
 
         return new RsData<>("200-2", message, token);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<RsData<String>> logout(HttpServletResponse response) {
+        // 쿠키 삭제 (token 이름으로 설정된 JWT 삭제)
+        ResponseCookie cookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0) // 쿠키 즉시 삭제
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
+
+        return ResponseEntity.ok(new RsData<>("200-4", "로그아웃 성공", null));
+    }
+
+
 }

@@ -55,11 +55,11 @@
 ## 4. 작업 및 역할 분담
    |     |                                                                                         |                                                                                                  |
    |-----|-----------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-   | 문권이 | <img src="https://avatars.githubusercontent.com/u/102517739?v=4" alt="문권이" width="100"> | <ul><li>프로젝트 계획 및 관리</li><li>팀 리딩 및 커뮤니케이션</li><li>회원가입/로그인 페이지 개발</li><li>회원 관리 기능 개발</li></ul> |
+   | 문권이 | <img src="https://avatars.githubusercontent.com/u/102517739?v=4" alt="문권이" width="100"> | <ul><li>프로젝트 계획 및 관리</li><li>팀 리딩 및 커뮤니케이션</li><li>회원가입/로그인 페이지 개발</li><li>토큰/세션/시큐리티</li></ul> |
    | 신동우 | <img src="https://avatars.githubusercontent.com/u/58596222?v=4" alt="신동우" width="100">  | <ul><li>메인 페이지 개발</li><li>상품 주문 페이지 개발</li><li>장바구니 페이지 개발</li></ul>|
    | 최지선 | <img src="https://avatars.githubusercontent.com/u/192316487?v=4" alt="최지선" width="100"> | <ul><li>사용자 페이지 개발</li><li>사용자 기능 개발</li></ul>|
    | 엄현수 | <img src="https://avatars.githubusercontent.com/u/55376152?v=4" alt="엄현수" width="100">  | <ul><li>메인 페이지 개발</li><li>상품 주문 페이지 개발</li><li>장바구니 페이지 개발</li></ul>|
-   | 김경래 | <img src="" alt="김경래" width="100">                                                      | <ul><li>관리자 관리 페이지 개발</li><li>관리자 기능 개발 </li></ul> |
+   | 김경래 | <img src="https://avatars.githubusercontent.com/u/15260002?v=4" alt="김경래" width="100">                                                      | <ul><li>관리자 관리 페이지 개발</li><li>관리자 기능 개발 </li></ul> |
 
 <br/>
 <br/>

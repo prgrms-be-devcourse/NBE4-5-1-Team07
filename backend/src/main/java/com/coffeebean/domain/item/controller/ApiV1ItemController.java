@@ -13,6 +13,7 @@ import com.coffeebean.global.security.annotations.AdminOnly;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -125,7 +126,8 @@ public class ApiV1ItemController {
 
     // 해당 상품의 질문 목록 조회
     @GetMapping("/{id}/questions")
-    public RsData<List<QuestionDto>> getQuestions(@RequestParam Long itemId) {
+    public RsData<List<QuestionDto>> getQuestions(@RequestParam Long itemId,
+                                                  @PathVariable("id") Long id) {
         try {
             // itemId에 해당하는 질문 목록 조회
             List<QuestionDto> questions = questionService.getQuestionsByItemId(itemId).stream()
