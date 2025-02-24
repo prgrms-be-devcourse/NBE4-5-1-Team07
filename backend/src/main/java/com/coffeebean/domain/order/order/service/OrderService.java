@@ -53,7 +53,6 @@ public class OrderService {
     }
 
     // 최신 3건만 보여 주는 용도
-    @Transactional
     public List<OrderDto> getRecentOrdersByEmail(String email) {
         List<Order> orders = orderRepository.findTop3ByEmailOrderByOrderDateDesc(email);
         return convertToDtoList(orders);

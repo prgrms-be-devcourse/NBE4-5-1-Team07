@@ -3,6 +3,7 @@ package com.coffeebean.domain.user.user.service;
 import com.coffeebean.domain.user.pointHitstory.PointHistoryDto;
 import com.coffeebean.domain.user.pointHitstory.entity.PointHistory;
 import com.coffeebean.domain.user.user.dto.SignupReqBody;
+import com.coffeebean.domain.user.user.dto.UserDto;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.repository.UserRepository;
 import com.coffeebean.global.exception.ServiceException;
@@ -11,6 +12,8 @@ import com.coffeebean.global.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -133,6 +136,7 @@ public class UserService {
 		}
 		return false;
 	}
+
     public Long getUserIdFromEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() ->
                         new DataNotFoundException("존재하지 않는 회원입니다."))
@@ -158,4 +162,10 @@ public class UserService {
                 pointHistory.getDescription(),
                 pointHistory.getCreateDate())).toList();
     }
+
+	@Transactional
+	public UserDto getDetails(String email) {
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("사용자를 찾을 수 없습니다."));
+		return new UserDto(user.getName(), user.getTotalPoints());
+	}
 }
