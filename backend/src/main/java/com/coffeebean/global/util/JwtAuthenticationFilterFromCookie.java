@@ -3,6 +3,7 @@ package com.coffeebean.global.util;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.repository.UserRepository;
 import com.coffeebean.global.exception.DataNotFoundException;
+
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,10 +11,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -22,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-@Component
+// @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
 
@@ -34,8 +35,10 @@ public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // 특정 경로에서 필터를 적용하지 않도록 설정
-        if (shouldNotFilter(request)) {
+        String requestURI = request.getRequestURI();
+
+        // 특정 경로는 필터를 타지 않도록 설정
+        if ("/api/v1/users/login".equals(requestURI)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -56,15 +59,12 @@ public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
                 }
 
                 // 4. 사용자 정보 조회 (클레임 추출)
-                Long userId = ((Number) claims.get("id")).longValue();
+                Long userId = ((Number)claims.get("id")).longValue();
+                String email = (String)claims.get("email");
 
-                // 5. DB 조회
-                User user = userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("찾을 수 없는 회원입니다."));
-
+                // 5. DB 조회 생략
                 // 6. 인증 객체 생성 및 저장 ✅
-                CustomUserDetails customUserDetails = new CustomUserDetails(
-                        user.getId(),
-                        user.getEmail());
+                CustomUserDetails customUserDetails = new CustomUserDetails(userId, email);
                 log.info("customUserDetails={}", customUserDetails);
 
                 // 권한은 필요없어서 빈 리스트로 반환
@@ -74,15 +74,17 @@ public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+            filterChain.doFilter(request, response);
         } catch (JwtException | DataNotFoundException e) {
-            throw new SecurityException(e.getMessage());
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            filterChain.doFilter(request, response);
         }
-        filterChain.doFilter(request, response);
     }
 
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        // ✅ 필터가 필요 없는 지점 설정 (예: /api/v1/user/login 같은 엔드포인트)
-        return request.getRequestURI().startsWith("/api/v1");
-    }
+//    protected boolean shouldNotFilter(HttpServletRequest request) {
+//        String path = request.getRequestURI();
+//        // ✅ 필터가 필요 없는 지점 설정 (예: /api/v1/user/login 같은 엔드포인트)
+//        return request.getRequestURI().startsWith("/api/v1");
+//    }   // 여거 때문이에요!
 }
