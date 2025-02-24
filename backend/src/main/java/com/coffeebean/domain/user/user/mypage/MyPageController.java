@@ -5,15 +5,18 @@ import com.coffeebean.domain.order.order.service.OrderService;
 import com.coffeebean.domain.review.review.service.ReviewService;
 import com.coffeebean.domain.user.MyPageResponse;
 import com.coffeebean.domain.user.pointHitstory.PointHistoryDto;
+import com.coffeebean.domain.user.user.dto.UserInfoResponse;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.repository.UserRepository;
 import com.coffeebean.domain.user.user.service.UserService;
 import com.coffeebean.global.annotation.Login;
+import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.exception.DataNotFoundException;
 import com.coffeebean.global.exception.ServiceException;
 import com.coffeebean.global.util.CustomUserDetails;
 import com.coffeebean.global.util.JwtUtil;
 import lombok.AllArgsConstructor;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,5 +60,18 @@ public class MyPageController {
         List<PointHistoryDto> pointHistories = userService.getPointHistories(userDetails.getUserId());
 
         return ResponseEntity.ok(pointHistories);
+    }
+
+    // 내 정보 조회 - 회원인 경우 결제 페이지에서 이메일, 배송지 주소를 미리 입력하기 위해 사용
+    @GetMapping("/my/info")
+    public RsData<UserInfoResponse> myInfo(@Login CustomUserDetails userDetails) {
+        User actor = userService.findByEmail(userDetails.getEmail())
+            .orElseThrow(() -> new ServiceException("401-1", "인증 정보가 없습니다."));
+
+        return new RsData<>(
+            "200-1",
+            "내 정보 조회가 완료되었습니다.",
+            new UserInfoResponse(actor)
+        );
     }
 }
