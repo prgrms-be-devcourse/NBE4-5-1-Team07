@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -41,12 +42,12 @@ public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
 
         try {
             // 1. 쿠키에서 JWT 추출
-            Optional<String> token = jwtUtil.getJwtFromCookies(request);
+            Optional<String> token = JwtUtil.getJwtFromCookies(request);
             log.info("JWT Token={}", token.orElse("No Token Found"));
 
             if (token.isPresent()) {
                 // 2. 페이로드 조회
-                Map<String, Object> claims = jwtUtil.getPayload(token.get());
+                Map<String, Object> claims = JwtUtil.getPayload(token.get());
                 log.info("JWT Claims={}", claims);
 
                 // 3. 필수 클레임 검증

@@ -5,6 +5,7 @@ import com.coffeebean.domain.order.order.service.OrderService;
 import com.coffeebean.domain.review.review.service.ReviewService;
 import com.coffeebean.domain.user.MyPageResponse;
 import com.coffeebean.domain.user.pointHitstory.PointHistoryDto;
+import com.coffeebean.domain.user.user.dto.UserDto;
 import com.coffeebean.domain.user.user.dto.UserInfoResponse;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.repository.UserRepository;
@@ -33,15 +34,15 @@ public class MyPageController {
 
     private UserService userService;
     private OrderService orderService;
-    private UserRepository repository;
 
     // 마이 페이지 접근
     @GetMapping("/my/home")
-    // @Login CustomUserDetails userDetails,
     public ResponseEntity<MyPageResponse> myPage(@Login CustomUserDetails userDetails) {
         // 사용자 정보 추출
         String email = userDetails.getEmail();
-        User user = repository.findByEmail(email).orElseThrow();
+        UserDto details = userService.getDetails(email);
+
+        log.info("controller -> userDetails={}", details);
 
         // ✅ 사용자별 데이터 조회
         // 주문 내역 조회 (최근 주문 내역으로 3건만) -> 더보기 버튼
@@ -49,8 +50,8 @@ public class MyPageController {
 
         // 리뷰 내역 조회 (작성 가능한 리뷰 / 작성한 리뷰) -> 버튼
 
-        return ResponseEntity.ok(new MyPageResponse(user.getName(),
-                user.getTotalPoints(),
+        return ResponseEntity.ok(new MyPageResponse(details.getName(),
+                details.getTotalPoints(),
                 recentOrders));
     }
 
