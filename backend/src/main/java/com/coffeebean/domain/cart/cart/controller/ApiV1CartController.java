@@ -64,7 +64,7 @@ public class ApiV1CartController {
 
 	// 자신의 장바구니 전체 조회
 	@GetMapping
-	@Transactional(readOnly = true)
+	@Transactional
 	public RsData<CartListResponseDto> getCarts(@Login CustomUserDetails userDetails) {
 
 		User actor = User.builder()
@@ -94,7 +94,6 @@ public class ApiV1CartController {
 
 	// 자신의 장바구니 상품 수량 변경
 	@PutMapping("/{id}")
-	@Transactional
 	public RsData<Void> modifyCartItem(@RequestBody @Valid CartItemModifyReqBody cartModifyReqBody,
 		@PathVariable(name = "id") Long itemId, @Login CustomUserDetails userDetails) {
 
@@ -115,15 +114,15 @@ public class ApiV1CartController {
 
 	// 자신의 장바구니 상품 삭제
 	@DeleteMapping("/{id}")
-	@Transactional
 	public RsData<Void> deleteCartItem(
-		@RequestBody @Valid AuthReqBody authReqBody,
-		@PathVariable(name = "id") Long itemId
+		@PathVariable(name = "id") Long itemId, @Login CustomUserDetails userDetails
 	) {
-		User actor = userService.getUserByAuthToken(authReqBody.authToken());
-		User realActor = userService.findByEmail(actor.getEmail())
-			.orElseThrow(() -> new ServiceException("401", "인증 정보가 잘못되었습니다."));
-		Cart cart = cartService.getMyCart(realActor);
+		User actor = User.builder()
+			.id(userDetails.getUserId())
+			.email(userDetails.getEmail())
+			.build();
+
+		Cart cart = cartService.getMyCart(actor);
 
 		cartItemService.deleteCartItem(cart, itemId);
 
@@ -135,7 +134,6 @@ public class ApiV1CartController {
 
 	// 자산의 장바구니 상품 전체 삭제
 	@DeleteMapping()
-	@Transactional
 	public RsData<Void> deleteCart(@RequestBody @Valid AuthReqBody authReqBody) {
 		User actor = userService.getUserByAuthToken(authReqBody.authToken());
 		User realActor = userService.findByEmail(actor.getEmail())
