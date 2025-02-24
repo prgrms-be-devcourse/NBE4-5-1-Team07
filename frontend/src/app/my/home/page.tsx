@@ -62,6 +62,8 @@ export default function MyPage() {
     };
   }, [router, error]);
 
+  }, [router]);
+
   if (!data) {
     return <div className="text-center">로딩 중...</div>; // 로딩 메시지 표시
   }
