@@ -27,22 +27,13 @@ public class AdminOnlyAspect {
 
 	@Before("checkAdminPointcut()")
 	public void before() {
-		// Authorization 헤더 검증
-		String authHeader = request.getHeader("Authorization");
-		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-			throw new ServiceException("401-1", "인증 정보가 없거나 잘못되었습니다.");
-		}
+		// Admin 쿠키 검증
+		String token = JwtUtil.getJwtFromCookies(request)
+				.orElseThrow(() -> new ServiceException("401-1", "인증 정보가 없습니다."));
+		Map<String, Object> payload = JwtUtil.getPayload(token);
 
-		Map<String, Object> payload;
-		try {
-			payload = JwtUtil.getPayload(authHeader.substring("Bearer ".length()));
-		} catch (Exception e) {
-			throw new ServiceException("401-2", "유효하지 않은 인증 토큰입니다.");
-		}
-
-		// 토큰에 관리자 권한이 있는지 검증
 		if (!payload.containsKey("role") || !payload.get("role").equals("ROLE_ADMIN")) {
-			throw new ServiceException("403-1", "접근 권한이 없습니다.");
+			throw new ServiceException("403-1", "관리자 권한이 없습니다.");
 		}
 	}
 }
