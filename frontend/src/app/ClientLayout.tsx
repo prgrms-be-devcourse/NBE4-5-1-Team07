@@ -13,7 +13,7 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 
-export default function ClinetLayout({
+export default function ClientLayout({
   children,
   //   me,
   fontVariable,
