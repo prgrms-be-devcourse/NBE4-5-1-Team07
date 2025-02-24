@@ -77,5 +77,31 @@ public class ApiV1NoticeController {
 		);
 	}
 
+	record AuthReqBody(@NotBlank(message = "인증 정보가 없습니다.") String authToken) {
+	}
+
+	// 공지사항 삭제
+	@DeleteMapping("/{id}")
+	public RsData<Void> deleteNotice(
+		@RequestBody @Valid AuthReqBody authReqBody,
+		@PathVariable(name = "id") Long noticeId) {
+		if(authReqBody.authToken.equals("admin")) {
+			noticeService.deleteNotice(noticeId);
+			return new RsData<>("200-1", "공지사항이 삭제되었습니다.");
+		}
+		if (canDeleteNotice(noticeId, authReqBody.authToken())) {
+			noticeService.deleteNotice(noticeId);
+			return new RsData<>("200-1", "공지사항이 삭제되었습니다.");
+		}
+		return new RsData<>("403-1", "공지사항을 삭제할 권한이 없습니다.");
+	}
+
+	private boolean canDeleteNotice(Long noticeId, String authToken) {
+		// 관리자인 경우
+		if (userService.isAdminByAuthToken(authToken)) {
+			return true;
+		}
+		return false;
+	}
 
 }

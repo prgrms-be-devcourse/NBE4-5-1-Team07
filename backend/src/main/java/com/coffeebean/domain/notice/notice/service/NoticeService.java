@@ -42,4 +42,8 @@ public class NoticeService {
                 .orElseThrow(() -> new DataNotFoundException("존재하지 않는 공지사항입니다."));
     }
 
+    // 공지사항 삭제
+    public void deleteNotice(Long noticeId) {
+        noticeRepository.deleteById(noticeId);
+    }
 }
