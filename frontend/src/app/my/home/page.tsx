@@ -53,21 +53,41 @@ export default function MyPage() {
         });
   }, [router]);
 
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>; // 에러 메시지 표시
-  }
-
   if (!data) {
     return <div className="text-center">로딩 중...</div>; // 로딩 메시지 표시
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* 환영 메시지 섹션 */}
-      <div className="mb-8 space-y-2">
-        <h1 className="text-3xl font-bold">{data.userName}님, 반갑습니다!</h1>
-        <p className="text-gray-600">보유 포인트 : {data.totalPoints.toLocaleString()}원</p>
-      </div>
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* 환영 메시지 섹션 */}
+        <div className="mb-8 space-y-2">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold">{data.userName}님, 반갑습니다!</h1>
+              <p className="text-gray-600 mt-2">
+                보유 포인트 : {data.totalPoints.toLocaleString()}원
+              </p>
+            </div>
+            <button
+                onClick={() => router.push('/my/profile/edit')}
+                className="bg-white text-gray-700 px-4 py-2 rounded-lg
+                 border border-gray-300 hover:bg-gray-50
+                 transition-colors duration-200
+                 flex items-center gap-2
+                 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+              >
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+              </svg>
+              내 정보 수정
+            </button>
+          </div>
+        </div>
 
       {/* 적립금 섹션 */}
       <Link href="/my/point/history" className="group block mb-8">
