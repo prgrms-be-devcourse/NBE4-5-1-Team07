@@ -2,6 +2,8 @@ package com.coffeebean.domain.question.question.controller;
 
 import java.util.List;
 
+import com.coffeebean.global.annotation.Login;
+import com.coffeebean.global.util.CustomUserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,20 +41,20 @@ public class ApiV1QuestionController {
 		@NotBlank(message = "질문 제목을 입력하세요.")
 		String subject,
 		@NotBlank(message = "내용을 입력하세요.")
-		String content,
-		@NotBlank(message = "인증 정보가 없습니다.")
-		String authToken
+		String content
 	) {
 	}
 
 	// 질문 작성
 	@PostMapping
-	public RsData<Void> writeQuestion(@RequestBody @Valid WriteQuestionReqBody writeQuestionReqBody) {
-		User actor = userService.getUserByAuthToken(writeQuestionReqBody.authToken());
-		User realActor = userService.findByEmail(actor.getEmail())
-			.orElseThrow(() -> new ServiceException("401-1", "인증 정보가 잘못되었습니다."));
+	public RsData<Void> writeQuestion(@RequestBody @Valid WriteQuestionReqBody writeQuestionReqBody, @Login CustomUserDetails userDetails) {
+		User actor = User.builder()
+				.id(userDetails.getUserId())
+				.email(userDetails.getEmail())
+				.build();
 
-		questionService.writeQuestion(realActor, writeQuestionReqBody.itemId(), writeQuestionReqBody.subject(),
+
+		questionService.writeQuestion(actor, writeQuestionReqBody.itemId(), writeQuestionReqBody.subject(),
 			writeQuestionReqBody.content());
 
 		return new RsData<>(
