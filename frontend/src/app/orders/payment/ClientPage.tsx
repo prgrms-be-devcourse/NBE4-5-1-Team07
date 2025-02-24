@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface Product {
   id: number;
@@ -17,6 +18,7 @@ export default function PaymentPage() {
   const [street, setStreet] = useState("");
   const [zipcode, setZipcode] = useState("");
   const [isMember, setIsMember] = useState(false); // 회원 여부 추가
+  const router = useRouter();
 
   // localStorage에서 데이터 가져오기
   useEffect(() => {
@@ -64,6 +66,7 @@ export default function PaymentPage() {
     }
 
     alert("결제가 진행됩니다.");
+    router.push("/orders/complete");
   };
 
   return (
