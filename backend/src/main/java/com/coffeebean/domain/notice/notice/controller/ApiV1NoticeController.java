@@ -50,6 +50,21 @@ public class ApiV1NoticeController {
 		);
 	}
 
+	// 공지사항 목록 전체 조회
+	@GetMapping
+	public RsData<List<NoticeDto>> getNotices() {
+
+		List<NoticeDto> noticeList = noticeService.getNotices().stream()
+			.map(NoticeDto::new)
+			.toList();
+
+		return new RsData<>(
+			"200-1",
+			"공지사항 목록 조회가 완료되었습니다.",
+			noticeList
+		);
+	}
+
 
 
 }

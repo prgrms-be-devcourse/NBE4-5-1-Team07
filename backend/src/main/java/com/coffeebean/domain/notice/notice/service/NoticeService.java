@@ -29,5 +29,11 @@ public class NoticeService {
         noticeRepository.save(notice);
     }
 
+    // 공지사항 목록 조회
+    @Transactional(readOnly = true)
+    public List<Notice> getNotices() {
+        return noticeRepository.findAll();
+    }
+
 
 }
