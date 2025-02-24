@@ -89,13 +89,58 @@ export default function ModifyAnswerPage({ id }: { id: number }) {
     }
   };
 
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm("정말로 이 답변을 삭제하시겠습니까?");
+    if (!confirmDelete) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/v1/questions/${id}/answers`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // 인증 정보 포함
+        }
+      );
+
+      const result = await res.json();
+
+      if (res.ok && result.code === "200-1") {
+        alert("답변이 삭제되었습니다.");
+        router.push(`/admin/questionManagement`); // 질문 목록으로 이동
+      } else {
+        throw new Error(result.message || "답변 삭제에 실패했습니다.");
+      }
+    } catch (error) {
+      setError("답변 삭제 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!question) {
     return <div className="text-center mt-10">Loading...</div>;
   }
 
   return (
     <div className="max-w-4xl mx-auto p-5">
-      <h1 className="text-2xl font-bold mb-4">답변 수정</h1>
+      <div className="flex justify-between">
+        <h1 className="text-2xl font-bold mb-4">답변 수정</h1>
+        {question.answer && (
+          <div className="flex justify-end">
+            <Button
+              onClick={handleDelete}
+              className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+              disabled={loading}
+            >
+              {loading ? "삭제 중..." : "답변 삭제"}
+            </Button>
+          </div>
+        )}
+      </div>
 
       {error && <p className="text-red-500">{error}</p>}
 
