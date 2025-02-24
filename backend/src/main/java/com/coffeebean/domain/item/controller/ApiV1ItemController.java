@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/items")
@@ -64,7 +65,7 @@ public class ApiV1ItemController {
     public RsData<ItemDto> getItem(@PathVariable long id) {
 
         Item item = itemService.getItem(id).orElseThrow(
-                ()-> new ServiceException("404-1", "존재하지 않는 상품입니다.")
+                () -> new ServiceException("404-1", "존재하지 않는 상품입니다.")
         );
 
         return new RsData<>(
@@ -80,7 +81,7 @@ public class ApiV1ItemController {
     @Transactional
     public RsData<Void> deleteItem(@PathVariable long id) {
         Item item = itemService.getItem(id).orElseThrow(
-                ()-> new ServiceException("404-1", "존재하지 않는 상품입니다.")
+                () -> new ServiceException("404-1", "존재하지 않는 상품입니다.")
         );
 
         itemService.deleteItem(item);
@@ -88,7 +89,7 @@ public class ApiV1ItemController {
         return new RsData<>(
                 "200-1",
                 "%d번 상품 삭제가 완료되었습니다.".formatted(id)
-                );
+        );
 
     }
 
@@ -106,10 +107,10 @@ public class ApiV1ItemController {
     @Transactional
     public RsData<Void> modifyItem(@PathVariable long id, @RequestBody ModifyReqBody reqBody) {
         Item item = itemService.getItem(id).orElseThrow(
-                ()-> new ServiceException("404-1", "존재하지 않는 상품입니다.")
+                () -> new ServiceException("404-1", "존재하지 않는 상품입니다.")
         );
 
-        Item modifyItem= itemService.modifyItem(item, reqBody.name(), reqBody.price(), reqBody.stockQuantity(), reqBody.description());
+        Item modifyItem = itemService.modifyItem(item, reqBody.name(), reqBody.price(), reqBody.stockQuantity(), reqBody.description());
 
         return new RsData<>(
                 "200-1",
@@ -117,4 +118,26 @@ public class ApiV1ItemController {
         );
 
     }
+
+    // 재고 수량만 변경
+    @PatchMapping("/{id}/stock")
+    public RsData<Void> modifyStock(@PathVariable long id, @RequestBody Map<String, Integer> body) {
+        Item item = itemService.getItem(id).orElseThrow(
+                () -> new ServiceException("404-1", "존재하지 않는 상품입니다.")
+        );
+
+        // 변경된 재고값 업데이트
+        if (body.containsKey("stockQuantity")) {
+            int newStockQuntity = body.get("stockQuantity");
+            itemService.updateStockQuantity(item, newStockQuntity);
+        } else {
+            throw new ServiceException("400-1", "재고가 입력되지 않았습니다.");
+        }
+
+        return new RsData<>(
+                "200-1",
+                "'%s' 상품의 재고가 %d개로 변경되었습니다.".formatted(item.getName(), body.get("stockQuantity"))
+        );
+    }
+
 }
