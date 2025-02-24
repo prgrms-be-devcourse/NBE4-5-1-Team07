@@ -38,7 +38,7 @@ public class ApiV1OrderController {
 
 		// 재고 부족 시 주문 등록 실패
 		if (!itemService.isStockSufficient(orderCreateRequest.getItems())) {
-			throw new ServiceException("400-1", "재고가 충분하지 않습니다. 상품 수량을 확인하세요.");
+			throw new ServiceException("400-3", "재고가 충분하지 않습니다. 상품 수량을 확인하세요.");
 		}
 
 		// 회원이 주문을 등록하는 경우

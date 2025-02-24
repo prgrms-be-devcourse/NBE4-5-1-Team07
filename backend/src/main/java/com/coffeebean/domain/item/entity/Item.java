@@ -35,7 +35,7 @@ public class Item {
 
 	public void reduceStock(int count) {
 		if (stockQuantity < count) {
-			throw new ServiceException("400-1", "재고가 충분하지 않습니다. 상품 수량을 확인하세요.");
+			throw new ServiceException("400-3", "재고가 충분하지 않습니다. 상품 수량을 확인하세요.");
 		}
 		stockQuantity -= count;
 	}
