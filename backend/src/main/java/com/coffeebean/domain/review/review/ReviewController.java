@@ -28,7 +28,7 @@ public class ReviewController {
      */
     @GetMapping("/pending/{email}")
     public ResponseEntity<List<ReviewableOrderItemDto>> getPendingReviews(@PathVariable("email") String email) {
-        List<ReviewableOrderItemDto> reviewableOrderItems = reviewService.getReviewableOrderItems(email);
+        List<ReviewableOrderItemDto> reviewableOrderItems = reviewService.getPendingReviews(email);
         return ResponseEntity.ok(reviewableOrderItems);
     }
 
@@ -38,7 +38,7 @@ public class ReviewController {
                                                                @RequestParam(value = "page", defaultValue = "0") int page,
                                                                @RequestParam(value = "size", defaultValue = "10") int size) {
         Long userId = userService.getUserIdFromEmail(email);
-        List<ReviewDetailDto> reviews = reviewService.getReviewsByUser(userId, page, size);
+        List<ReviewDetailDto> reviews = reviewService.getWrittenReviews(userId, page, size);
 
         if (reviews.isEmpty()) {
             return ResponseEntity.noContent().build();
