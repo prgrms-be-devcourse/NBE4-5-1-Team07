@@ -59,14 +59,46 @@ export default function PaymentPage() {
       });
   }, []);
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     if (!email || !city || !street || !zipcode) {
       alert("모든 항목을 입력해주세요.");
       return;
     }
 
-    alert("결제가 진행됩니다.");
-    router.push("/orders/complete");
+    const orderData = {
+      email,
+      address: { city, street, zipcode },
+      items: products.map(({ id, quantity }) => ({
+        id,
+        count: quantity,
+      })),
+    };
+
+    try {
+      const response = await fetch("http://localhost:8080/api/v1/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(orderData),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("결제가 완료되었습니다.");
+
+        // 주문 데이터를 sessionStorage에 저장
+        sessionStorage.setItem("orderData", JSON.stringify(result.data));
+
+        // 결제 완료 페이지로 리디렉션
+        router.push(`/orders/complete`);
+      } else {
+        alert(result.msg || "결제 실패");
+      }
+    } catch (error) {
+      alert("결제 처리 중 오류가 발생했습니다.");
+    }
   };
 
   return (
