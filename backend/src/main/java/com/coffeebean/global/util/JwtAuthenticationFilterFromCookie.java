@@ -76,13 +76,12 @@ public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (JwtException e) {
-            response.setHeader("WWW-Authenticate", "Bearer error=\"invalid_token\"");
-            response.sendError(401, e.getMessage());
+            filterChain.doFilter(request, response);
         } catch (DataNotFoundException e) {
-            response.sendError(404, e.getMessage());
+            filterChain.doFilter(request, response);
         }
         catch (Exception e) {
-            response.sendError(500, "서버 오류");
+            filterChain.doFilter(request, response);
         }
     }
 }
