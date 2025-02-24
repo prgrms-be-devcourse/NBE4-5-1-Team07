@@ -123,6 +123,7 @@ export default function PaymentPage() {
         alert(result.msg);
       } else if (response.ok) {
         alert("결제가 완료되었습니다.");
+        localStorage.removeItem("selectedCartItems");
         sessionStorage.setItem("orderData", JSON.stringify(result.data));
         router.push(`/orders/complete`);
       } else {
