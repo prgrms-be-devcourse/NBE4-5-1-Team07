@@ -65,12 +65,14 @@ public class ApiV1CartController {
 	// 자신의 장바구니 전체 조회
 	@GetMapping
 	@Transactional(readOnly = true)
-	public RsData<CartListResponseDto> getCarts(@RequestBody @Valid AuthReqBody authReqBody) {
+	public RsData<CartListResponseDto> getCarts(@Login CustomUserDetails userDetails) {
 
-		User actor = userService.getUserByAuthToken(authReqBody.authToken());
-		User realActor = userService.findByEmail(actor.getEmail())
-			.orElseThrow(() -> new ServiceException("401", "인증 정보가 잘못되었습니다."));
-		Cart cart = cartService.getMyCart(realActor);
+		User actor = User.builder()
+			.id(userDetails.getUserId())
+			.email(userDetails.getEmail())
+			.build();
+
+		Cart cart = cartService.getMyCart(actor);
 
 		List<CartItemDto> cartItems = cartItemService.getCartItems(cart).stream()
 			.map(CartItemDto::new)
