@@ -11,6 +11,7 @@ interface Product {
 }
 
 export default function PaymentPage() {
+  const [cartOrder, setCartOrder] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [email, setEmail] = useState("");
@@ -23,9 +24,13 @@ export default function PaymentPage() {
   // localStorage에서 데이터 가져오기
   useEffect(() => {
     const storedProducts = localStorage.getItem("checkoutItems");
+    const storedCartOrder = localStorage.getItem("cartOrder");
 
     if (storedProducts) {
       setProducts(JSON.parse(storedProducts));
+    }
+    if (storedCartOrder && storedCartOrder === "true") {
+      setCartOrder(true);
     }
   }, []);
 
@@ -66,6 +71,7 @@ export default function PaymentPage() {
     }
 
     const orderData = {
+      cartOrder: cartOrder,
       email,
       address: { city, street, zipcode },
       items: products.map(({ id, quantity }) => ({
