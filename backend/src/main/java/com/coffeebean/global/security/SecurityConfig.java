@@ -5,6 +5,7 @@ import com.coffeebean.domain.user.user.repository.UserRepository;
 import java.util.Arrays;
 
 import com.coffeebean.global.app.AppConfig;
+import com.coffeebean.global.util.JwtAuthenticationFilterFromCookie;
 import com.coffeebean.global.util.JwtAuthenticationFilterFromHeader;
 import com.coffeebean.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -44,8 +45,7 @@ public class SecurityConfig {
                                 .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // .addFilterBefore(new JwtAuthenticationFilterFromCookie(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new JwtAuthenticationFilterFromHeader(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilterFromCookie(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
                 .headers((headers) -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(
                                 XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
