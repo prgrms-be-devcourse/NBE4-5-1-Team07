@@ -15,16 +15,13 @@ export default function PointHistory() {
   const [pointHistories, setPointHistories] = useState<PointHistoryDto[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const token =
-  "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZW1haWwiOiJleGFtcGxlQGV4YW0uY29tIiwiaWF0IjoxNzQwMzExNDE0LCJleHAiOjE3NDAzOTc4MTR9.NHyfiZEx2N2juwwYFy5qByE-Pmex9rxAk6XiHU9YsSY";
-
   useEffect(() => {
     // API 요청
     fetch("http://localhost:8080/api/point/history", {
       method: "GET",
+      credentials: "include",
       headers: {
-        Authorization: `Bearer ${token}`, // JWT 토큰을 Authorization 헤더에 추가
-         "Content-Type": "application/json",
+         "Content-Type": "application/json"
       },
     })
       .then((response) => {

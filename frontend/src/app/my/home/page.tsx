@@ -6,6 +6,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { CurrencyYenIcon } from "@heroicons/react/16/solid";
 import { GiftIcon } from "lucide-react";
 import { PencilIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 
 export interface MyPageResponse {
   userName: string;
@@ -22,75 +23,35 @@ export interface OrderDto {
   totalPrice: number;
 }
 
-export const mockMyPageResponse: MyPageResponse = {
-  userName: "홍길동",
-  totalPoints: 1500,
-  orders: [
-    {
-      orderId: 1,
-      orderDate: "2025-02-21T17:26:00",
-      itemName: "Item A",
-      orderStatus: "COMPLETED",
-      deliveryStatus: "READY",
-      totalPrice: 50000,
-    },
-    {
-      orderId: 2,
-      orderDate: "2025-02-20T14:10:00",
-      itemName: "Item B",
-      orderStatus: "ORDER",
-      deliveryStatus: "START",
-      totalPrice: 120000,
-    },
-    {
-      orderId: 3,
-      orderDate: "2025-02-18T10:00:00",
-      itemName: "Item C",
-      orderStatus: "CANCELLED",
-      deliveryStatus: "CANCELLED",
-      totalPrice: 0,
-    },
-  ],
-};
-
 export default function MyPage() {
 
-  // const data = mockMyPageResponse; // Mock 데이터를 사용
 
   const [data, setData] = useState<MyPageResponse | null>(null); // 마이페이지 데이터 상태
   const [error, setError] = useState<string | null>(null); // 에러 메시지 상태
+  const router = useRouter(); // Next.js 라우터 사용
 
   useEffect(() => {
-    // JWT 토큰 가져오기
-    // const token = localStorage.getItem("authToken"); // localStorage에서 JWT 토큰 가져오기
-
-    // 일단 토큰 직접 저장하는 방식으로 테스트 했습니다
-    const token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZW1haWwiOiJleGFtcGxlQGV4YW0uY29tIiwiaWF0IjoxNzQwMjkzNTQxLCJleHAiOjE3NDAzNzk5NDF9.n4g2tiP-k5iOf2K6FbaAQydXlQCzh7kwkTZTRtWZ7Po";
-
-    if (!token) {
-      setError("로그인이 필요합니다."); // 토큰이 없으면 에러 설정
-      return;
-    }
-
-
     // API 요청
     fetch("http://localhost:8080/api/my/home", {
       method: "GET",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        credentials: "include", // 쿠키 전송 허용
-        Authorization: `Bearer ${token}`, // 인증 토큰 추가
       },
     })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((result) => setData(result)) // 데이터를 상태에 저장
-      .catch((err) => setError(err.message)); // 에러 처리
-  }, []);
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`로그인이 필요합니다`);
+          }
+          return response.json();
+        })
+        .then((result) => setData(result)) // 데이터를 상태에 저장
+        .catch((err) => {
+          alert(err.message); // 팝업 창에 에러 메시지 표시
+          router.push("/user/login"); // /login 페이지로 리다이렉트
+          setError(err.message); // 에러 메시지 상태 업데이트
+        });
+  }, [router]);
 
   if (error) {
     return <div className="text-center text-red-500">{error}</div>; // 에러 메시지 표시

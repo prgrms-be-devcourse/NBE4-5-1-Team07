@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
+import {useState, useEffect} from "react";
+import {motion} from "framer-motion";
+import {PencilIcon, TrashIcon} from "@heroicons/react/24/solid";
 
 // 리뷰 내역 간단 조회 DTO
 interface ReviewDetailDto {
@@ -43,8 +43,9 @@ export default function ReviewsPage() {
     const [selectedItem, setSelectedItem] = useState<ReviewableOrderItemDto | null>(null);
     const [reviewContent, setReviewContent] = useState("");
     const [reviewRating, setReviewRating] = useState(1);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [selectedReviewForEdit, setSelectedReviewForEdit] = useState<ReviewDetailDto | null>(null);
+    const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
+    const [tempContent, setTempContent] = useState("");
+    const [tempRating, setTempRating] = useState(1);
 
     // 모달 열기 함수
     const openModal = (item: ReviewableOrderItemDto) => {
@@ -62,29 +63,6 @@ export default function ReviewsPage() {
         setReviewRating(1); // 별점 초기화
     };
 
-    // 수정 모달 열기 함수
-    const openEditModal = (review: ReviewDetailDto) => {
-        setSelectedReviewForEdit(review);
-        setIsEditModalOpen(true);
-        setReviewContent(review.content);
-        setReviewRating(review.rating);
-    };
-
-    // 수정 모달 닫기 함수
-    const closeEditModal = () => {
-        setIsEditModalOpen(false);
-        setSelectedReviewForEdit(null);
-        setReviewContent("");
-        setReviewRating(1);
-    };
-
-    const token =
-        "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZW1haWwiOiJleGFtcGxlQGV4YW0uY29tIiwiaWF0IjoxNzQwMzAyNDQ4LCJleHAiOjE3NDAzODg4NDh9.Ru-kOnsLvQ9AUN7OYSbkj20pbsyw8Krd6ZB1ItNtkTY";
-
-    if (!token) {
-        throw new Error("로그인이 필요합니다.");
-    }
-
     // API 요청 함수
     const fetchData = async () => {
         try {
@@ -98,8 +76,8 @@ export default function ReviewsPage() {
 
             const response = await fetch(endpoint, {
                 method: "GET",
+                credentials: "include",
                 headers: {
-                    Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -146,17 +124,13 @@ export default function ReviewsPage() {
         };
 
         try {
-
-            const token =
-                "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZW1haWwiOiJleGFtcGxlQGV4YW0uY29tIiwiaWF0IjoxNzQwMzAyNDQ4LCJleHAiOjE3NDAzODg4NDh9.Ru-kOnsLvQ9AUN7OYSbkj20pbsyw8Krd6ZB1ItNtkTY";
-
             const response = await fetch(
                 `http://localhost:8080/api/reviews/${selectedItem.orderItemId}`,
                 {
                     method: "POST",
+                    credentials: "include",
                     headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify(reviewRequest),
                 }
@@ -181,40 +155,41 @@ export default function ReviewsPage() {
         }
     };
 
-    // 리뷰 수정 함수
-    const updateReview = async () => {
-        if (!selectedReviewForEdit) return;
+    // 수정 시작
+    const startEditing = (review: ReviewDetailDto) => {
+        setEditingReviewId(review.reviewId);
+        setTempContent(review.content);
+        setTempRating(review.rating);
+    };
 
-        const token =
-            "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZW1haWwiOiJleGFtcGxlQGV4YW0uY29tIiwiaWF0IjoxNzQwMzAyNDQ4LCJleHAiOjE3NDAzODg4NDh9.Ru-kOnsLvQ9AUN7OYSbkj20pbsyw8Krd6ZB1ItNtkTY";
+    // 수정 취소
+    const cancelEditing = () => {
+        setEditingReviewId(null);
+        setTempContent("");
+        setTempRating(1);
+    };
 
+    // 리뷰 수정 함수 (변경 부분)
+    const updateReview = async (reviewId: number) => {
         try {
-            const response = await fetch(
-                `http://localhost:8080/api/reviews/${selectedReviewForEdit.reviewId}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        content: reviewContent,
-                        rating: reviewRating,
-                    } as ReviewRequest),
-                }
-            );
+            const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
+                method: "PUT",
+                credentials: "include",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({content: tempContent, rating: tempRating}),
+            });
 
             if (!response.ok) throw new Error("리뷰 수정 실패");
 
-            alert("리뷰가 수정되었습니다!");
-            setWrittenReviews((prev) =>
-                prev.map((review) =>
-                    review.reviewId === selectedReviewForEdit.reviewId
-                        ? { ...review, content: reviewContent, rating: reviewRating }
+            setWrittenReviews(prev =>
+                prev.map(review =>
+                    review.reviewId === reviewId
+                        ? {...review, content: tempContent, rating: tempRating}
                         : review
                 )
             );
-            closeEditModal();
+            cancelEditing();
+            alert("리뷰가 수정되었습니다!");
         } catch (err) {
             console.error(err);
             alert("리뷰 수정 중 오류 발생");
@@ -225,16 +200,14 @@ export default function ReviewsPage() {
     const deleteReview = async (review: ReviewDetailDto) => {
         if (!confirm("정말로 이 리뷰를 삭제하시겠습니까?")) return;
 
-        const token =
-            "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZW1haWwiOiJleGFtcGxlQGV4YW0uY29tIiwiaWF0IjoxNzQwMzAyNDQ4LCJleHAiOjE3NDAzODg4NDh9.Ru-kOnsLvQ9AUN7OYSbkj20pbsyw8Krd6ZB1ItNtkTY";
-
         try {
             const response = await fetch(
                 `http://localhost:8080/api/reviews/${review.reviewId}`,
                 {
                     method: "DELETE",
+                    credentials: "include",
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
                     },
                 }
             );
@@ -255,16 +228,16 @@ export default function ReviewsPage() {
         <div className="max-w-4xl mx-auto px-4 py-8">
             {/* 탭 전환 */}
             <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
+                initial={{opacity: 0, y: -10}}
+                animate={{opacity: 1, y: 0}}
+                transition={{duration: 0.5}}
                 className="flex border-b mb-8"
             >
                 <button
                     className={`flex-1 py-2 text-center ${activeTab === "pending"
                         ? "border-b-2 border-blue-600 text-blue-600 font-semibold"
                         : "text-gray-500 hover:text-gray-800"
-                        }`}
+                    }`}
                     onClick={() => setActiveTab("pending")}
                 >
                     작성 가능한 리뷰
@@ -273,7 +246,7 @@ export default function ReviewsPage() {
                     className={`flex-1 py-2 text-center ${activeTab === "written"
                         ? "border-b-2 border-blue-600 text-blue-600 font-semibold"
                         : "text-gray-500 hover:text-gray-800"
-                        }`}
+                    }`}
                     onClick={() => setActiveTab("written")}
                 >
                     작성한 리뷰
@@ -283,9 +256,9 @@ export default function ReviewsPage() {
             {/* 로딩 상태 */}
             {loading && (
                 <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
+                    initial={{opacity: 0}}
+                    animate={{opacity: 1}}
+                    transition={{duration: 0.5}}
                     className="text-center text-gray-500"
                 >
                     로딩 중...
@@ -295,9 +268,9 @@ export default function ReviewsPage() {
             {/* 에러 상태 */}
             {error && (
                 <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
+                    initial={{opacity: 0}}
+                    animate={{opacity: 1}}
+                    transition={{duration: 0.5}}
                     className="text-center text-red-500"
                 >
                     {error}
@@ -310,9 +283,9 @@ export default function ReviewsPage() {
                     {/* 작성 가능한 리뷰 */}
                     {activeTab === "pending" && (
                         <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
+                            initial={{opacity: 0, y: -10}}
+                            animate={{opacity: 1, y: 0}}
+                            transition={{duration: 0.5}}
                             className="space-y-4">
 
                             {/* [추가] 작성 가능한 후기 수 표시 */}
@@ -323,7 +296,8 @@ export default function ReviewsPage() {
                             </div>
 
                             {pendingReviews.map((item) => (
-                                <li key={item.orderItemId} className="p-4 border rounded-lg hover:bg-gray-50 transition">
+                                <li key={item.orderItemId}
+                                    className="p-4 border rounded-lg hover:bg-gray-50 transition">
                                     <div className="flex justify-between items-center">
                                         <div>
                                             <h3 className="font-medium text-gray-900">{item.itemName}</h3>
@@ -341,9 +315,10 @@ export default function ReviewsPage() {
                         </motion.div>
                     )}
 
-                    {isModalOpen && (
-                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+                    {isModalOpen && ( // 작성 모달
+                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full z-60">
+                                {/* 작성 모달 내용 */}
                                 <h2 className="text-xl font-bold mb-4">{selectedItem?.itemName}</h2>
                                 <textarea
                                     value={reviewContent}
@@ -363,10 +338,12 @@ export default function ReviewsPage() {
                                     ))}
                                 </select>
                                 <div className="flex justify-end space-x-4">
-                                    <button onClick={closeModal} className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
+                                    <button onClick={closeModal}
+                                            className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
                                         취소
                                     </button>
-                                    <button onClick={submitReview} className="bg-blue-500 px-4 py-2 text-white rounded hover:bg-blue-600">
+                                    <button onClick={submitReview}
+                                            className="bg-blue-500 px-4 py-2 text-white rounded hover:bg-blue-600">
                                         저장하기
                                     </button>
                                 </div>
@@ -375,94 +352,71 @@ export default function ReviewsPage() {
                     )}
 
 
-                    {/* 작성된 리뷰 */}
+                    {/* 작성된 리뷰 (수정 부분) */}
                     {activeTab === "written" && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                            className="space-y-4"
-                        >
-                            {writtenReviews.length === 0 ? (
-                                <p className="text-center text-gray-500">작성된 리뷰가 없습니다.</p>
-                            ) : (
-                                writtenReviews.map((review) => (
-                                    <div
-                                        key={review.reviewId}
-                                        className="p-4 border rounded-lg hover:bg-gray-50 transition group"
-                                    >
-                                        <div className="flex justify-between items-center">
-                                            <div>
-                                                <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition">
-                                                    {review.content}
-                                                </h3>
-                                                <p>별점: {"⭐".repeat(review.rating)}</p>
-                                                <p className="text-sm text-gray-500">
-                                                    작성 날짜:{" "}
-                                                    {new Date(review.createDate).toLocaleDateString()}
-                                                </p>
-                                            </div>
-                                            <div className="space-x-2 flex">
-                                                {/* 수정 버튼 */}
+                        <motion.div className="space-y-4">
+                            {writtenReviews.map(review => (
+                                <div key={review.reviewId} className="p-4 border rounded-lg hover:bg-gray-50 group">
+                                    {editingReviewId === review.reviewId ? (
+                                        // 수정 모드 UI
+                                        <div className="space-y-4">
+                  <textarea
+                      value={tempContent}
+                      onChange={(e) => setTempContent(e.target.value)}
+                      className="w-full border rounded p-2 mb-2"
+                      rows={3}
+                  />
+                                            <select
+                                                value={tempRating}
+                                                onChange={(e) => setTempRating(Number(e.target.value))}
+                                                className="w-full border rounded p-2 mb-2"
+                                            >
+                                                {[1, 2, 3, 4, 5].map(rating => (
+                                                    <option key={rating} value={rating}>{rating}점</option>
+                                                ))}
+                                            </select>
+                                            <div className="flex justify-end space-x-2">
                                                 <button
-                                                    onClick={() => openEditModal(review)}
-                                                    className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition flex items-center space-x-2"
+                                                    onClick={cancelEditing}
+                                                    className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
                                                 >
-                                                    <PencilIcon className="w-4 h-4" />
-                                                    <span>수정</span>
+                                                    취소
                                                 </button>
-                                                {isEditModalOpen && (
-                                                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                                                        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-                                                            <h2 className="text-xl font-bold mb-4">{selectedReviewForEdit?.content}</h2>
-                                                            <textarea
-                                                                value={reviewContent}
-                                                                onChange={(e) => setReviewContent(e.target.value)}
-                                                                placeholder="리뷰 내용을 입력하세요"
-                                                                className="w-full border rounded p-2 mb-4"
-                                                            />
-                                                            <select
-                                                                value={reviewRating}
-                                                                onChange={(e) => setReviewRating(Number(e.target.value))}
-                                                                className="w-full border rounded p-2 mb-4"
-                                                            >
-                                                                {[1, 2, 3, 4, 5].map((rating) => (
-                                                                    <option key={rating} value={rating}>
-                                                                        {rating}점
-                                                                    </option>
-                                                                ))}
-                                                            </select>
-                                                            <div className="flex justify-end space-x-4">
-                                                                <button
-                                                                    onClick={closeEditModal}
-                                                                    className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
-                                                                >
-                                                                    취소
-                                                                </button>
-                                                                <button
-                                                                    onClick={updateReview}
-                                                                    className="bg-green-500 px-4 py-2 text-white rounded hover:bg-green-600"
-                                                                >
-                                                                    수정하기
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {/* 삭제 버튼 */}
                                                 <button
-                                                    onClick={() => deleteReview(review)}
-                                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center space-x-2"
+                                                    onClick={() => updateReview(review.reviewId)}
+                                                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
                                                 >
-                                                    <TrashIcon className="w-4 h-4" />
-                                                    <span>삭제</span>
+                                                    저장
                                                 </button>
                                             </div>
                                         </div>
-                                    </div>
-                                ))
-                            )}
+                                    ) : (
+                                        // 기본 보기 모드
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <h3 className="font-medium">{review.content}</h3>
+                                                <p className="text-sm text-gray-500">
+                                                    ⭐ {review.rating} • {new Date(review.createDate).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                            <div className="flex space-x-2">
+                                                <button
+                                                    onClick={() => startEditing(review)}
+                                                    className="p-2 text-yellow-600 hover:text-yellow-700"
+                                                >
+                                                    <PencilIcon className="w-5 h-5"/>
+                                                </button>
+                                                <button
+                                                    onClick={() => deleteReview(review)}
+                                                    className="p-2 text-red-600 hover:text-red-700"
+                                                >
+                                                    <TrashIcon className="w-5 h-5"/>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
                         </motion.div>
                     )}
                 </>
