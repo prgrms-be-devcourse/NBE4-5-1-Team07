@@ -38,6 +38,11 @@ public class ApiV1OrderController {
 			throw new ServiceException("400-3", "재고가 충분하지 않습니다. 상품 수량을 확인하세요.");
 		}
 
+		// 주문에 상품이 하나도 포함되어 있지 않으면 실패
+		if (orderCreateRequest.getItems().isEmpty()) {
+			throw new ServiceException("400-4", "주문에 상품이 추가되지 않았습니다. 먼저 상품을 추가하세요.");
+		}
+
 		// Order 생성
 		Order order = orderService.createOrder(email,
 			orderCreateRequest.getAddress().getCity(),
