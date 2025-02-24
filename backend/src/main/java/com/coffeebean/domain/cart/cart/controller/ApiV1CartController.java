@@ -88,9 +88,7 @@ public class ApiV1CartController {
 	record CartItemModifyReqBody(
 		@NotNull(message = "상품 수량이 입력되지 않았습니다.")
 		@Min(value = 1, message = "잘못된 상품 수량입니다.")
-		int quantity,
-		@NotBlank(message = "인증 정보가 없습니다.")
-		String authToken
+		int quantity
 	) {
 	}
 
@@ -98,12 +96,14 @@ public class ApiV1CartController {
 	@PutMapping("/{id}")
 	@Transactional
 	public RsData<Void> modifyCartItem(@RequestBody @Valid CartItemModifyReqBody cartModifyReqBody,
-		@PathVariable(name = "id") Long itemId) {
+		@PathVariable(name = "id") Long itemId, @Login CustomUserDetails userDetails) {
 
-		User actor = userService.getUserByAuthToken(cartModifyReqBody.authToken());
-		User realActor = userService.findByEmail(actor.getEmail())
-			.orElseThrow(() -> new ServiceException("401", "인증 정보가 잘못되었습니다."));
-		Cart cart = cartService.getMyCart(realActor);
+		User actor = User.builder()
+			.id(userDetails.getUserId())
+			.email(userDetails.getEmail())
+			.build();
+
+		Cart cart = cartService.getMyCart(actor);
 
 		cartItemService.modifyCartItem(cart, itemId, cartModifyReqBody.quantity());
 
