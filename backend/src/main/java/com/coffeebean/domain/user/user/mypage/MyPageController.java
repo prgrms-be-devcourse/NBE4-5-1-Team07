@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -37,6 +38,7 @@ public class MyPageController {
     public ResponseEntity<MyPageResponse> myPage(@Login CustomUserDetails userDetails) {
         // 사용자 정보 추출
         String email = userDetails.getEmail();
+        User user = repository.findByEmail(email).orElseThrow();
 
         // ✅ 사용자별 데이터 조회
         // 주문 내역 조회 (최근 주문 내역으로 3건만) -> 더보기 버튼
@@ -44,8 +46,8 @@ public class MyPageController {
 
         // 리뷰 내역 조회 (작성 가능한 리뷰 / 작성한 리뷰) -> 버튼
 
-        return ResponseEntity.ok(new MyPageResponse(userDetails.getName(),
-                userDetails.getTotalPoints(),
+        return ResponseEntity.ok(new MyPageResponse(user.getName(),
+                user.getTotalPoints(),
                 recentOrders));
     }
 
