@@ -133,21 +133,6 @@ public class UserService {
 		}
 		return false;
 	}
-
-	public boolean isAdminByAuthToken(String token) {
-		Map<String, Object> payload = JwtUtil.getPayload(token);
-		if (payload == null) {
-			throw new IllegalArgumentException("잘못된 인증 정보입니다.");
-		}
-
-		if (payload.keySet().contains("role")) {
-			String role = (String)payload.get("role");
-			if (role.equals(ADMIN_ROLE)) {
-				return true;
-			}
-		}
-		return false;
-	}
     public Long getUserIdFromEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() ->
                         new DataNotFoundException("존재하지 않는 회원입니다."))

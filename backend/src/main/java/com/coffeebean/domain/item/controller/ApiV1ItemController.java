@@ -137,6 +137,20 @@ public class ApiV1ItemController {
         }
     }
 
+    // 해당 상품의 질문 목록 조회
+    @GetMapping("/{id}/questions")
+    public RsData<List<QuestionDto>> getQuestions(@RequestParam Long itemId) {
+        try {
+            // itemId에 해당하는 질문 목록 조회
+            List<QuestionDto> questions = questionService.getQuestionsByItemId(itemId).stream()
+                    .map(QuestionDto::new)
+                    .toList();
+            return new RsData<>("200-1", "질문 목록 조회가 완료되었습니다.", questions);
+        } catch (Exception e) {
+            return new RsData<>("500-1", "질문 목록을 불러오는 데 실패했습니다.");
+        }
+    }
+
     // 재고 수량만 변경
     @PatchMapping("/{id}/stock")
     public RsData<Void> modifyStock(@PathVariable long id, @RequestBody Map<String, Integer> body) {
