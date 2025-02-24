@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
@@ -68,7 +69,7 @@ public class JwtUtil {
                 .httpOnly(true)  // 클라이언트에서 JS로 접근 불가
                 .secure(true)    // HTTPS에서만 전달
                 .path("/")       // 모든 경로에서 사용 가능
-                .maxAge(EXPIRATION_TIME / 1000000) // 만료 시간 (초 단위)
+                .maxAge(Duration.ofDays(1))
                 .sameSite("Strict") // SameSite 설정 (CSRF 방어)
                 .build();
 
@@ -82,8 +83,6 @@ public class JwtUtil {
         if (request.getCookies() != null) {
             Arrays.stream(request.getCookies())
                     .forEach(cookie -> System.out.println("Cookie Name: " + cookie.getName() + ", Value: " + cookie.getValue()));
-        } else {
-            throw new SecurityException("로그인이 필요합니다.");
         }
 
         return Arrays.stream(cookies).filter(cookie -> "token".equals(cookie.getName()))

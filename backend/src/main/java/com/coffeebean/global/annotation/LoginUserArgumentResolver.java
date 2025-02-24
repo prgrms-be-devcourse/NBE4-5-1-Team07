@@ -1,5 +1,6 @@
 package com.coffeebean.global.annotation;
 
+import com.coffeebean.global.exception.ServiceException;
 import com.coffeebean.global.util.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -31,13 +32,13 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null) {
-            throw new AccessDeniedException("인증 정보가 없습니다.");
+            throw new ServiceException("401-1", "인증 정보가 없습니다.");
         }
 
         Object principal = authentication.getPrincipal();
 
         if (!(principal instanceof CustomUserDetails)) {
-            throw new AccessDeniedException("올바른 사용자 정보가 아닙니다.");
+            throw new ServiceException("401-2", "인증 정보가 잘못되었거나 없습니다.");
         }
         return principal;
     }

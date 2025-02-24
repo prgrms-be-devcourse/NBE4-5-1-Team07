@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 // ItemDto 인터페이스 정의
@@ -12,6 +13,13 @@ interface ItemDto {
   price: number;
   stockQuantity: number;
   description: string;
+}
+
+interface CartItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
 }
 
 interface AnswerDto {
@@ -33,6 +41,7 @@ interface QuestionDto {
 
 export default function ClientPage({ id }: { id: number }) {
   const [item, setItem] = useState<ItemDto | null>(null);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [quantity, setQuantity] = useState(1); // 수량 상태 관리
@@ -40,6 +49,7 @@ export default function ClientPage({ id }: { id: number }) {
     "info" | "review" | "question"
   >("info"); // 선택된 탭 상태
   const [questions, setQuestions] = useState<QuestionDto[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     setLoading(true);
@@ -99,6 +109,79 @@ export default function ClientPage({ id }: { id: number }) {
     }
   };
 
+  const handleAddToCart = async () => {
+    if (!item) return;
+
+    const cartItem: CartItem = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity,
+    };
+
+    try {
+      const response = await fetch("http://localhost:8080/api/v1/carts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: item.id,
+          quantity,
+        }),
+        credentials: "include",
+      });
+
+      if (response.status === 401) {
+        // 🛒 비회원 → localStorage에 저장
+        const localCart: CartItem[] = JSON.parse(
+          localStorage.getItem("cartItems") || "[]"
+        );
+
+        // 기존 상품 있는지 확인
+        const existingItem = localCart.find((item) => item.id === cartItem.id);
+        if (existingItem) {
+          existingItem.quantity += quantity; // 수량 증가
+        } else {
+          localCart.push(cartItem); // 새로운 상품 추가
+        }
+
+        localStorage.setItem("cartItems", JSON.stringify(localCart));
+        alert("비회원 장바구니에 추가되었습니다.");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("장바구니 추가에 실패했습니다.");
+      }
+
+      const data = await response.json();
+      alert(data.message || "장바구니에 상품이 추가되었습니다!");
+    } catch (error) {
+      console.error("장바구니 추가 중 오류:", error);
+      alert("장바구니 추가 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleCheckout = () => {
+    if (!item) return;
+
+    // 결제할 상품 정보 저장
+    const checkoutItems = [
+      {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity,
+      },
+    ];
+
+    localStorage.setItem("checkoutItems", JSON.stringify(checkoutItems));
+
+    // 결제 페이지로 이동
+    router.push("/orders/payment");
+  };
+
   if (loading) return <div className="text-center p-6">로딩 중...</div>;
   if (error) return <div className="text-center p-6 text-red-500">{error}</div>;
   if (!item)
@@ -150,12 +233,18 @@ export default function ClientPage({ id }: { id: number }) {
 
           <div className="flex flex-row gap-4 justify-center">
             <div>
-              <Button className="border-2 border-blue-500 w-[200px] bg-white text-black hover:bg-gray-400 ">
+              <Button
+                className="border-2 border-blue-500 w-[200px] bg-white text-black hover:bg-gray-400"
+                onClick={handleAddToCart} // 추가
+              >
                 장바구니 담기
               </Button>
             </div>
             <div>
-              <Button className="bg-blue-500 w-[200px] hover:bg-gray-500 ">
+              <Button
+                className="bg-blue-500 w-[200px] hover:bg-gray-500 "
+                onClick={handleCheckout} // 결제
+              >
                 바로구매 {`>`}
               </Button>
             </div>
