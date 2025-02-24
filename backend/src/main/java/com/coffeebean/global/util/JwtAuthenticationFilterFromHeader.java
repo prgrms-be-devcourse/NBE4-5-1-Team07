@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.Map;
 
 @Slf4j
+// @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilterFromHeader extends OncePerRequestFilter {
 
@@ -31,10 +33,8 @@ public class JwtAuthenticationFilterFromHeader extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String requestURI = request.getRequestURI();
-
-        // 특정 경로는 필터를 타지 않도록 설정
-        if ("/api/v1/users/login".equals(requestURI)) {
+        // 리뷰, 마이 페이지만 필터 탈 수 있도록 설정
+        if (shouldNotFilter(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -75,16 +75,18 @@ public class JwtAuthenticationFilterFromHeader extends OncePerRequestFilter {
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        } catch (JwtException e) {
-            response.setHeader("WWW-Authenticate", "Bearer error=\"invalid_token\"");
-            response.sendError(401, e.getMessage());
-        } catch (DataNotFoundException e) {
-            response.sendError(404, e.getMessage());
-        }
-        catch (Exception e) {
-            response.sendError(500, "서버 오류");
+        } catch (JwtException | DataNotFoundException e) {
+            throw new SecurityException(e.getMessage());
+        } catch (NullPointerException e) {
+            throw new DataNotFoundException("토큰 없음, 로그인이 필요합니다!");
         }
         // 요청 필터링 체인 계속 진행
         filterChain.doFilter(request, response);
+    }
+
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        // ✅ 필터가 필요 없는 지점 설정
+        return request.getRequestURI().startsWith("/api/v1");
     }
 }

@@ -82,6 +82,8 @@ public class JwtUtil {
         if (request.getCookies() != null) {
             Arrays.stream(request.getCookies())
                     .forEach(cookie -> System.out.println("Cookie Name: " + cookie.getName() + ", Value: " + cookie.getValue()));
+        } else {
+            throw new SecurityException("로그인이 필요합니다.");
         }
 
         return Arrays.stream(cookies).filter(cookie -> "token".equals(cookie.getName()))

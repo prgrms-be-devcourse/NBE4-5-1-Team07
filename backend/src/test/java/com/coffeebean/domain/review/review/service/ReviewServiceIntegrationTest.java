@@ -115,7 +115,7 @@ public class ReviewServiceIntegrationTest {
         String email = "test@example.com";
         
         //when
-        List<ReviewableOrderItemDto> reviewableOrderItems = reviewService.getReviewableOrderItems(email);
+        List<ReviewableOrderItemDto> reviewableOrderItems = reviewService.getPendingReviews(email);
 
         //then
         assertThat(reviewableOrderItems.size()).isEqualTo(1);
@@ -125,11 +125,12 @@ public class ReviewServiceIntegrationTest {
     @Test
     void 리뷰_수정() throws Exception {
         //given
+        Long orderItemId = 1L;
         Long reviewId = 1L;
         String newContent = "수정된 내용입니다.";
         int newRating = 4;
 
-        reviewService.writeReivew(1L, "기존 내용입니다.", 3);
+        reviewService.writeReivew(orderItemId, "기존 내용입니다.", 3);
 
         //when
         reviewService.modifyReview(reviewId, newContent, newRating);

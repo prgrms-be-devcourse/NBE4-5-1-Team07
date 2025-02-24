@@ -5,6 +5,8 @@ import com.coffeebean.domain.cart.cart.repository.CartRepository;
 import com.coffeebean.domain.cart.cart.service.CartService;
 import com.coffeebean.domain.cart.cartItem.service.CartItemService;
 
+import com.coffeebean.domain.notice.notice.entity.Notice;
+import com.coffeebean.domain.notice.notice.repository.NoticeRepository;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +40,7 @@ public class BaseInit {
 	private final QuestionRepository questionRepository;
 	private final AnswerService answerService;
 	private final AnswerRepository answerRepository;
+	private final NoticeRepository noticeRepository;
 
 	@Transactional
 	@Bean
@@ -142,4 +145,24 @@ public class BaseInit {
 			}
 		};
 	}
+
+    @Bean
+    @Order(6)
+    public ApplicationRunner initNotice() {
+        return args -> {
+
+            if (noticeRepository.count() == 0) {
+                // 공지사항 10개 추가
+                for (int i = 1; i < 10; i++) {
+                    noticeRepository.save(Notice.builder()
+                            .title(i + "번 공지사항입니다.")
+                            .content("우리 커피빈은 최고급 원두를 공수해 파는 No.1 커피콩 브랜드입니다.<br>" +
+                                    "우리 제품은 가장 많이 팔렸으며 지금도 월드 레코드를 갱신해 나가는 중입니다.<br>" +
+                                    "공지사항번호는 " + i + "입니다.<br>" +
+                                    "사이트는 추가로 업데이트할 예정입니다.")
+                            .build());
+                }
+            }
+        };
+    }
 }
