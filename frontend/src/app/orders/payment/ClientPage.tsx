@@ -1,61 +1,103 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+}
 
 export default function PaymentPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [totalPrice, setTotalPrice] = useState(0);
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
   const [street, setStreet] = useState("");
   const [zipcode, setZipcode] = useState("");
+  const [isMember, setIsMember] = useState(false); // 회원 여부 추가
+  const router = useRouter();
 
-  // 예시 상품 데이터
-  const products = [
-    { id: 1, name: "상품 A", price: 10000, quantity: 2 },
-    { id: 2, name: "상품 B", price: 20000, quantity: 1 },
-  ];
+  // localStorage에서 데이터 가져오기
+  useEffect(() => {
+    const storedProducts = localStorage.getItem("checkoutItems");
 
-  // 총 가격 계산
-  const totalPrice = products.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+    if (storedProducts) {
+      setProducts(JSON.parse(storedProducts));
+    }
+  }, []);
 
-  const handlePayment = () => {
+  // products 상태가 변경될 때마다 totalPrice 자동 계산
+  useEffect(() => {
+    const total = products.reduce(
+      (sum, product) => sum + product.price * product.quantity,
+      0
+    );
+    setTotalPrice(total);
+  }, [products]);
+
+  // 회원 정보 가져오기
+  useEffect(() => {
+    fetch("http://localhost:8080/api/my/info", {
+      method: "GET",
+      credentials: "include", // 쿠키 인증 정보 포함
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code === "200-1") {
+          setEmail(data.data.email);
+          setCity(data.data.address.city);
+          setStreet(data.data.address.street);
+          setZipcode(data.data.address.zipcode);
+          setIsMember(true); // 회원이면 true 설정
+        }
+      })
+      .catch(() => {
+        // 비회원이면 입력칸 유지 (isMember = false)
+      });
+  }, []);
+
+  const handlePayment = async () => {
     if (!email || !city || !street || !zipcode) {
       alert("모든 항목을 입력해주세요.");
       return;
     }
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      alert("올바른 이메일 형식을 입력해주세요.");
-      return;
-    }
+    const orderData = {
+      email,
+      address: { city, street, zipcode },
+      items: products.map(({ id, quantity }) => ({
+        id,
+        count: quantity,
+      })),
+    };
 
-    if (zipcode.length !== 5) {
-      alert("우편번호는 5자리 숫자로 입력해야 합니다.");
-      return;
-    }
+    try {
+      const response = await fetch("http://localhost:8080/api/v1/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(orderData),
+      });
 
-    alert("결제가 진행됩니다.");
-  };
+      const result = await response.json();
+      if (response.ok) {
+        alert("결제가 완료되었습니다.");
 
-  const handleCityChange = (e) => {
-    if (e.target.value.length <= 20) {
-      setCity(e.target.value);
-    }
-  };
+        // 주문 데이터를 sessionStorage에 저장
+        sessionStorage.setItem("orderData", JSON.stringify(result.data));
 
-  const handleStreetChange = (e) => {
-    if (e.target.value.length <= 20) {
-      setStreet(e.target.value);
-    }
-  };
-
-  const handleZipcodeChange = (e) => {
-    const value = e.target.value.replace(/[^0-9]/g, "");
-    if (value.length <= 5) {
-      setZipcode(value);
+        // 결제 완료 페이지로 리디렉션
+        router.push(`/orders/complete`);
+      } else {
+        alert(result.msg || "결제 실패");
+      }
+    } catch (error) {
+      alert("결제 처리 중 오류가 발생했습니다.");
     }
   };
 
@@ -91,6 +133,7 @@ export default function PaymentPage() {
           onChange={(e) => setEmail(e.target.value)}
           className="w-full p-2 border rounded"
           placeholder="이메일 입력"
+          disabled={isMember} // 회원이면 수정 불가
         />
       </div>
 
@@ -100,21 +143,21 @@ export default function PaymentPage() {
         <input
           type="text"
           value={city}
-          onChange={handleCityChange}
+          onChange={(e) => setCity(e.target.value)}
           className="w-full p-2 border rounded mb-2"
           placeholder="기본주소 (최대 20자)"
         />
         <input
           type="text"
           value={street}
-          onChange={handleStreetChange}
+          onChange={(e) => setStreet(e.target.value)}
           className="w-full p-2 border rounded mb-2"
           placeholder="상세주소 (최대 20자)"
         />
         <input
           type="text"
           value={zipcode}
-          onChange={handleZipcodeChange}
+          onChange={(e) => setZipcode(e.target.value.replace(/[^0-9]/g, ""))}
           className="w-full p-2 border rounded"
           placeholder="우편번호 (숫자 5자리)"
         />

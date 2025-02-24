@@ -1,12 +1,8 @@
 package com.coffeebean.global.security;
 
 import com.coffeebean.domain.user.user.repository.UserRepository;
-
-import java.util.Arrays;
-
 import com.coffeebean.global.app.AppConfig;
 import com.coffeebean.global.util.JwtAuthenticationFilterFromCookie;
-import com.coffeebean.global.util.JwtAuthenticationFilterFromHeader;
 import com.coffeebean.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +17,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -48,7 +46,6 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAuthenticationFilterFromCookie(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
-                //.addFilterBefore(new JwtAuthenticationFilterFromHeader(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
                 .headers((headers) -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(
                                 XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
@@ -61,7 +58,6 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
