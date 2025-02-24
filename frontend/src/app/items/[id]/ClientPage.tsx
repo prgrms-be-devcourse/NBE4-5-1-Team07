@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 // ItemDto 인터페이스 정의
@@ -13,11 +14,32 @@ interface ItemDto {
   description: string;
 }
 
+interface AnswerDto {
+  content: string;
+  createDate: string;
+  modifyDate: string;
+}
+
+interface QuestionDto {
+  id: number;
+  itemId: number;
+  name: string;
+  subject: string;
+  content: string;
+  createDate: string;
+  modifyDate: string;
+  answer: AnswerDto | null;
+}
+
 export default function ClientPage({ id }: { id: number }) {
   const [item, setItem] = useState<ItemDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [quantity, setQuantity] = useState(1); // 수량 상태 관리
+  const [selectedTab, setSelectedTab] = useState<
+    "info" | "review" | "question"
+  >("info"); // 선택된 탭 상태
+  const [questions, setQuestions] = useState<QuestionDto[]>([]);
 
   useEffect(() => {
     setLoading(true);
@@ -38,6 +60,25 @@ export default function ClientPage({ id }: { id: number }) {
         setLoading(false);
       });
   }, [id]); // id가 변경될 때마다 실행
+
+  useEffect(() => {
+    if (selectedTab === "question") {
+      fetch(`http://localhost:8080/api/v1/items/${id}/questions?itemId=${id}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("질문 목록을 불러오는 데 실패했습니다.");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setQuestions(data.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching questions:", error);
+          setError("질문 목록을 불러올 수 없습니다.");
+        });
+    }
+  }, [id, selectedTab]);
 
   const increaseQuantity = () => {
     if (quantity < (item?.stockQuantity || 0)) {
@@ -121,13 +162,105 @@ export default function ClientPage({ id }: { id: number }) {
           </div>
         </div>
       </div>
-      <div className="flex flex-row gap-4 justify-center py-4">
-        <div className="p-6 rounded-2xl w-[50vw] h-[50vh] flex justify-center font-bold text-2xl ">
-          상품 정보 : {item.description}
-        </div>
-        <div className="p-6 w-[50vw] h-[50vh] flex justify-center gap-4 font-bold text-2xl ">
-          <div>리뷰</div>
-        </div>
+
+      {/* 탭 UI */}
+      <div className="flex justify-center space-x-4 py-4 border-b-2">
+        <Button
+          onClick={() => setSelectedTab("info")}
+          className={
+            selectedTab === "info"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-black"
+          }
+        >
+          상품 정보
+        </Button>
+        <Button
+          onClick={() => setSelectedTab("review")}
+          className={
+            selectedTab === "review"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-black"
+          }
+        >
+          리뷰
+        </Button>
+        <Button
+          onClick={() => setSelectedTab("question")}
+          className={
+            selectedTab === "question"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-black"
+          }
+        >
+          상품 문의
+        </Button>
+      </div>
+
+      {/* 선택된 탭에 따라 내용 표시 */}
+      <div className="p-6">
+        {selectedTab === "info" && (
+          <div className="text-2xl h-[50vh]">
+            <h2>상품 정보</h2>
+            <div dangerouslySetInnerHTML={{ __html: item.description }} />
+          </div>
+        )}
+        {selectedTab === "review" && (
+          <div className="text-2xl h-[50vh]">
+            <h2>리뷰</h2>
+            <p>여기에 리뷰 목록이 들어갑니다.</p>
+          </div>
+        )}
+        {selectedTab === "question" && (
+          <div className="">
+            <div className="flex justify-center pb-4">
+              <Link href="/questions/new">
+                <Button className="border-2 border-blue-500 w-[100px] bg-white text-black hover:bg-gray-400 ">
+                  질문 작성
+                </Button>
+              </Link>
+            </div>
+            {questions.length > 0 ? (
+              <ul>
+                {questions.map((question) => (
+                  <li
+                    key={question.id}
+                    className="p-4 border rounded-lg shadow"
+                  >
+                    <Link href={`/questions/${question.id}`} className="block">
+                      <h2 className="text-lg font-semibold">
+                        {question.subject}
+                      </h2>
+                      <p className="text-gray-600">작성자: {question.name}</p>
+                      <p className="text-sm text-gray-500">
+                        작성일: {new Date(question.createDate).toLocaleString()}
+                      </p>
+                      <p className="mt-2">{question.content}</p>
+                    </Link>
+                    {question.answer ? (
+                      <div className="mt-4 p-3 border-l-4 border-blue-500 bg-blue-50">
+                        <p className="font-semibold">답변:</p>
+                        <p>{question.answer.content}</p>
+                        <p className="text-xs text-gray-500">
+                          작성일:{" "}
+                          {new Date(
+                            question.answer.createDate
+                          ).toLocaleString()}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="mt-4 text-gray-500">
+                        아직 답변이 없습니다.
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>등록된 질문이 없습니다.</p>
+            )}
+          </div>
+        )}
       </div>
     </>
   );
