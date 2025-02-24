@@ -13,16 +13,20 @@ interface CartItem {
 export default function Cart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // 로그인 상태를 useState로 관리
   const router = useRouter();
-
-  const isLoggedIn = true; // 로그인 상태 확인 (실제로는 로그인 상태를 확인하는 로직을 추가해야 함)
 
   // 장바구니 데이터 가져오기
   useEffect(() => {
     if (isLoggedIn) {
       // 회원인 경우 API로 장바구니 가져오기
       fetch("http://localhost:8080/api/v1/carts", { credentials: "include" })
-        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === 401) {
+            throw new Error("Unauthorized");
+          }
+          return res.json();
+        })
         .then((data) => {
           if (data.code === "200-1" && data.data) {
             setCartItems(data.data.items);
@@ -30,11 +34,12 @@ export default function Cart() {
         })
         .catch((error) => {
           console.error("장바구니 조회 실패", error);
-          // API 실패 시 로컬 저장소에서 비회원 장바구니 데이터를 불러옴
+          // 401 에러가 발생하면 로컬 저장소에서 비회원 장바구니 데이터를 불러오기
           const savedCartItems = localStorage.getItem("cartItems");
           if (savedCartItems) {
             setCartItems(JSON.parse(savedCartItems));
           }
+          setIsLoggedIn(false); // 로그인 실패 시 상태를 false로 설정
         });
     } else {
       // 비회원인 경우 localStorage에서 장바구니 데이터를 불러옴
@@ -42,6 +47,7 @@ export default function Cart() {
       if (savedCartItems) {
         setCartItems(JSON.parse(savedCartItems));
       }
+      setIsLoggedIn(false); // 로그인 실패 시 상태를 false로 설정
     }
 
     // localStorage에서 선택된 아이템 불러오기
