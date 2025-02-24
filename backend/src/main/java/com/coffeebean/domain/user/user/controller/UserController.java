@@ -18,6 +18,7 @@ import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.buf.UEncoder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -104,4 +105,22 @@ public class UserController {
 
         return new RsData<>("200-2", message, token);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<RsData<String>> logout(HttpServletResponse response) {
+        // 쿠키 삭제 (token 이름으로 설정된 JWT 삭제)
+        ResponseCookie cookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0) // 쿠키 즉시 삭제
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
+
+        return ResponseEntity.ok(new RsData<>("200-4", "로그아웃 성공", null));
+    }
+
+
 }

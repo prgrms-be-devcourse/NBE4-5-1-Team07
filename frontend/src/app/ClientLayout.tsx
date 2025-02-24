@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import {
   Menubar,
@@ -23,6 +24,33 @@ export default function ClinetLayout({
   fontVariable: string;
   fontClassName: string;
 }>) {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/v1/users/logout",
+        {
+          method: "POST",
+          credentials: "include", // ✅ 쿠키 포함 요청
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("로그아웃 실패");
+      }
+
+      // ✅ 클라이언트에서 쿠키 삭제
+      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+      alert("로그아웃 되었습니다.");
+      router.push("/"); // ✅ 기본 메인 페이지로 이동
+    } catch (error) {
+      console.error("🔴 로그아웃 중 오류 발생:", error);
+      alert("로그아웃 실패");
+    }
+  };
+
   return (
     <html lang="en" className={`${fontVariable}`}>
       <body
@@ -51,9 +79,7 @@ export default function ClinetLayout({
               </MenubarTrigger>
             </MenubarMenu>
             <MenubarMenu>
-              <MenubarTrigger>
-                <Link href="">로그아웃</Link>
-              </MenubarTrigger>
+              <MenubarTrigger onClick={handleLogout}>로그아웃</MenubarTrigger>
             </MenubarMenu>
             <MenubarMenu>
               <MenubarTrigger>My Page</MenubarTrigger>
