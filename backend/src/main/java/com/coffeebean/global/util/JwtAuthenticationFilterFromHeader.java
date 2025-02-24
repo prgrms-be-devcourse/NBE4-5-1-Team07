@@ -64,9 +64,7 @@ public class JwtAuthenticationFilterFromHeader extends OncePerRequestFilter {
             // 6. 인증 객체 생성 및 저장 ✅
             CustomUserDetails customUserDetails = new CustomUserDetails(
                     user.getId(),
-                    user.getName(),
-                    user.getEmail(),
-                    user.getTotalPoints()
+                    user.getEmail()
             );
             log.info("CustomUserDetails={}", customUserDetails);
 

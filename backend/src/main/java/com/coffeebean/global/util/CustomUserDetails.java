@@ -13,15 +13,11 @@ import java.util.Collections;
 @ToString
 public class CustomUserDetails implements UserDetails {
     private final Long userId;
-    private final String name;
     private final String email;
-    private final int totalPoints;
 
-    public CustomUserDetails(Long userId, String name, String email, int totalPoints) {
+    public CustomUserDetails(Long userId, String email) {
         this.userId = userId;
-        this.name = name;
         this.email = email;
-        this.totalPoints = totalPoints;
     }
 
     // 필수 메서드 구현
@@ -38,7 +34,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return name;
+        return "";
     }
 
 }

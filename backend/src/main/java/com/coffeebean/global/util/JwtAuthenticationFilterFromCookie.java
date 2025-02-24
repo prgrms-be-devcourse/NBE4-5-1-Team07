@@ -63,8 +63,9 @@ public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
                 User user = userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("찾을 수 없는 회원입니다."));
 
                 // 6. 인증 객체 생성 및 저장 ✅
-                CustomUserDetails customUserDetails = new CustomUserDetails(user.getId(),
-                        user.getName(), user.getEmail(), user.getTotalPoints());
+                CustomUserDetails customUserDetails = new CustomUserDetails(
+                        user.getId(),
+                        user.getEmail());
                 log.info("customUserDetails={}", customUserDetails);
 
                 // 권한은 필요없어서 빈 리스트로 반환
@@ -75,14 +76,9 @@ public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
             filterChain.doFilter(request, response);
-        } catch (JwtException e) {
-            response.setHeader("WWW-Authenticate", "Bearer error=\"invalid_token\"");
-            response.sendError(401, e.getMessage());
-        } catch (DataNotFoundException e) {
-            response.sendError(404, e.getMessage());
-        }
-        catch (Exception e) {
-            response.sendError(500, "서버 오류");
+        } catch (JwtException | DataNotFoundException e) {
+            request.setAttribute("exception", e); // 예외 저장
+            request.getRequestDispatcher("/error").forward(request, response);
         }
     }
 }
