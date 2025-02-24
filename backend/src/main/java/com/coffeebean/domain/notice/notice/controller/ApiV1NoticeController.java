@@ -33,20 +33,16 @@ public class ApiV1NoticeController {
 		@NotBlank(message = "공지사항 제목을 입력하세요.")
 		String title,
 		@NotBlank(message = "내용을 입력하세요.")
-		String content,
-		@NotBlank(message = "인증 정보가 없습니다.")
-		String authToken
+		String content
 	) {
 	}
 
 	// 공지사항 작성
+	@AdminOnly
 	@PostMapping
 	public RsData<Void> writeNotice(@RequestBody @Valid WriteNoticeReqBody writeNoticeReqBody) {
-		User actor = userService.getUserByAuthToken(writeNoticeReqBody.authToken());
-		User realActor = userService.findByEmail(actor.getEmail())
-			.orElseThrow(() -> new ServiceException("401-1", "인증 정보가 잘못되었습니다."));
 
-		noticeService.writeNotice(realActor, writeNoticeReqBody.title(), writeNoticeReqBody.content());
+		noticeService.writeNotice(writeNoticeReqBody.title(), writeNoticeReqBody.content());
 
 		return new RsData<>(
 			"200-1",
@@ -81,32 +77,14 @@ public class ApiV1NoticeController {
 		);
 	}
 
-	record AuthReqBody(@NotBlank(message = "인증 정보가 없습니다.") String authToken) {
-	}
-
 	// 공지사항 삭제
+	@AdminOnly
 	@Transactional
 	@DeleteMapping("/{id}")
-	public RsData<Void> deleteNotice(
-		@RequestBody @Valid AuthReqBody authReqBody,
-		@PathVariable(name = "id") Long noticeId) {
-		if(authReqBody.authToken.equals("admin")) {
-			noticeService.deleteNotice(noticeId);
-			return new RsData<>("200-1", "공지사항이 삭제되었습니다.");
-		}
-		if (canDeleteNotice(noticeId, authReqBody.authToken())) {
-			noticeService.deleteNotice(noticeId);
-			return new RsData<>("200-1", "공지사항이 삭제되었습니다.");
-		}
-		return new RsData<>("403-1", "공지사항을 삭제할 권한이 없습니다.");
-	}
+	public RsData<Void> deleteNotice(@PathVariable(name = "id") Long noticeId) {
 
-	private boolean canDeleteNotice(Long noticeId, String authToken) {
-		// 관리자인 경우
-		if (userService.isAdminByAuthToken(authToken)) {
-			return true;
-		}
-		return false;
+		noticeService.deleteNotice(noticeId);
+		return new RsData<>("200-1", "공지사항이 삭제되었습니다.");
 	}
 
 	record ModifyReqBody(
@@ -114,7 +92,7 @@ public class ApiV1NoticeController {
 			String content
 	) {
 	}
-	// 상품 수정
+	// 공지사항 수정
 	@PutMapping("/{id}")
 	@Transactional
 	public RsData<Void> modifyNotice(@PathVariable long id, @RequestBody ModifyReqBody reqBody) {
