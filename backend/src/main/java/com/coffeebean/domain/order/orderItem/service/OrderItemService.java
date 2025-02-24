@@ -1,14 +1,17 @@
 package com.coffeebean.domain.order.orderItem.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.coffeebean.domain.item.entity.Item;
+import com.coffeebean.domain.item.service.ItemService;
 import com.coffeebean.domain.order.order.entity.Order;
 import com.coffeebean.domain.order.orderItem.entity.OrderItem;
 import com.coffeebean.domain.order.orderItem.repository.OrderItemRepository;
+import com.coffeebean.global.exception.DataNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,17 +20,22 @@ import lombok.RequiredArgsConstructor;
 public class OrderItemService {
 
 	private final OrderItemRepository orderItemRepository;
+	private final ItemService itemService;
 
 	@Transactional
-	public void createOrderItem(Order order, Map<Long, Integer> items) {
+	public List<OrderItem> createOrderItem(Order order, Map<Long, Integer> items) {
+		List<OrderItem> orderItems = new ArrayList<>();
 		for (Long itemId : items.keySet()) {
 			int count = items.get(itemId);
 			OrderItem orderItem = OrderItem.builder()
 				.order(order)
-				.item(Item.builder().id(itemId).build()) // 아직 Item ID 유효성 검사는 하지 않음
+				.item(itemService.getItem(itemId)
+					.orElseThrow(() -> new DataNotFoundException("주문하려는 상품이 존재하지 않습니다.")))
 				.count(count)
 				.build();
 			orderItemRepository.save(orderItem);
+			orderItems.add(orderItem);
 		}
+		return orderItems;
 	}
 }
