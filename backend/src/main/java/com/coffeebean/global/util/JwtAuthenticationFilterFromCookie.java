@@ -76,8 +76,9 @@ public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
 			}
 			filterChain.doFilter(request, response);
 		} catch (JwtException | DataNotFoundException e) {
-			request.setAttribute("exception", e); // 예외 저장
-			request.getRequestDispatcher("/error").forward(request, response);
+			filterChain.doFilter(request, response);
+		} catch (Exception e) {
+			filterChain.doFilter(request, response);
 		}
 	}
 }
