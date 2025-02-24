@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface CartItem {
   id: number;
@@ -13,6 +13,7 @@ interface CartItem {
 export default function Cart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const router = useRouter();
 
   // 장바구니 데이터 가져오기
   useEffect(() => {
@@ -24,7 +25,38 @@ export default function Cart() {
         }
       })
       .catch((error) => console.error("장바구니 조회 실패", error));
+
+    // localStorage에서 선택된 아이템 불러오기
+    const savedSelectedItems = localStorage.getItem("selectedCartItems");
+    if (savedSelectedItems) {
+      setSelectedItems(JSON.parse(savedSelectedItems));
+    }
   }, []);
+
+  // 선택한 상품 업데이트 및 저장
+  const toggleSelectItem = (id: number) => {
+    setSelectedItems((prev) => {
+      const updatedItems = prev.includes(id)
+        ? prev.filter((i) => i !== id)
+        : [...prev, id];
+
+      localStorage.setItem("selectedCartItems", JSON.stringify(updatedItems));
+      return updatedItems;
+    });
+  };
+
+  // 결제 페이지로 이동
+  const handleCheckout = () => {
+    if (selectedItems.length === 0) return;
+
+    // 선택한 상품 정보를 localStorage에 저장
+    const selectedProducts = cartItems.filter((item) =>
+      selectedItems.includes(item.id)
+    );
+    localStorage.setItem("checkoutItems", JSON.stringify(selectedProducts));
+
+    router.push("/orders/payment");
+  };
 
   // 장바구니 갱신
   const refreshCart = () => {
@@ -96,13 +128,7 @@ export default function Cart() {
               <input
                 type="checkbox"
                 checked={selectedItems.includes(item.id)}
-                onChange={() =>
-                  setSelectedItems((prev) =>
-                    prev.includes(item.id)
-                      ? prev.filter((i) => i !== item.id)
-                      : [...prev, item.id]
-                  )
-                }
+                onChange={() => toggleSelectItem(item.id)}
                 className="w-5 h-5"
               />
               <div className="flex-1">
@@ -151,18 +177,17 @@ export default function Cart() {
         <div className="mt-6 p-4 border-t text-right font-semibold text-lg">
           총 가격:{" "}
           <span className="text-blue-600">{totalPrice.toLocaleString()}원</span>
-          <Link href="/orders/complete">
-            <button
-              className={`ml-4 px-4 py-2 rounded ${
-                selectedItems.length > 0
-                  ? "bg-blue-500 hover:bg-blue-600 text-white"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
-              disabled={selectedItems.length === 0}
-            >
-              결제하기
-            </button>
-          </Link>
+          <button
+            onClick={handleCheckout}
+            className={`ml-4 px-4 py-2 rounded ${
+              selectedItems.length > 0
+                ? "bg-blue-500 hover:bg-blue-600 text-white"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
+            disabled={selectedItems.length === 0}
+          >
+            결제하기
+          </button>
         </div>
       )}
     </div>
