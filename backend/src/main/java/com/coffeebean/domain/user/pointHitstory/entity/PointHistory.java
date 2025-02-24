@@ -2,23 +2,22 @@ package com.coffeebean.domain.user.pointHitstory.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class PointHistory {
 
 	@Id
@@ -35,6 +34,5 @@ public class PointHistory {
 	public PointHistory(int amount, String description) {
 		this.amount = amount;
 		this.description = description;
-		this.createDate = LocalDateTime.now();
 	}
 }

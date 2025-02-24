@@ -1,22 +1,29 @@
 package com.coffeebean.domain.user.user.service;
 
+import com.coffeebean.domain.user.pointHitstory.PointHistoryDto;
+import com.coffeebean.domain.user.pointHitstory.entity.PointHistory;
 import com.coffeebean.domain.user.user.dto.SignupReqBody;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.repository.UserRepository;
 import com.coffeebean.global.exception.ServiceException;
+import com.coffeebean.global.exception.DataNotFoundException;
 import com.coffeebean.global.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -126,4 +133,29 @@ public class UserService {
 		}
 		return false;
 	}
+    public Long getUserIdFromEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() ->
+                        new DataNotFoundException("존재하지 않는 회원입니다."))
+                .getId();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PointHistoryDto> getPointHistories(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new DataNotFoundException("사용자를 찾을 수 없습니다."));
+        log.info("user={}", user);
+
+        User userWithHistories = userRepository.findByIdWithPointHistories(userId).orElse(user);
+        List<PointHistory> pointHistories = userWithHistories.getPointHistories();
+        log.info("pointHistories={}", pointHistories);
+
+        if (userWithHistories.getPointHistories().isEmpty()) {
+            throw new DataNotFoundException("포인트 적립 내역이 없습니다.");
+        }
+
+        return pointHistories.stream().map(pointHistory -> new PointHistoryDto(
+                pointHistory.getAmount(),
+                pointHistory.getDescription(),
+                pointHistory.getCreateDate())).toList();
+    }
 }
