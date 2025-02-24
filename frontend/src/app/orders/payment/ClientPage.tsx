@@ -35,6 +35,26 @@ export default function PaymentPage() {
     setTotalPrice(total);
   }, [products]);
 
+  // 회원 정보 가져오기
+  useEffect(() => {
+    fetch("http://localhost:8080/api/my/info", {
+      method: "GET",
+      credentials: "include", // 쿠키 인증 정보 포함
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code === "200-1") {
+          setEmail(data.data.email);
+          setCity(data.data.address.city);
+          setStreet(data.data.address.street);
+          setZipcode(data.data.address.zipcode);
+        }
+      })
+      .catch(() => {
+        // 회원이 아닌 경우 입력칸을 비워둠
+      });
+  }, []);
+
   const handlePayment = () => {
     if (!email || !city || !street || !zipcode) {
       alert("모든 항목을 입력해주세요.");
