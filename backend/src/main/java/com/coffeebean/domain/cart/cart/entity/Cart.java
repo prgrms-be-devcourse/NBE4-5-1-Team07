@@ -1,8 +1,11 @@
 package com.coffeebean.domain.cart.cart.entity;
 
 import com.coffeebean.domain.cart.cartItem.entity.CartItem;
+
 import jakarta.persistence.*;
 
+import com.coffeebean.domain.item.entity.Item;
+import com.coffeebean.domain.order.orderItem.entity.OrderItem;
 import com.coffeebean.domain.user.user.enitity.User;
 
 import lombok.AccessLevel;
@@ -36,5 +39,9 @@ public class Cart {
 
 	public void deleteAllCartItems() {
 		cartItems.clear();
+	}
+
+	public void deleteItems(List<Item> items) {
+		cartItems.removeIf(cartItem -> items.contains(cartItem.getItem()));
 	}
 }

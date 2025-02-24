@@ -14,8 +14,6 @@ import com.coffeebean.domain.order.order.entity.Order;
 import com.coffeebean.domain.order.order.service.OrderService;
 import com.coffeebean.domain.order.orderItem.entity.OrderItem;
 import com.coffeebean.domain.order.orderItem.service.OrderItemService;
-import com.coffeebean.domain.user.user.enitity.User;
-import com.coffeebean.domain.user.user.service.UserService;
 import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.exception.ServiceException;
 
@@ -29,7 +27,6 @@ public class ApiV1OrderController {
 
 	private final OrderService orderService;
 	private final OrderItemService orderItemService;
-	private final UserService userService;
 	private final ItemService itemService;
 
 	@PostMapping
@@ -41,12 +38,6 @@ public class ApiV1OrderController {
 			throw new ServiceException("400-3", "재고가 충분하지 않습니다. 상품 수량을 확인하세요.");
 		}
 
-		// 회원이 주문을 등록하는 경우
-		if (orderCreateRequest.getAuthToken() != null) {
-			User actor = userService.getUserByAuthToken(orderCreateRequest.getAuthToken());
-			email = actor.getEmail();
-		}
-
 		// Order 생성
 		Order order = orderService.createOrder(email,
 			orderCreateRequest.getAddress().getCity(),
@@ -54,8 +45,7 @@ public class ApiV1OrderController {
 			orderCreateRequest.getAddress().getZipcode());
 
 		// Order의 세부 상품 항목들 OderItem 저장
-		List<OrderItem> orderItems = orderItemService.createOrderItem(order, orderCreateRequest.getItems());
-
+		List<OrderItem> orderItems = orderItemService.createOrderItem(order, orderCreateRequest.getItems(), email, orderCreateRequest.getCartOrder());
 		return new RsData<>(
 			"201-1",
 			"주문이 등록되었습니다.",
