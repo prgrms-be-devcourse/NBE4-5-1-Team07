@@ -16,6 +16,7 @@ export default function PaymentPage() {
   const [city, setCity] = useState("");
   const [street, setStreet] = useState("");
   const [zipcode, setZipcode] = useState("");
+  const [isMember, setIsMember] = useState(false); // 회원 여부 추가
 
   // localStorage에서 데이터 가져오기
   useEffect(() => {
@@ -48,10 +49,11 @@ export default function PaymentPage() {
           setCity(data.data.address.city);
           setStreet(data.data.address.street);
           setZipcode(data.data.address.zipcode);
+          setIsMember(true); // 회원이면 true 설정
         }
       })
       .catch(() => {
-        // 회원이 아닌 경우 입력칸을 비워둠
+        // 비회원이면 입력칸 유지 (isMember = false)
       });
   }, []);
 
@@ -96,6 +98,7 @@ export default function PaymentPage() {
           onChange={(e) => setEmail(e.target.value)}
           className="w-full p-2 border rounded"
           placeholder="이메일 입력"
+          disabled={isMember} // 회원이면 수정 불가
         />
       </div>
 
