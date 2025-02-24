@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OrderScheduler {
 
-    private OrderService orderService;
+    private final OrderService orderService;
 
     // 배송 상태 변경 스케줄러
     @Scheduled(cron = "0 0 14 * * ?")// 매일 14시 실행
