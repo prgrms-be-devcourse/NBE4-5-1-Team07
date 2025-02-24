@@ -18,14 +18,12 @@ import com.coffeebean.domain.cart.cart.entity.Cart;
 import com.coffeebean.domain.cart.cart.service.CartService;
 import com.coffeebean.domain.cart.cartItem.service.CartItemService;
 import com.coffeebean.domain.user.user.enitity.User;
-import com.coffeebean.domain.user.user.service.UserService;
 import com.coffeebean.global.annotation.Login;
 import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.util.CustomUserDetails;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 
