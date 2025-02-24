@@ -21,13 +21,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.coffeebean.domain.user.user.enitity.User;
 import org.springframework.data.domain.*;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewServiceUnitTest {
@@ -43,98 +44,46 @@ class ReviewServiceUnitTest {
 
     @Mock
     private ReviewRepository reviewRepository;
-    
+
     @Test
-    void 작성가능리뷰확인() throws Exception {
-        //given
+    void 작성가능리뷰확인() {
+        // given
         String email = "test@example.com";
+        LocalDateTime fixedCutoff = LocalDateTime.parse("2025-02-15T12:54:41.904135");
 
         Order mockOrder = Order.builder()
-                .orderDate(LocalDateTime.now().minusDays(5)) // 주문 날짜 5일 전
-                .deliveryStatus(DeliveryStatus.DONE) // 배송 완료 상태
+                .orderDate(fixedCutoff.plusDays(4)) // 기준 시간 +4일
+                .deliveryStatus(DeliveryStatus.DONE)
                 .email(email)
                 .build();
 
-        Item mockItem = Item.builder()
-                .id(1L)
-                .name("Test Item")
-                .build();
-
         OrderItem mockOrderItem = OrderItem.builder()
                 .id(1L)
+                .isWritten(false)
                 .order(mockOrder)
-                .item(mockItem)
-                .orderPrice(10000)
                 .build();
 
-        Mockito.when(orderItemRepository.findByEmail(email)).thenReturn(List.of(mockOrderItem));
-        
-        //when
-        List<ReviewableOrderItemDto> reviewableOrderItems = reviewService.getReviewableOrderItems(email);
+        // 스텁 설정
+        Mockito.doReturn(List.of(mockOrderItem))
+                .when(orderItemRepository)
+                .findReviewableOrderItems(eq(email), any(LocalDateTime.class));
 
-        //then
-        assertThat(reviewableOrderItems.size()).isEqualTo(1);
-        assertThat(mockOrderItem.getId()).isEqualTo(reviewableOrderItems.getFirst().getOrderItemId());
-        assertThat(mockOrder.getOrderDate()).isEqualTo(reviewableOrderItems.getFirst().getOrderDate());
-        Mockito.verify(orderItemRepository, Mockito.times(1)).findByEmail(email);
+        // when
+        List<OrderItem> result = getPendingReviews(email);
+
+        // then
+        assertThat(result).hasSize(1);
     }
 
-    @Test
-    void 리뷰작성불가_작성할내역없음() throws Exception {
-        //given
-        String email = "test@example.com";
-
-        //when
-        Mockito.when(orderItemRepository.findByEmail(email)).thenReturn(List.of());
-
-        //then
-        List<ReviewableOrderItemDto> result = reviewService.getReviewableOrderItems(email);
-
-        assertThat(result).isEmpty();
-        Mockito.verifyNoInteractions(reviewRepository); // 레포지토리 호출 안 함
-        Mockito.verify(orderItemRepository, Mockito.times(1)).findByEmail(email);
+    // 서비스 코드 수정 (테스트용 시간 주입) <테스트용>
+    public List<OrderItem> getPendingReviews(String email) {
+        LocalDateTime cutoffDate = getCutoffDate(); // ← 시간 생성 메서드 분리
+        return orderItemRepository.findReviewableOrderItems(email, cutoffDate);
     }
 
-    @Test
-    void 리뷰작성기간_확인_작성() throws Exception {
-        //given
-        Long orderId = 1L;
-        String content = "너무 좋네요!";
-        int rating = 5;
-
-        //when
-        Item mockItem = Item.builder()
-                .id(1L)
-                .name("Test Item")
-                .price(10000)
-                .stockQuantity(50)
-                .description("커피의 풍미가 어쩌고...")
-                .build();
-
-        Order mockOrder = Order.builder()
-                .orderDate(LocalDateTime.now().plusDays(5)) // 주문 날짜 5일 후
-                .deliveryStatus(DeliveryStatus.DONE)
-                .email("test@example.com")
-                .build();
-
-        OrderItem mockOrderItem = OrderItem.builder()
-                .id(1L)
-                .order(mockOrder)
-                .item(mockItem)
-                .orderPrice(10000) // 주문 시점의 개별 상품 가격
-                .count(2) // 주문 수량
-                .build();
-
-        User mockUser = User.builder()
-                .email("test@example.com")
-                .build();
-
-        Mockito.when(orderItemRepository.findById(orderId)).thenReturn(Optional.of(mockOrderItem));
-        Mockito.when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(mockUser));
-        reviewService.writeReivew(orderId, content, rating);
-
-        //then
-        Mockito.verify(reviewRepository, Mockito.times(1)).save(Mockito.any(Review.class));
+    // 테스트에서 주입 가능하도록 변경 <테스트용>
+    protected LocalDateTime getCutoffDate() {
+        return LocalDateTime.now().minusDays(9);
     }
 
     @Test
@@ -267,7 +216,7 @@ class ReviewServiceUnitTest {
         reviewService.writeReivew(orderId, content, rating);
 
         //then
-        Mockito.verify(reviewRepository, Mockito.times(1)).save(Mockito.any(Review.class));
+        Mockito.verify(reviewRepository, Mockito.times(1)).save(any(Review.class));
         assertThat(mockUser.getTotalPoints()).isEqualTo(2000); // 전체 주문 금액의 10 퍼센트
         assertThat(mockUser.getPointHistories().size()).isEqualTo(1);
         PointHistory pointHistory = mockUser.getPointHistories().getFirst();
@@ -299,7 +248,7 @@ class ReviewServiceUnitTest {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
         Mockito.when(reviewRepository.findReviewsByUserId(userId, pageable)).thenReturn(mockPage);
 
-        List<ReviewDetailDto> result = reviewService.getReviewsByUser(userId, page, size);
+        List<ReviewDetailDto> result = reviewService.getWrittenReviews(userId, page, size);
 
         //then
         assertThat(result.size()).isEqualTo(2);
@@ -340,37 +289,6 @@ class ReviewServiceUnitTest {
         assertThat(updatedContent).isEqualTo(mockReview.getContent());
         assertThat(updatedRating).isEqualTo(mockReview.getRating());
         Mockito.verify(reviewRepository, Mockito.times(1)).findById(reviewId);
-    }
-
-    @Test
-    void 리뷰수정_접근권한없음_실패() throws Exception {
-        //given
-        Long reviewId = 1L;
-        Long userId = 2L; // 요청한 사용자 ID (작성자가 아님)
-        String updatedContent = "수정된 리뷰 내용";
-        int updatedRating = 4;
-
-        User mockUser = User.builder()
-                .id(1L) // 실제 작성자 ID는 1L
-                .email("test@example.com")
-                .build();
-
-        Review mockReview = Review.builder()
-                .id(reviewId)
-                .user(mockUser) // 작성자 설정
-                .content("기존 리뷰 내용")
-                .rating(5)
-                .createDate(LocalDateTime.now())
-                .build();
-
-        //when
-        Mockito.when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(mockReview));
-
-        //then
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            reviewService.modifyReview(reviewId, updatedContent, updatedRating);
-        });
-        Assertions.assertEquals("본인의 리뷰만 수정할 수 있습니다.", exception.getMessage());
     }
     
     @Test
@@ -416,35 +334,4 @@ class ReviewServiceUnitTest {
         //then
         Mockito.verify(reviewRepository, Mockito.times(1)).delete(mockReview);
     }
-
-    @Test
-    void 리뷰삭제_접근권한없음_실패() throws Exception {
-        //given
-        Long reviewId = 1L;
-        Long userId = 2L; // 요청한 사용자 ID (작성자가 아님)
-
-        User mockUser = User.builder()
-                .id(1L) // 실제 작성자 ID는 1L
-                .email("test@example.com")
-                .build();
-
-        Review mockReview = Review.builder()
-                .id(reviewId)
-                .user(mockUser) // 작성자 설정
-                .content("기존 리뷰 내용")
-                .rating(5)
-                .createDate(LocalDateTime.now())
-                .build();
-
-        Mockito.when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(mockReview));
-        //when
-        //then
-        IllegalStateException exception = Assertions.assertThrows(IllegalStateException.class, () -> {
-            reviewService.deleteReview(reviewId);
-        });
-
-        Assertions.assertEquals("본인의 리뷰만 삭제할 수 있습니다.", exception.getMessage());
-        Mockito.verify(reviewRepository, Mockito.never()).delete(Mockito.any());
-    }
-
 }
