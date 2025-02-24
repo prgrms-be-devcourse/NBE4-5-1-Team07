@@ -43,7 +43,15 @@ public class NoticeService {
     }
 
     // 공지사항 삭제
+    @Transactional
     public void deleteNotice(Long noticeId) {
         noticeRepository.deleteById(noticeId);
+    }
+
+    @Transactional
+    public Notice modifyNotice(Notice notice, String title, String content) {
+        notice.setTitle(title);
+        notice.setContent(content);
+        return noticeRepository.save(notice);
     }
 }

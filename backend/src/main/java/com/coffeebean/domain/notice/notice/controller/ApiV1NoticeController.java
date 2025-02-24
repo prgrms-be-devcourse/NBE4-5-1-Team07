@@ -1,5 +1,7 @@
 package com.coffeebean.domain.notice.notice.controller;
 
+import com.coffeebean.domain.item.controller.ApiV1ItemController;
+import com.coffeebean.domain.item.entity.Item;
 import com.coffeebean.domain.notice.notice.dto.NoticeDto;
 import com.coffeebean.domain.notice.notice.entity.Notice;
 import com.coffeebean.domain.notice.notice.service.NoticeService;
@@ -9,9 +11,11 @@ import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.service.UserService;
 import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.exception.ServiceException;
+import com.coffeebean.global.security.annotations.AdminOnly;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -81,6 +85,7 @@ public class ApiV1NoticeController {
 	}
 
 	// 공지사항 삭제
+	@Transactional
 	@DeleteMapping("/{id}")
 	public RsData<Void> deleteNotice(
 		@RequestBody @Valid AuthReqBody authReqBody,
@@ -102,6 +107,26 @@ public class ApiV1NoticeController {
 			return true;
 		}
 		return false;
+	}
+
+	record ModifyReqBody(
+			String title,
+			String content
+	) {
+	}
+	// 상품 수정
+	@PutMapping("/{id}")
+	@Transactional
+	public RsData<Void> modifyNotice(@PathVariable long id, @RequestBody ModifyReqBody reqBody) {
+		Notice notice = noticeService.findByNoticeId(id);
+
+		Notice modifyNotice = noticeService.modifyNotice(notice, reqBody.title(), reqBody.content());
+
+		return new RsData<>(
+				"200-1",
+				"'%d'번 공지사항이 수정 되었습니다.".formatted(modifyNotice.getId())
+		);
+
 	}
 
 }
