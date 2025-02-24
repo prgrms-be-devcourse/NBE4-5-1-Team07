@@ -34,7 +34,7 @@ public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // 리뷰, 마이 페이지만 필터 탈 수 있도록 설정
+        // 특정 경로에서 필터를 적용하지 않도록 설정
         if (shouldNotFilter(request)) {
             filterChain.doFilter(request, response);
             return;
@@ -82,7 +82,7 @@ public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
 
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        // ✅ 필터가 필요 없는 지점 설정
+        // ✅ 필터가 필요 없는 지점 설정 (예: /api/v1/user/login 같은 엔드포인트)
         return request.getRequestURI().startsWith("/api/v1");
     }
 }

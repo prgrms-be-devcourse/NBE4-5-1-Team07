@@ -69,4 +69,12 @@ public class Order {
 		orderStatus = OrderStatus.CANCELED;
 		deliveryStatus = DeliveryStatus.CANCELLED;
 	}
+
+	// 배송 상태 변경
+	public void setDeliveryStatus(DeliveryStatus deliveryStatus) {
+		if (this.deliveryStatus == DeliveryStatus.DONE) {
+			throw new IllegalStateException("배송 완료 상태에서는 변경할 수 없습니다.");
+		}
+		this.deliveryStatus = deliveryStatus;
+	}
 }
