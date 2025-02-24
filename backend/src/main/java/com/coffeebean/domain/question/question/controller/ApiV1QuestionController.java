@@ -2,15 +2,14 @@ package com.coffeebean.domain.question.question.controller;
 
 import java.util.List;
 
+import com.coffeebean.domain.notice.notice.controller.ApiV1NoticeController;
+import com.coffeebean.domain.notice.notice.entity.Notice;
+import com.coffeebean.domain.question.answer.entity.Answer;
 import com.coffeebean.global.annotation.Login;
+import com.coffeebean.global.security.annotations.AdminOnly;
 import com.coffeebean.global.util.CustomUserDetails;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 import com.coffeebean.domain.question.answer.service.AnswerService;
 import com.coffeebean.domain.question.question.dto.QuestionDto;
@@ -90,47 +89,49 @@ public class ApiV1QuestionController {
 		);
 	}
 
-	record AuthReqBody(@NotBlank(message = "인증 정보가 없습니다.") String authToken) {
-	}
 
-	// 질문 삭제
+	// 질문 삭제 - 유저
 	@DeleteMapping("/{id}")
 	public RsData<Void> deleteQuestion(
-		@RequestBody @Valid AuthReqBody authReqBody,
+			@Login CustomUserDetails userDetails,
 		@PathVariable(name = "id") Long questionId) {
-		if (canDeleteQuestion(questionId, authReqBody.authToken())) {
+		User actor = User.builder()
+				.id(userDetails.getUserId())
+				.email(userDetails.getEmail())
+				.build();
+		if (canDeleteQuestion(questionId, actor)) {
 			questionService.deleteQuestion(questionId);
 			return new RsData<>("200-1", "질문이 삭제되었습니다.");
 		}
 		return new RsData<>("403-1", "질문을 삭제할 권한이 없습니다.");
 	}
 
-	private boolean canDeleteQuestion(Long questionId, String authToken) {
-		// 관리자인 경우
-		if (userService.isAdminByAuthToken(authToken)) {
-			return true;
-		}
+	private boolean canDeleteQuestion(Long questionId, User actor) {
 		// 작성자인 경우
-		User actor = userService.getUserByAuthToken(authToken);
 		Question question = questionService.findQuestionById(questionId);
 		return question.getAuthor().getEmail().equals(actor.getEmail());
 	}
 
+	// 질문 삭제 - 관리자
+	@AdminOnly
+	@DeleteMapping("/{id}/admin")
+	public RsData<Void> deleteQuestion(@PathVariable(name = "id") Long questionId) {
+		questionService.deleteQuestion(questionId);
+		return new RsData<>("200-1", "질문이 삭제되었습니다.");
+	}
+
 	record WriteAnswerReqBody(
 		@NotBlank(message = "답변 내용은 공백일 수 없습니다.")
-		String content,
-		@NotNull(message = "인증 정보가 없습니다.")
-		String authToken
+		String content
 	) {
 	}
 
 	// 질문에 대한 답변 작성
-	@PostMapping("/{id}")
-	public RsData<Void> writeAnswer(@RequestBody @Valid WriteAnswerReqBody writeAnswerReqBody,
-		@PathVariable(name = "id") long questionId) {
-		if (!userService.isAdminByAuthToken(writeAnswerReqBody.authToken())) {
-			throw new ServiceException("403-1", "답변 작성은 관리자만 가능합니다.");
-		}
+	@AdminOnly
+	@PostMapping("/{id}/answers")
+	public RsData<Void> writeAnswer(
+			@RequestBody @Valid WriteAnswerReqBody writeAnswerReqBody,
+			@PathVariable(name = "id") long questionId) {
 
 		Question question = questionService.findQuestionById(questionId);
 		answerService.writeAnswer(question, writeAnswerReqBody.content());
@@ -142,13 +143,9 @@ public class ApiV1QuestionController {
 	}
 
 	// 질문에 대한 답변 삭제
+	@AdminOnly
 	@DeleteMapping("/{id}/answers")
-	public RsData<Void> deleteAnswer(
-		@RequestBody @Valid AuthReqBody authReqBody,
-		@PathVariable(name = "id") Long questionId) {
-		if (!userService.isAdminByAuthToken(authReqBody.authToken())) {
-			throw new ServiceException("403-1", "답변 삭제는 관리자만 가능합니다.");
-		}
+	public RsData<Void> deleteAnswer(@PathVariable(name = "id") Long questionId) {
 
 		questionService.deleteAnswer(questionId);
 
