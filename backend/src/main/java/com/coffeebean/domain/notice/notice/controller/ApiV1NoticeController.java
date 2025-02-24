@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -55,8 +56,9 @@ public class ApiV1NoticeController {
 	public RsData<List<NoticeDto>> getNotices() {
 
 		List<NoticeDto> noticeList = noticeService.getNotices().stream()
-			.map(NoticeDto::new)
-			.toList();
+				.map(NoticeDto::new)
+				.sorted(Comparator.comparing(NoticeDto::getCreateDate).reversed()) // 역순 정렬
+				.toList();
 
 		return new RsData<>(
 			"200-1",
