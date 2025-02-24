@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation"; // useRouter 추가
-import { error } from "console";
 
 interface AnswerDto {
   content: string;
