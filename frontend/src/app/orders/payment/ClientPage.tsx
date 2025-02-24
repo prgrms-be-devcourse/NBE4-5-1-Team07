@@ -85,7 +85,9 @@ export default function PaymentPage() {
       });
 
       const result = await response.json();
-      if (response.ok) {
+      if (result.code === "400-3") {
+        alert(result.msg);
+      } else if (response.ok) {
         alert("결제가 완료되었습니다.");
 
         // 주문 데이터를 sessionStorage에 저장
