@@ -15,16 +15,34 @@ export default function Cart() {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const router = useRouter();
 
+  const isLoggedIn = true; // 로그인 상태 확인 (실제로는 로그인 상태를 확인하는 로직을 추가해야 함)
+
   // 장바구니 데이터 가져오기
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/carts", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.code === "200-1" && data.data) {
-          setCartItems(data.data.items);
-        }
-      })
-      .catch((error) => console.error("장바구니 조회 실패", error));
+    if (isLoggedIn) {
+      // 회원인 경우 API로 장바구니 가져오기
+      fetch("http://localhost:8080/api/v1/carts", { credentials: "include" })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code === "200-1" && data.data) {
+            setCartItems(data.data.items);
+          }
+        })
+        .catch((error) => {
+          console.error("장바구니 조회 실패", error);
+          // API 실패 시 로컬 저장소에서 비회원 장바구니 데이터를 불러옴
+          const savedCartItems = localStorage.getItem("cartItems");
+          if (savedCartItems) {
+            setCartItems(JSON.parse(savedCartItems));
+          }
+        });
+    } else {
+      // 비회원인 경우 localStorage에서 장바구니 데이터를 불러옴
+      const savedCartItems = localStorage.getItem("cartItems");
+      if (savedCartItems) {
+        setCartItems(JSON.parse(savedCartItems));
+      }
+    }
 
     // localStorage에서 선택된 아이템 불러오기
     const savedSelectedItems = localStorage.getItem("selectedCartItems");
@@ -60,45 +78,75 @@ export default function Cart() {
 
   // 장바구니 갱신
   const refreshCart = () => {
-    fetch("http://localhost:8080/api/v1/carts", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.code === "200-1" && data.data) {
-          setCartItems(data.data.items);
-        }
-      });
+    if (isLoggedIn) {
+      // 회원인 경우 API로 장바구니 갱신
+      fetch("http://localhost:8080/api/v1/carts", { credentials: "include" })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code === "200-1" && data.data) {
+            setCartItems(data.data.items);
+            localStorage.setItem("cartItems", JSON.stringify(data.data.items));
+          }
+        });
+    }
   };
 
   // 상품 수량 변경
   const handleQuantityChange = async (id: number, newQuantity: number) => {
     if (newQuantity < 1) return;
-    await fetch(`http://localhost:8080/api/v1/carts/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ quantity: newQuantity }),
-      credentials: "include",
-    });
-    refreshCart();
+
+    if (isLoggedIn) {
+      // 회원인 경우 API로 장바구니 수량 변경
+      await fetch(`http://localhost:8080/api/v1/carts/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity: newQuantity }),
+        credentials: "include",
+      });
+      refreshCart();
+    } else {
+      // 비회원인 경우 로컬 저장소에서 수량 변경
+      const updatedCartItems = cartItems.map((item) =>
+        item.id === id ? { ...item, quantity: newQuantity } : item
+      );
+      setCartItems(updatedCartItems);
+      localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+    }
   };
 
   // 상품 삭제
   const handleRemove = async (id: number) => {
-    await fetch(`http://localhost:8080/api/v1/carts/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-    refreshCart();
+    if (isLoggedIn) {
+      // 회원인 경우 API로 상품 삭제
+      await fetch(`http://localhost:8080/api/v1/carts/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      refreshCart();
+    } else {
+      // 비회원인 경우 로컬 저장소에서 상품 삭제
+      const updatedCartItems = cartItems.filter((item) => item.id !== id);
+      setCartItems(updatedCartItems);
+      localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+    }
   };
 
   // 장바구니 전체 삭제
   const clearCart = async () => {
     if (confirm("정말 삭제하시겠습니까?")) {
-      await fetch("http://localhost:8080/api/v1/carts", {
-        method: "DELETE",
-        credentials: "include",
-      });
-      setCartItems([]);
-      setSelectedItems([]);
+      if (isLoggedIn) {
+        // 회원인 경우 API로 전체 장바구니 삭제
+        await fetch("http://localhost:8080/api/v1/carts", {
+          method: "DELETE",
+          credentials: "include",
+        });
+        setCartItems([]);
+      } else {
+        // 비회원인 경우 로컬 저장소에서 장바구니 삭제
+        localStorage.removeItem("cartItems");
+        localStorage.removeItem("selectedCartItems");
+        setCartItems([]);
+      }
     }
   };
 
