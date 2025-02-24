@@ -5,11 +5,13 @@ import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.Random;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailVerificationService {
@@ -42,14 +44,37 @@ public class EmailVerificationService {
         // 인증 코드 전송
         mailService.sendSimpleMessage(email, code);
 
-        httpSession.setAttribute(SESSION_KEY, new VerificationData(email, code, false));
+        httpSession.setAttribute(SESSION_KEY, new VerificationData(email.trim(), code, false));
+        log.info("세션에 저장된 데이터 -> email={}, code={}", email, code);
     }
 
     // 인증 코드 확인 후 세션 상태 변경
     public boolean verifyEmail(String email, String inputCode) {
         VerificationData verificationData = (VerificationData) httpSession.getAttribute(SESSION_KEY);
 
-        if (verificationData == null || !verificationData.getEmail().equals(email)) {
+        System.out.println("세션 이메일: [" + verificationData.getEmail() + "]");
+        System.out.println("요청 이메일: [" + email + "]");
+
+        if (verificationData == null || !verificationData.getEmail().trim().equals(email.trim())) {
+            throw new IllegalArgumentException("이메일 인증 요청이 없습니다.");
+        }
+
+        if (!verificationData.getCode().equals(inputCode)) {
+            throw new IllegalArgumentException("인증 코드가 일치하지 않습니다.");
+        }
+
+        verificationData.setVerified(true);
+        httpSession.setAttribute(SESSION_KEY, verificationData);
+        return true;
+    }
+
+    public boolean verifyEmailForGuest(String email, String inputCode) {
+        VerificationData verificationData = (VerificationData) httpSession.getAttribute(SESSION_KEY);
+
+        System.out.println("세션 이메일: [" + verificationData.getEmail() + "]");
+        System.out.println("요청 이메일: [" + email + "]");
+
+        if (!verificationData.getEmail().trim().replace("\"", "").equals(email.trim().replace("\"", ""))) {
             throw new IllegalArgumentException("이메일 인증 요청이 없습니다.");
         }
 

@@ -94,12 +94,6 @@ public class OrderService {
      */
 
     // 주문 상세 조회 (단건)
-    public Order getOrderDetail(String email) {
-        return orderRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당 주문을 찾을 수 없습니다."));
-    }
-
-    // 주문 상세 조회 (단건)
     public OrderDetailDto getOrderDetailById(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 주문을 찾을 수 없습니다."));
@@ -178,5 +172,7 @@ public class OrderService {
             }
         }
     }
+
+
 
 }
