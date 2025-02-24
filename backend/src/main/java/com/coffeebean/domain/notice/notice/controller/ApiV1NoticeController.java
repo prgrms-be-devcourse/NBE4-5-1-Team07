@@ -65,6 +65,17 @@ public class ApiV1NoticeController {
 		);
 	}
 
+	// 공지사항 단건 조회
+	@GetMapping("/{id}")
+	public RsData<NoticeDto> findById(@PathVariable long id) {
+		Notice notice = noticeService.findByNoticeId(id);
+
+		return new RsData<>(
+				"200-1",
+				"공지사항 단건 조회가 완료되었습니다.",
+				new NoticeDto(notice)
+		);
+	}
 
 
 }

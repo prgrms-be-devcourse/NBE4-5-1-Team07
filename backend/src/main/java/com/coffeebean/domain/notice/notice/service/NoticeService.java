@@ -35,5 +35,11 @@ public class NoticeService {
         return noticeRepository.findAll();
     }
 
+    // 공지사항 Id로 조회
+    @Transactional(readOnly = true)
+    public Notice findByNoticeId(long id) {
+        return noticeRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("존재하지 않는 공지사항입니다."));
+    }
 
 }
