@@ -65,21 +65,6 @@ public class ApiV1ItemController {
         );
     }
 
-//    // 상품 전체 조회
-//    @GetMapping
-//    public RsData<ItemListResponseDto> getItems() {
-//
-//        List<ItemDto> items = itemService.getItems().stream()
-//                .map(ItemDto::new)
-//                .toList();
-//
-//        return new RsData<>(
-//                "200-1",
-//                "전체 상품이 조회 되었습니다.",
-//                new ItemListResponseDto(items)
-//        );
-//    }
-
     // 상품 전체 조회 - 페이징
     @GetMapping
     public RsData<Page<ItemDto>> getItems(

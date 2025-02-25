@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.coffeebean.domain.user.user.Address;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,10 +77,58 @@ public class UserService {
 		claims.put("role", ADMIN_ROLE);
 
 		String token = JwtUtil.createToken(claims);
-		JwtUtil.setJwtCookie(token, response); // ✅ 쿠키 저장
+		JwtUtil.setJwtCookie(token, response); // 쿠키 저장
 
-		return token; // ✅ 토큰 반환
+		return token; // 토큰 반환
 	}
+
+	// newName으로 이름 수정
+	@Transactional
+	public User modifyName(String email, String newName) {
+		// 사용자 확인
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ServiceException("404-1", "사용자를 찾을 수 없습니다."));
+
+		if (user.getName().equals(newName)) {
+			throw new ServiceException("400-2", "새로운 이름이 기존 이름과 동일합니다.");
+		}
+
+		// 이름 변경
+		user.setName(newName);
+		return userRepository.save(user);
+	}
+
+	// newAddress로 주소 수정
+	@Transactional
+	public User modifyAddress(String email, String city, String street, String zipcode) {
+		// 사용자 확인
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ServiceException("404-1", "사용자를 찾을 수 없습니다."));
+
+		// 주소 수정
+		Address newAddress = new Address(city, street, zipcode);
+		user.setAddress(newAddress);
+
+		return userRepository.save(user);
+	}
+
+	// 비밀번호 변경
+	@Transactional
+	public void modifyPassword(String email,String oldPassword, String newPassword) {
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ServiceException("404-1", "사용자를 찾을 수 없습니다."));
+
+		if(!passwordEncoder.matches(oldPassword, user.getPassword())) {
+			throw new ServiceException("400-2", "기존 비밀번호가 일치하지 않습니다.");
+		}
+
+		// 새 비밀번호 암호화 후 저장
+		String encodedPassword = passwordEncoder.encode(newPassword);
+		user.setPassword(encodedPassword);
+
+		log.info("변경된 비밀번호: {}", encodedPassword);
+	}
+
 
 	// 일반 사용자 로그인
 	public Map<String, String> loginUser(String email, String password, HttpServletResponse response) {
@@ -96,9 +145,9 @@ public class UserService {
 		claims.put("id", user.getId());
 
 		String token = JwtUtil.createToken(claims);
-		JwtUtil.setJwtCookie(token, response); // ✅ 쿠키 저장
+		JwtUtil.setJwtCookie(token, response); // 쿠키 저장
 
-		// ✅ 사용자 이름과 토큰을 반환
+		// 사용자 이름과 토큰을 반환
 		Map<String, String> result = new HashMap<>();
 		result.put("userName", user.getName());
 		result.put("token", token);
@@ -106,12 +155,14 @@ public class UserService {
 		return result;
 	}
 
+	// 이메일을 통해 사용자 ID 가져오기
     public Long getUserIdFromEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() ->
                         new DataNotFoundException("존재하지 않는 회원입니다."))
                 .getId();
     }
 
+	// 포인트 적립 내역 조회
 	@Transactional(readOnly = true)
 	public List<PointHistoryDto> getPointHistories(Long userId) {
 		User user = userRepository.findById(userId).orElseThrow(() ->
@@ -132,6 +183,7 @@ public class UserService {
 			pointHistory.getCreateDate())).toList();
 	}
 
+	// 포인트가 충분한지 확인
 	public boolean isPointAvailable(String email, int point) {
 		Optional<User> opActor = userRepository.findByEmail(email);
 		if (opActor.isEmpty()) {
@@ -156,6 +208,7 @@ public class UserService {
 			.build());
     }
 
+	// 유저 상세 정보 조회
 	@Transactional
 	public UserDto getDetails(String email) {
 		User user = userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("사용자를 찾을 수 없습니다."));

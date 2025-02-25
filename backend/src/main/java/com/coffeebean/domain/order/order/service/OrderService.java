@@ -94,6 +94,7 @@ public class OrderService {
 
     /**
      * 마이 페이지 - 주문 최근 내역 3건만 보여 주기
+     *
      * @param email
      * @return
      */
@@ -176,6 +177,15 @@ public class OrderService {
                 continue; // 프로세스 중단 방지
             }
         }
+    }
+
+    // 주문시 메일 전송
+    public void sendOrderMail(Order order) {
+        mailService.sendMailToUser(
+                order.getEmail(),
+                "배송이 시작되었습니다.",
+                "주문번호[%d]의 상품의 배송이 시작되었습니다.".formatted(order.getId())
+        );
     }
 
     // 모든 주문 조회
