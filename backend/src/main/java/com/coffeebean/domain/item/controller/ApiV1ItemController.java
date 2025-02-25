@@ -23,7 +23,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -36,27 +41,56 @@ public class ApiV1ItemController {
     private final QuestionService questionService;
 
 
+    // 상품 등록 요청을 위한 요청 바디
     record AddReqBody(
-            @NotBlank(message = "상품명을 입력하세요")
-            String name,
-            @NotNull(message = "가격을 입력하세요")
-            @Min(value = 1, message = "가격은 1 이상이어야 합니다.")
-            int price,
-            int stockQuantity,
-            String description
+        @NotBlank(message = "상품명을 입력하세요")
+        String name,
+        @NotNull(message = "가격을 입력하세요")
+        @Min(value = 1, message = "가격은 1 이상이어야 합니다.")
+        int price,
+        int stockQuantity,
+        String description
     ) {
     }
 
-    // 상품 등록
+    // 상품 등록 (파일 업로드 처리)
     @AdminOnly
     @PostMapping
-    public RsData<Item> addItem(@RequestBody @Valid AddReqBody reqBody) {
-        Item item = itemService.addItem(reqBody.name(), reqBody.price(), reqBody.stockQuantity(), reqBody.description());
+    public RsData<Item> addItem(@RequestParam("name") String name,
+        @RequestParam("price") int price,
+        @RequestParam("stockQuantity") int stockQuantity,
+        @RequestParam("description") String description,
+        @RequestParam("image") MultipartFile image) throws IOException {
+
+        String fileName = null;
+
+        // 파일 처리 로직 (파일 저장 등)
+        if (!image.isEmpty()) {
+            // 파일 저장 경로 설정 (resources/static 폴더 내부)
+            String uploadDir = "src/main/resources/static/";
+            File uploadDirFile = new File(uploadDir);
+
+            // 폴더가 없으면 생성
+            if (!uploadDirFile.exists()) {
+                uploadDirFile.mkdirs();
+            }
+
+            // 파일명 생성 (원본 파일명 사용)
+            fileName = image.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir + fileName);
+
+            // 파일을 지정된 경로에 저장
+            image.transferTo(filePath);
+        }
+
+
+        // 상품 등록 서비스 호출
+        Item item = itemService.addItem(name, price, stockQuantity, description, fileName);
 
         return new RsData<>(
-                "200-1",
-                "'%s' 상품이 정상적으로 등록되었습니니다.".formatted(item.getName()),
-                item
+            "200-1",
+            "'%s' 상품이 정상적으로 등록되었습니다.".formatted(item.getName()),
+            item
         );
     }
 
