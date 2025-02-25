@@ -8,6 +8,7 @@ import com.coffeebean.domain.order.order.OrderDto;
 import com.coffeebean.domain.order.order.dto.OrderListDto;
 import com.coffeebean.domain.order.orderItem.entity.OrderItem;
 import com.coffeebean.domain.user.user.service.MailService;
+import com.coffeebean.global.exception.DataNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -182,5 +183,4 @@ public class OrderService {
                 .map(OrderListDto::new)
                 .toList();
     }
-
 }

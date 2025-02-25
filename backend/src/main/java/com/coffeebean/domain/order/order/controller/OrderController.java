@@ -124,4 +124,20 @@ public class OrderController {
         orderService.cancelOrder(orderId);
         return ResponseEntity.noContent().build();
     }
+
+    // 관리자 - 주문 상세 보기
+    @GetMapping("/orders/list/{id}")
+    public RsData<OrderDetailDto> getOrderItem(@PathVariable long id) {
+        OrderDetailDto orderDetail = orderService.getOrderDetailById(id);
+
+        if (orderDetail == null) {
+            throw new ServiceException("400-1","해당 주문 번호를 찾을 수 없습니다.");
+        }
+
+        return new RsData<>(
+                "200-2",
+                "주문 상세 조회 완료",
+                orderDetail
+        );
+    }
 }
