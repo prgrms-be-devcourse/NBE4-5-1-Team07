@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
   Menubar,
   MenubarContent,
@@ -17,13 +15,13 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [searchQuery, setSearchQuery] = useState("");
-
   return (
     <div>
-      <Menubar className="flex w-full box-content">
+      <Menubar className="flex justify-center box-content ">
         <MenubarMenu>
-          <MenubarTrigger>상품 관리</MenubarTrigger>
+          <MenubarTrigger className="hover:bg-gray-200 cursor-pointer">
+            상품 관리
+          </MenubarTrigger>
           <MenubarContent>
             <MenubarItem>
               <Link href="/admin/addItem">새상품 등록</Link>
@@ -38,13 +36,17 @@ export default function AdminLayout({
             </MenubarItem>
           </MenubarContent>
         </MenubarMenu>
+
         <MenubarMenu>
-          <MenubarTrigger>
+          <MenubarTrigger className="hover:bg-gray-200 cursor-pointer">
             <Link href="/admin/orderManagement">주문 관리</Link>
           </MenubarTrigger>
         </MenubarMenu>
+
         <MenubarMenu>
-          <MenubarTrigger>문의</MenubarTrigger>
+          <MenubarTrigger className="hover:bg-gray-200 cursor-pointer">
+            문의
+          </MenubarTrigger>
           <MenubarContent>
             <MenubarItem>
               <Link href="/admin/noticeManagement">공지사항 관리</Link>
@@ -59,18 +61,14 @@ export default function AdminLayout({
             </MenubarItem>
           </MenubarContent>
         </MenubarMenu>
-      </Menubar>
 
-      <div className="flex w-full justify-end p-4">
-        <input
-          type="text"
-          placeholder="상품명 검색"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="border p-2 rounded"
-        />
-        <Button className="ml-2">검색</Button>
-      </div>
+        {/* 로그아웃 메뉴 추가 */}
+        <MenubarMenu>
+          <MenubarTrigger className="hover:bg-gray-200 cursor-pointer">
+            로그아웃
+          </MenubarTrigger>
+        </MenubarMenu>
+      </Menubar>
 
       <div className="p-4">{children}</div>
     </div>
