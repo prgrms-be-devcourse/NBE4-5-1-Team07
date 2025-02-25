@@ -304,7 +304,7 @@ export default function ClientPage({ id }: { id: number }) {
         {selectedTab === "question" && (
           <div className="">
             <div className="flex justify-center pb-4">
-              <Link href="/questions/new">
+              <Link href={`/questions/new?itemId=${item.id}`}>
                 <Button className="border-2 border-blue-500 w-[100px] bg-white text-black hover:bg-gray-400 ">
                   질문 작성
                 </Button>

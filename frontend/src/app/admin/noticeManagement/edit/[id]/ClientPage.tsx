@@ -50,7 +50,7 @@ export default function NoticeEdit({ id }: { id: number }) {
           throw new Error("공지사항 수정에 실패했습니다.");
         }
         alert("공지사항이 수정되었습니다.");
-        router.push(`/notices/${id}`); // 수정 후 상세 페이지로 리디렉션
+        router.push(`/admin/noticeManagement`); // 수정 후 상세 페이지로 리디렉션
       })
       .catch((error) => {
         alert(error.message);
@@ -64,7 +64,7 @@ export default function NoticeEdit({ id }: { id: number }) {
   return (
     <div className="max-w-3xl mx-auto p-4">
       <button
-        onClick={() => router.push("/notices")}
+        onClick={() => router.push("/admin/noticeManagement")}
         className="mb-4 text-blue-600"
       >
         ← 목록으로

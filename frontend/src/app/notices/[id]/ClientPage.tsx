@@ -79,20 +79,6 @@ export default function NoticeDetail({ id }: { id: number }) {
         className="mt-4 whitespace-pre-wrap"
         dangerouslySetInnerHTML={{ __html: notice.content }}
       />
-      <div className="mt-4 flex gap-3">
-        <button
-          onClick={() => router.push(`/notices/edit/${notice.id}`)}
-          className="mt-4 bg-yellow-500 text-white px-4 py-2 rounded"
-        >
-          수정
-        </button>
-        <button
-          onClick={handleDelete}
-          className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-        >
-          삭제
-        </button>
-      </div>
     </div>
   );
 }

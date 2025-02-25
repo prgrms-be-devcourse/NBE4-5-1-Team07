@@ -19,7 +19,7 @@ public class NoticeService {
 
     // 공지사항 작성
     @Transactional
-    public void writeNotice(User author, String title, String content) {
+    public void writeNotice(String title, String content) {
 
         Notice notice = Notice.builder()
                 .title(title)

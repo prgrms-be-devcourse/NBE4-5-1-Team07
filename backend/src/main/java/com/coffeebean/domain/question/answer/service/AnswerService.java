@@ -1,5 +1,7 @@
 package com.coffeebean.domain.question.answer.service;
 
+import com.coffeebean.domain.notice.notice.entity.Notice;
+import com.coffeebean.global.exception.DataNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,5 +24,23 @@ public class AnswerService {
 				.question(question)
 			.build()
 		);
+	}
+
+	// 답변 Id로 조회
+	@Transactional(readOnly = true)
+	public Answer findByAnswerId(long id) {
+		return answerRepository.findById(id)
+				.orElseThrow(() -> new DataNotFoundException("존재하지 않는 답변입니다."));
+	}
+
+	// 답변 수정
+	@Transactional
+	public Answer modifyAnswer(Answer answer, String content) {
+		answer.setContent(content);
+		return answerRepository.save(answer);
+	}
+
+	public Answer findByQuestion(Question question) {
+		return answerRepository.findByQuestion(question);
 	}
 }

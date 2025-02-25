@@ -55,6 +55,14 @@ public class BaseInit {
 					.address(new Address("서울", "관악구 원두아파트", "12345"))
 					.build();
 				userRepository.save(user);
+
+				User user2 = User.builder()
+						.email("user2@exam.com")
+						.password(passwordEncoder.encode("password")) // 암호화 생략
+						.name("user2")
+						.address(new Address("수원", "수원구 원두아파트", "43251"))
+						.build();
+				userRepository.save(user2);
 			}
 		};
 	}
@@ -128,6 +136,16 @@ public class BaseInit {
 						.author(user)
 						.subject("상품 원산지 관련 문의입니다.")
 						.content("상품 원산지 정보가 표시되어 있지 않은데 어디인가요?")
+						.build());
+
+				User user2 = userRepository.findById(2L).get();
+				long item4Id = 3L;
+				Item item4 = itemRepository.findById(item4Id).get();
+				questionRepository.save(Question.builder()
+						.item(item4)
+						.author(user2)
+						.subject("배송 질문")
+						.content("주문 했는데, 언제 배송되나요?")
 						.build());
 			}
 		};

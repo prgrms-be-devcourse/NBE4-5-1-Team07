@@ -48,16 +48,19 @@ export default function QuestionDetailPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          authToken: "TEMP_AUTH_TOKEN", // 인증 토큰을 여기에 넣어주세요
-        }),
+        credentials: "include", // 인증 정보 포함
       })
         .then((res) => {
           if (res.ok) {
             alert("질문이 삭제되었습니다.");
             router.back(); // 이전 페이지로 돌아가기
+          } else if (res.status === 401) {
+            alert("로그인이 필요합니다.");
+            router.push("/user/login"); // 로그인 페이지로 이동
+          } else if (res.status === 403) {
+            alert("질문을 삭제할 권한이 없습니다.");
           } else {
-            alert("삭제에 실패했습니다.");
+            alert("질문을 삭제하는 데 실패했습니다.");
           }
         })
         .catch((error) => {
