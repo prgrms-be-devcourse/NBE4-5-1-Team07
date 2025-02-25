@@ -7,6 +7,7 @@ import com.coffeebean.domain.review.review.ReviewRequest;
 import com.coffeebean.domain.review.review.ReviewableOrderItemDto;
 import com.coffeebean.domain.review.review.entity.Review;
 import com.coffeebean.domain.review.review.entity.ReviewDetailDto;
+import com.coffeebean.domain.review.review.entity.ReviewDetailNotImageDto;
 import com.coffeebean.domain.review.review.respository.ReviewRepository;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.repository.UserRepository;
@@ -178,15 +179,15 @@ public class ReviewService {
 
     // 아이템 id로 리뷰 조회
     @Transactional(readOnly = true)
-    public List<ReviewDetailDto> getReviewsByItemId(Long itemId) {
+    public List<ReviewDetailNotImageDto> getReviewsByItemId(Long itemId) {
         return reviewRepository.findByItemId(itemId);
     }
 
     // 리뷰 전체 조회
     @Transactional(readOnly = true)
-    public List<ReviewDetailDto> getAllReviews() {
+    public List<ReviewDetailNotImageDto> getAllReviews() {
         return reviewRepository.findAllByOrderByCreateDateDesc().stream()
-                .map(ReviewDetailDto::new)
+                .map(ReviewDetailNotImageDto::new)
                 .toList();
     }
 }

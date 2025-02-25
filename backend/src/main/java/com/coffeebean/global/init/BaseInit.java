@@ -12,6 +12,11 @@ import com.coffeebean.domain.cart.cartItem.service.CartItemService;
 import com.coffeebean.domain.notice.notice.entity.Notice;
 import com.coffeebean.domain.notice.notice.repository.NoticeRepository;
 
+import com.coffeebean.domain.order.order.DeliveryStatus;
+import com.coffeebean.domain.order.order.OrderStatus;
+import com.coffeebean.domain.order.order.repository.OrderRepository;
+import com.coffeebean.domain.order.orderItem.entity.OrderItem;
+import com.coffeebean.domain.order.orderItem.repository.OrderItemRepository;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,6 +52,8 @@ public class BaseInit {
 	private final AnswerService answerService;
 	private final AnswerRepository answerRepository;
 	private final NoticeRepository noticeRepository;
+	private final OrderRepository orderRepository;
+	private final OrderItemRepository orderItemRepository;
 
 	@Transactional
 	@Bean
@@ -99,7 +106,7 @@ public class BaseInit {
 							"상품번호는 " + i + "입니다.<br>" +
 							"상품 문의는 문의사항에서 질문해주세요")
 						.imageUrl("http://localhost:8080/%d.webp".formatted(i))
-						.name(i + "상품")
+						.name("상품 " + i)
 						.build());
 				}
 			}
@@ -109,13 +116,26 @@ public class BaseInit {
 	@Transactional
 	@Bean
 	@Order(3)
-	public ApplicationRunner initCart() {
+	public ApplicationRunner initOrder() {
 		return args -> {
-			if (cartRepository.count() == 0) {
-				User actor = userRepository.findByEmail("example@exam.com").get();
-				Cart cart = cartService.getMyCart(actor);
-				cartItemService.addCartItem(cart, 3L, 4);
-				cartItemService.addCartItem(cart, 8L, 2);
+			if (orderRepository.count() == 0) {
+				orderRepository.save(com.coffeebean.domain.order.order.entity.Order.builder()
+						.email("example@exam.com")
+						.deliveryAddress(new Address("서울", "관악구 원두아파트", "12345"))
+						.deliveryStatus(DeliveryStatus.DONE)
+						.orderStatus(OrderStatus.COMPLETED)
+						.build());
+			}
+			if(orderItemRepository.count() == 0) {
+				Item item = itemRepository.findById(1L).get();
+				com.coffeebean.domain.order.order.entity.Order order = orderRepository.findById(1L).get();
+
+				orderItemRepository.save(OrderItem.builder()
+						.order(order)
+						.item(item)
+						.count(2)
+						.orderPrice(item.getPrice())
+						.build());
 			}
 		};
 	}

@@ -6,8 +6,7 @@ import com.coffeebean.domain.item.entity.Item;
 import com.coffeebean.domain.item.service.ItemService;
 import com.coffeebean.domain.question.question.dto.QuestionDto;
 import com.coffeebean.domain.question.question.service.QuestionService;
-import com.coffeebean.domain.review.review.entity.Review;
-import com.coffeebean.domain.review.review.entity.ReviewDetailDto;
+import com.coffeebean.domain.review.review.entity.ReviewDetailNotImageDto;
 import com.coffeebean.domain.review.review.service.ReviewService;
 import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.exception.ServiceException;
@@ -201,8 +200,8 @@ public class ApiV1ItemController {
 
     // 상품 상세 페이지 상품 id로 리뷰 조회
     @GetMapping("/{id}/reviews")
-    public RsData<List<ReviewDetailDto>> getReviewsByItemId(@PathVariable Long id) {
-        List<ReviewDetailDto> reviews = reviewService.getReviewsByItemId(id);
+    public RsData<List<ReviewDetailNotImageDto>> getReviewsByItemId(@PathVariable Long id) {
+        List<ReviewDetailNotImageDto> reviews = reviewService.getReviewsByItemId(id);
         return new RsData<>(
                 "200-1",
                 "리뷰가 조회되었습니다",
@@ -212,9 +211,9 @@ public class ApiV1ItemController {
 
     // 리뷰 전체 조회 - 관리자
     @GetMapping("/reviews")
-    public RsData<List<ReviewDetailDto>> getReviews() {
+    public RsData<List<ReviewDetailNotImageDto>> getReviews() {
         System.out.println("admin");
-        List<ReviewDetailDto> reviews = reviewService.getAllReviews();
+        List<ReviewDetailNotImageDto> reviews = reviewService.getAllReviews();
         return new RsData<>(
                 "200-1",
                 "리뷰 목록 조회가 완료되었습니다.",
