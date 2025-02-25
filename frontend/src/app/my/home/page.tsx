@@ -141,7 +141,7 @@ export default function MyPage() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">최근 주문 내역</h2>
           <Link
-            href="/my/orders"
+            href="/my/orders/"
             className="text-blue-600 hover:text-blue-800 flex items-center space-x-1 transition-colors"
           >
             <span>더보기</span>
@@ -168,7 +168,7 @@ export default function MyPage() {
 function OrderItem({ order }: { order: OrderDto }) {
   return (
     <Link
-      href={`/orders/${order.orderId}`}
+      href={`/my/orders/detail/${order.orderId}`}
       className="block p-4 border rounded-lg hover:bg-gray-50 transition-colors group"
     >
       <div className="flex justify-between items-start">
