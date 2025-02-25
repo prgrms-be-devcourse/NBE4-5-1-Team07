@@ -1,7 +1,9 @@
 package com.coffeebean.domain.order.order.controller;
 
+import com.coffeebean.domain.order.order.DeliveryStatus;
 import com.coffeebean.domain.order.order.OrderDetailDto;
 import com.coffeebean.domain.order.order.OrderDto;
+import com.coffeebean.domain.order.order.OrderStatus;
 import com.coffeebean.domain.order.order.dto.OrderListDto;
 import com.coffeebean.domain.order.order.dto.OrderListResponseDto;
 import com.coffeebean.domain.order.order.service.OrderService;
@@ -14,6 +16,7 @@ import com.coffeebean.global.exception.ServiceException;
 import com.coffeebean.global.security.annotations.AdminOnly;
 import com.coffeebean.global.util.CustomUserDetails;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -144,5 +147,31 @@ public class OrderController {
                 "주문 상세 조회 완료",
                 orderDetail
         );
+    }
+
+    record OrderStatusUpdateRequest(OrderStatus orderStatus) {}
+
+    // 주문 상태 변경
+    @AdminOnly
+    @PatchMapping("/v1/orders/{orderId}/status")
+    public ResponseEntity<String> updateOrderStatus(
+            @PathVariable Long orderId,
+            @RequestBody OrderStatusUpdateRequest request) {
+
+        orderService.updateOrderStatus(orderId, request.orderStatus());
+        return ResponseEntity.ok("주문 상태가 변경되었습니다.");
+    }
+
+    record DeliveryStatusUpdateRequest(DeliveryStatus deliveryStatus) {}
+
+    // 배송 상태 변경
+    @AdminOnly
+    @PatchMapping("/v1/orders/{orderId}/delivery-status")
+    public ResponseEntity<String> updateDeliveryStatus(
+            @PathVariable Long orderId,
+            @RequestBody DeliveryStatusUpdateRequest request) {
+
+        orderService.updateDeliveryStatus(orderId, request.deliveryStatus());
+        return ResponseEntity.ok("배송 상태가 변경되었습니다.");
     }
 }

@@ -77,4 +77,13 @@ public class Order {
 		}
 		this.deliveryStatus = deliveryStatus;
 	}
+
+	// 주문 상태 변경
+	public void changeOrderStatus(OrderStatus newStatus) {
+		if (this.orderStatus == OrderStatus.COMPLETED) {
+			throw new IllegalStateException("완료된 주문은 상태를 변경할 수 없습니다.");
+		}
+		this.orderStatus = newStatus;
+	}
+
 }
