@@ -1,6 +1,7 @@
 package com.coffeebean.domain.user.user.controller;
 
 import com.coffeebean.domain.user.MyPageResponse;
+import com.coffeebean.domain.user.user.Address;
 import com.coffeebean.domain.user.user.dto.EmailVerificationRequest;
 import com.coffeebean.domain.user.user.dto.SignupReqBody;
 import com.coffeebean.domain.user.user.enitity.User;
@@ -79,6 +80,41 @@ public class UserController {
         // 회원가입 진행
         User user = userService.create(signupRequest);
         return new RsData<>("200-3", "회원가입이 완료되었습니다.", user);
+    }
+
+    // 회원 이름 변경
+    @PostMapping("/modify/name")
+    // @Login CustomUserDetails userDetails
+    public RsData<String> modifyName(@RequestParam("email") String email, @RequestParam("newName") String  newName) {
+        // 이름 수정 요청
+        User user = userService.modifyName(email, newName);
+
+        return new RsData<>("200-4", "이름이 성공적으로 변경되었습니다.",user.getName());
+    }
+
+    // 비밀번호 변경
+    @PostMapping("/modify/password")
+    public RsData<String> modifyPassword(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("email");
+        String oldPassword = requestBody.get("oldPassword");
+        String newPassword = requestBody.get("newPassword");
+        userService.modifyPassword(email, oldPassword, newPassword);
+        return new RsData<>("200-1", "비밀번호 변경 완료");
+    }
+
+
+    // 주소 변경
+    @PostMapping("/modify/address")
+    public RsData<Address> modifyAddress(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("email");
+        String city = requestBody.get("city");
+        String street = requestBody.get("street");
+        String zipcode = requestBody.get("zipcode");
+
+        // 주소 수정 요청
+        User user = userService.modifyAddress(email,city,street,zipcode);
+
+        return new RsData<>("200-5", "주소가 성공적으로 변경되었습니다.", user.getAddress());
     }
 
 
