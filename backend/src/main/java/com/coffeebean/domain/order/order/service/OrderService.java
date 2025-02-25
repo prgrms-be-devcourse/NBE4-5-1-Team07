@@ -200,7 +200,7 @@ public class OrderService {
     public void updateOrderStatus(Long orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("주문을 찾을 수 없습니다."));
-        order.changeOrderStatus(newStatus);
+        order.setOrderStatus(newStatus);
     }
 
     // 배송 상태 변경
