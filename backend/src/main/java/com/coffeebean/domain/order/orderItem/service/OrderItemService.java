@@ -47,6 +47,7 @@ public class OrderItemService {
 				.order(order)
 				.item(item)
 				.count(count)
+				.orderPrice(item.getPrice())
 				.build();
 
 			orderItemRepository.save(orderItem);
