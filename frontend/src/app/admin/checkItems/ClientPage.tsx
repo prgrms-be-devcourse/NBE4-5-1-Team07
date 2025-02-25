@@ -99,6 +99,7 @@ export default function CheckItemsPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ stockQuantity: newStock }),
+          credentials: "include",
         }
       );
 

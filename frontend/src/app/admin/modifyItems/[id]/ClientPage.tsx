@@ -18,6 +18,7 @@ export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
   const [item, setItem] = useState<Item | null>(null);
   const [editData, setEditData] = useState<Partial<Item>>({});
   const [loading, setLoading] = useState<boolean>(true);
+  const [errors, setErrors] = useState<{ [key in keyof Item]?: string }>({});
 
   // 백엔드에서 상품 정보 불러오기
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
         }
 
         const data = await response.json();
-        setItem(data.data); // 최신 데이터로 불러오기
+        setItem(data.data);
       } catch (error) {
         console.error("상품을 불러오는 중 오류 발생:", error);
       } finally {
@@ -40,12 +41,12 @@ export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
     }
 
     fetchItem();
-  }, [itemId]); // itemId가 변경될 때마다 최신 데이터 불러오기
+  }, [itemId]);
 
   if (loading) return <p className="p-4">상품을 불러오는 중...</p>;
   if (!item) return <p className="p-4">상품을 찾을 수 없습니다.</p>;
 
-  // 입력 필드 변경 핸들러
+  // 입력 필드 변경 핸들러 + 유효성 검사
   const handleInputChange = (field: keyof Item, value: string | number) => {
     setEditData((prev) => ({
       ...prev,
@@ -54,10 +55,44 @@ export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
           ? parseInt(value, 10) || 0
           : value,
     }));
+
+    // 유효성 검사
+    let errorMsg = "";
+    if (field === "name" && (!value || value.toString().trim() === "")) {
+      errorMsg = "상품명을 입력하세요.";
+    } else if (
+      field === "price" &&
+      (Number(value) <= 0 || isNaN(Number(value)))
+    ) {
+      errorMsg = "올바른 가격을 입력하세요.";
+    }
+
+    setErrors((prev) => ({
+      ...prev,
+      [field]: errorMsg,
+    }));
   };
 
   // 상품 수정 후 목록으로 이동
   const handleUpdate = async () => {
+    if (editData.name !== undefined && editData.name.trim() === "") {
+      alert("상품명을 입력하세요.");
+      return;
+    }
+    if (
+      editData.price !== undefined &&
+      (editData.price <= 0 || isNaN(editData.price))
+    ) {
+      alert("올바른 가격을 입력하세요.");
+      return;
+    }
+
+    // 기존 데이터와 병합하여 undefined 값은 기존 데이터 유지
+    const updatedItem = {
+      ...item,
+      ...editData,
+    };
+
     try {
       const response = await fetch(
         `http://localhost:8080/api/v1/items/${item.id}`,
@@ -66,19 +101,25 @@ export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ ...item, ...editData }),
+          body: JSON.stringify(updatedItem),
+          credentials: "include",
         }
       );
 
       if (!response.ok) {
-        throw new Error("상품 수정에 실패했습니다.");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "상품 수정에 실패했습니다.");
       }
 
       alert(`${item.name}이(가) 수정되었습니다.`);
-      router.push("/admin/modifyItems"); // 수정 후 목록으로 이동
+      router.push("/admin/modifyItems");
     } catch (error) {
       console.error("상품 수정 중 오류 발생:", error);
-      alert("상품 수정 중 오류가 발생했습니다.");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "알 수 없는 오류가 발생했습니다."
+      );
     }
   };
 
@@ -91,6 +132,7 @@ export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
         `http://localhost:8080/api/v1/items/${item.id}`,
         {
           method: "DELETE",
+          credentials: "include",
         }
       );
 
@@ -99,7 +141,7 @@ export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
       }
 
       alert(`${item.name}이(가) 삭제되었습니다.`);
-      router.push("/admin/modifyItems"); //삭제 후 목록으로 이동
+      router.push("/admin/modifyItems");
     } catch (error) {
       console.error("상품 삭제 중 오류 발생:", error);
       alert("상품 삭제 중 오류가 발생했습니다.");
@@ -127,6 +169,7 @@ export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
             className="border p-1 w-full"
             onChange={(e) => handleInputChange("name", e.target.value)}
           />
+          {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
         </div>
         <div>
           <label className="block font-semibold">가격</label>
@@ -136,6 +179,9 @@ export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
             className="border p-1 w-full"
             onChange={(e) => handleInputChange("price", e.target.value)}
           />
+          {errors.price && (
+            <p className="text-red-500 text-sm">{errors.price}</p>
+          )}
         </div>
         <div>
           <label className="block font-semibold">재고</label>
