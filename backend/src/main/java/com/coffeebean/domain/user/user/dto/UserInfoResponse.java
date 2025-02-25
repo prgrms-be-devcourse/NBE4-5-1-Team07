@@ -12,10 +12,12 @@ public class UserInfoResponse {
 	private String name;
 	private String email;
 	private Address address;
+	private int totalPoints;
 
 	public UserInfoResponse(User actor) {
 		this.name = actor.getName();
 		this.email = actor.getEmail();
 		this.address = actor.getAddress();
+		this.totalPoints = actor.getTotalPoints();
 	}
 }
