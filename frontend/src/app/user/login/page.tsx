@@ -38,8 +38,8 @@ export default function LoginPage() {
       localStorage.removeItem("selectedCartItems");
 
       alert(`${data.msg}`); // ✅ 로그인 성공 메시지 출력
-      router.push("/"); // ✅ 홈으로 이동
-      router.refresh();
+      // router.push("/"); // ✅ 홈으로 이동
+      window.location.href = "/";
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."
