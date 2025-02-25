@@ -9,6 +9,7 @@ import com.coffeebean.global.annotation.Login;
 import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.exception.DataNotFoundException;
 import com.coffeebean.global.exception.ServiceException;
+import com.coffeebean.global.security.annotations.AdminOnly;
 import com.coffeebean.global.util.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -68,6 +69,8 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
+    // 관리자 - 주문 전체 조회
+    @AdminOnly
     @GetMapping("/orders/list")
     public RsData<OrderListResponseDto> getOrderList() {
         List<OrderListDto> orders = orderService.getAllOrder();
@@ -126,6 +129,7 @@ public class OrderController {
     }
 
     // 관리자 - 주문 상세 보기
+    @AdminOnly
     @GetMapping("/orders/list/{id}")
     public RsData<OrderDetailDto> getOrderItem(@PathVariable long id) {
         OrderDetailDto orderDetail = orderService.getOrderDetailById(id);

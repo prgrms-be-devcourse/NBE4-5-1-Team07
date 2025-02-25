@@ -33,7 +33,7 @@ export default function OrderListPage() {
         const data = await response.json();
         setOrders(data.data.orders);
       } catch (error) {
-        setError("주문 목록을 불러오는 중 오류가 발생했습니다.");
+        setError("관리자가 아닙니다.");
       } finally {
         setLoading(false);
       }
