@@ -1,14 +1,14 @@
 package com.coffeebean.domain.notice.notice.service;
 
-import com.coffeebean.domain.item.entity.Item;
+import com.coffeebean.domain.notice.notice.dto.NoticeDto;
 import com.coffeebean.domain.notice.notice.entity.Notice;
 import com.coffeebean.domain.notice.notice.repository.NoticeRepository;
-import com.coffeebean.domain.question.question.entity.Question;
-import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.global.exception.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -48,10 +48,18 @@ public class NoticeService {
         noticeRepository.deleteById(noticeId);
     }
 
+    // 공지사항 수정
     @Transactional
     public Notice modifyNotice(Notice notice, String title, String content) {
         notice.setTitle(title);
         notice.setContent(content);
         return noticeRepository.save(notice);
+    }
+
+    // 공지사항 페이징 조회
+    @Transactional(readOnly = true)
+    public Page<NoticeDto> getNotices(Pageable pageable) {
+        return noticeRepository.findAllByOrderByCreateDateDesc(pageable)
+                .map(NoticeDto::new); // Entity → DTO 변환
     }
 }

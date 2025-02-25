@@ -15,6 +15,8 @@ import com.coffeebean.global.security.annotations.AdminOnly;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,6 +69,17 @@ public class ApiV1NoticeController {
 		);
 	}
 
+	// 공지사항 목록 전체 조회 - 페이징
+	@GetMapping("/list")
+	public RsData<Page<NoticeDto>> getNotices(Pageable pageable) {
+		Page<NoticeDto> noticePage = noticeService.getNotices(pageable);
+		return new RsData<>(
+				"200-1",
+				"공지사항 목록 조회가 완료되었습니다.",
+				noticePage
+		);
+	}
+
 	// 공지사항 단건 조회
 	@GetMapping("/{id}")
 	public RsData<NoticeDto> findById(@PathVariable long id) {
@@ -95,6 +108,7 @@ public class ApiV1NoticeController {
 	) {
 	}
 	// 공지사항 수정
+	@AdminOnly
 	@PutMapping("/{id}")
 	@Transactional
 	public RsData<Void> modifyNotice(@PathVariable long id, @RequestBody ModifyReqBody reqBody) {
