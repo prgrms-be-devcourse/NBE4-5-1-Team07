@@ -153,7 +153,7 @@ export default function PaymentPage() {
           type="email"
           value={email}
           className="w-full p-2 border rounded"
-          disabled
+          disabled={isMember}
         />
       </div>
 
