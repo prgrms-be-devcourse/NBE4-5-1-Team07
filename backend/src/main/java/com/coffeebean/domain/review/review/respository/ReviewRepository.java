@@ -2,6 +2,7 @@ package com.coffeebean.domain.review.review.respository;
 
 import com.coffeebean.domain.review.review.entity.Review;
 import com.coffeebean.domain.review.review.entity.ReviewDetailDto;
+import com.coffeebean.domain.review.review.entity.ReviewDetailNotImageDto;
 import com.coffeebean.domain.user.user.enitity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +23,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r.orderItem.id FROM Review r WHERE r.user.id = :userId")
     List<Long> findReviewedOrderItemIdsByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT new com.coffeebean.domain.review.review.entity.ReviewDetailDto(r.id, r.content, r.rating, r.createDate) " +
+    @Query("SELECT new com.coffeebean.domain.review.review.entity.ReviewDetailNotImageDto(r.id, r.content, r.rating, r.createDate) " +
             "FROM Review r JOIN r.orderItem oi JOIN oi.item i WHERE i.id = :itemId")
-    List<ReviewDetailDto> findByItemId(@Param("itemId") Long itemId);
+    List<ReviewDetailNotImageDto> findByItemId(@Param("itemId") Long itemId);
 
     List<Review> findAllByOrderByCreateDateDesc();
 }
