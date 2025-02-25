@@ -2,10 +2,9 @@ package com.coffeebean.domain.order.order.controller;
 
 import com.coffeebean.domain.order.order.OrderDetailDto;
 import com.coffeebean.domain.order.order.OrderDto;
+import com.coffeebean.domain.order.order.dto.OrderListDto;
+import com.coffeebean.domain.order.order.dto.OrderListResponseDto;
 import com.coffeebean.domain.order.order.service.OrderService;
-import com.coffeebean.domain.user.user.dto.EmailVerificationRequest;
-import com.coffeebean.domain.user.user.service.EmailVerificationService;
-import com.coffeebean.domain.user.user.service.UserService;
 import com.coffeebean.global.annotation.Login;
 import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.exception.DataNotFoundException;
@@ -20,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -68,6 +68,17 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/orders/list")
+    public RsData<OrderListResponseDto> getOrderList() {
+        List<OrderListDto> orders = orderService.getAllOrder();
+
+        return new RsData<>(
+                "200-1",
+                "주문 전체 조회 완료",
+                new OrderListResponseDto(orders)
+        );
+    }
+
     // 비회원 주문 조회 - 이메일 인증
     @PostMapping("/v1/non-user/verify")
     public RsData<Void> nonUserEmailVerification(@RequestBody String email) {
@@ -114,6 +125,3 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 }
-
-
-
