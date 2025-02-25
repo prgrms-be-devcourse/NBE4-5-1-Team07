@@ -23,6 +23,7 @@ export default function PaymentPage() {
   const [totalPoints, setTotalPoints] = useState(0);
   const [usedPoints, setUsedPoints] = useState(0);
   const [finalPrice, setFinalPrice] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false); // ✅ 결제 진행 상태 추가
   const router = useRouter();
 
   useEffect(() => {
@@ -102,6 +103,8 @@ export default function PaymentPage() {
       return;
     }
 
+    setIsProcessing(true); // ✅ 결제 진행 중 상태 활성화
+
     const orderData = {
       cartOrder,
       email,
@@ -129,6 +132,8 @@ export default function PaymentPage() {
       }
     } catch {
       alert("결제 처리 중 오류가 발생했습니다.");
+    } finally {
+      setIsProcessing(false); // ✅ 결제 진행 상태 해제
     }
   };
 
@@ -229,12 +234,23 @@ export default function PaymentPage() {
         />
       </div>
 
+      <div className="flex justify-between items-center mb-6">
+        <span className="text-lg font-semibold">
+          * 당일 오후 2시 이후의 주문은 다음날 배송을 시작합니다.
+        </span>
+      </div>
+
       {/* 결제 버튼 */}
       <button
         onClick={handlePayment}
-        className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition"
+        className={`w-full text-white p-3 rounded-lg transition ${
+          isProcessing
+            ? "bg-gray-500 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700"
+        }`}
+        disabled={isProcessing} // ✅ 결제 중이면 버튼 비활성화
       >
-        결제하기
+        {isProcessing ? "결제 중..." : "결제하기"}
       </button>
     </div>
   );
