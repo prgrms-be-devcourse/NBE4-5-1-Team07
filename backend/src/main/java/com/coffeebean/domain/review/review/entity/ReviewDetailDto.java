@@ -19,4 +19,11 @@ public class ReviewDetailDto {
     private String content;
     private int rating;
     private LocalDateTime createDate;
+
+    public ReviewDetailDto(Review review) {
+        this.reviewId = review.getId();
+        this.content = review.getContent();
+        this.rating = review.getRating();
+        this.createDate = review.getCreateDate();
+    }
 }
