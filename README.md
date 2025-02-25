@@ -96,7 +96,7 @@
 ![image](https://github.com/user-attachments/assets/6eb191d6-d686-4e25-a383-6338d02675fc)
 
 ## API 명세서
-[API 명세서](https://peaceful-acorn-daf.notion.site/API-193d9ae0b864813fa94aea1a6645edbf?pvs=4)
+[📝 API 명세서](https://peaceful-acorn-daf.notion.site/API-193d9ae0b864813fa94aea1a6645edbf?pvs=4)
 <br/>
 <br/>
 
