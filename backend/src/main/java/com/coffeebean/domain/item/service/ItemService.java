@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,11 @@ public class ItemService {
     // 전체 조회
     public List<Item> getItems() {
         return itemRepository.findAll();
+    }
+
+    // 페이징
+    public Page<Item> getItems(Pageable pageable) {
+        return itemRepository.findAll(pageable);
     }
 
     // 단건 조회

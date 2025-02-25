@@ -22,22 +22,45 @@ interface NoticeDto {
   modifyDate: string;
 }
 
+// API 응답 타입 정의
+interface PaginatedResponse<T> {
+  content: T[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+  };
+  totalPages: number;
+  totalElements: number;
+}
+
 export default function ItemsPage() {
   const [items, setItems] = useState<ItemDto[]>([]);
   const [notices, setNotices] = useState<NoticeDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // 페이지네이션 및 정렬 상태
+  const [page, setPage] = useState(0);
+  const [size] = useState(8);
+  const [totalPages, setTotalPages] = useState(1);
+  const [sortBy, setSortBy] = useState("id"); // 기본 정렬: 상품번호순
+  const [direction, setDirection] = useState("asc"); // 오름차순
+
+  // 상품 목록 불러오기 (페이지 & 정렬 반영)
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/items")
+    setLoading(true);
+    fetch(
+      `http://localhost:8080/api/v1/items?page=${page}&size=${size}&sortBy=${sortBy}&direction=${direction}`
+    )
       .then((response) => {
         if (!response.ok) {
           throw new Error("데이터를 불러오는 데 실패했습니다.");
         }
         return response.json();
       })
-      .then((data) => {
-        setItems(data.data.items); // 백엔드 응답 구조에 맞게 설정
+      .then((data: { data: PaginatedResponse<ItemDto> }) => {
+        setItems(data.data.content);
+        setTotalPages(data.data.totalPages);
         setLoading(false);
       })
       .catch((error) => {
@@ -45,7 +68,22 @@ export default function ItemsPage() {
         setError("상품 목록을 불러올 수 없습니다.");
         setLoading(false);
       });
+  }, [page, size, sortBy, direction]); // 정렬 기준이 변경되면 다시 불러오기
 
+  // 정렬 기준 변경 핸들러
+  const handleSortChange = (newSortBy: string) => {
+    if (sortBy === newSortBy) {
+      // 이미 선택된 정렬 기준이면 방향만 변경
+      setDirection(direction === "asc" ? "desc" : "asc");
+    } else {
+      // 새로운 정렬 기준이면 오름차순으로 설정
+      setSortBy(newSortBy);
+      setDirection("asc");
+    }
+  };
+
+  // 공지사항 불러오기
+  useEffect(() => {
     fetch("http://localhost:8080/api/v1/notices")
       .then((response) => {
         if (!response.ok) {
@@ -54,7 +92,7 @@ export default function ItemsPage() {
         return response.json();
       })
       .then((data) => {
-        setNotices(data.data); // 공지사항 목록 설정
+        setNotices(data.data);
       })
       .catch((error) => {
         console.error("Error fetching notices:", error);
@@ -68,13 +106,50 @@ export default function ItemsPage() {
     <>
       <div className="flex flex-col gap-4">
         <div className="p-4">
-          <div className="pb-4">
-            상품 목록입니다. 상품을 누르면 상세 페이지로 이동합니다.
+          <div className="flex flex-row justify-between items-center pb-4">
+            <div className="pb-4">
+              상품 목록입니다. 상품을 누르면 상세 페이지로 이동합니다.
+            </div>
+
+            <div>
+              {/* 정렬 버튼 */}
+              <div className="flex gap-4 mb-4">
+                <Button
+                  onClick={() => handleSortChange("id")}
+                  className={`px-4 py-2 ${
+                    sortBy === "id" ? "bg-indigo-400" : "bg-gray-400"
+                  }`}
+                >
+                  상품번호순{" "}
+                  {sortBy === "id" ? (direction === "asc" ? "▲" : "▼") : ""}
+                </Button>
+                <Button
+                  onClick={() => handleSortChange("price")}
+                  className={`px-4 py-2 ${
+                    sortBy === "price" ? "bg-indigo-400" : "bg-gray-400"
+                  }`}
+                >
+                  가격순{" "}
+                  {sortBy === "price" ? (direction === "asc" ? "▲" : "▼") : ""}
+                </Button>
+                <Button
+                  onClick={() => handleSortChange("name")}
+                  className={`px-4 py-2 ${
+                    sortBy === "name" ? "bg-indigo-400" : "bg-gray-400"
+                  }`}
+                >
+                  이름순{" "}
+                  {sortBy === "name" ? (direction === "asc" ? "▲" : "▼") : ""}
+                </Button>
+              </div>
+            </div>
           </div>
+
+          {/* 상품 목록 */}
           <ul className="grid grid-cols-4 gap-6 px-4 w-11/12 mx-auto">
             {items.map((item) => (
               <Link href={`/items/${item.id}`} key={item.id}>
-                <li className="border-2 border-blue-300 p-2 rounded-2xl  h-[200px] hover:bg-gray-100 flex flex-col items-center justify-center">
+                <li className="border-2 border-gray-400 p-2 rounded-2xl  h-[200px] hover:bg-gray-100 flex flex-col items-center justify-center">
                   <div>상품번호-{item.id}.</div>
                   <div> 상품명-{item.name}</div>
                   <div> 가격-{item.price}원</div>
@@ -83,10 +158,33 @@ export default function ItemsPage() {
               </Link>
             ))}
           </ul>
+
+          {/* 페이징 컨트롤 UI */}
+          <div className="flex justify-center mt-6 gap-4">
+            <Button
+              onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+              disabled={page === 0}
+              className="bg-gray-400 px-4 py-2 rounded-md"
+            >
+              이전
+            </Button>
+            <span className="px-4 py-2">
+              {page + 1} / {totalPages}
+            </span>
+            <Button
+              onClick={() =>
+                setPage((prev) => (prev < totalPages - 1 ? prev + 1 : prev))
+              }
+              disabled={page >= totalPages - 1}
+              className="bg-gray-400 px-4 py-2 rounded-md"
+            >
+              다음
+            </Button>
+          </div>
         </div>
 
+        {/* 공지사항 섹션 */}
         <div className="bg-gray-300 rounded-b-2xl py-6 flex flex-col gap-2">
-          {/* 공지사항 3개만 보여주기 */}
           <div className="flex flex-col gap-4 w-full">
             <div className="flex flex-row">
               <div className="px-10 py-2 font-bold flex items-center justify-center">
