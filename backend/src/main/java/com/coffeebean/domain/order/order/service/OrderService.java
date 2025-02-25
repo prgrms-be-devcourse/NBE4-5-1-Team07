@@ -9,6 +9,7 @@ import com.coffeebean.domain.order.order.dto.OrderListDto;
 import com.coffeebean.domain.order.orderItem.entity.OrderItem;
 import com.coffeebean.domain.user.user.service.MailService;
 import com.coffeebean.global.exception.DataNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -192,5 +193,21 @@ public class OrderService {
         return orderRepository.findAllOrdersWithItems().stream()
                 .map(OrderListDto::new)
                 .toList();
+    }
+
+    // 주문 상태 변경
+    @Transactional
+    public void updateOrderStatus(Long orderId, OrderStatus newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("주문을 찾을 수 없습니다."));
+        order.setOrderStatus(newStatus);
+    }
+
+    // 배송 상태 변경
+    @Transactional
+    public void updateDeliveryStatus(Long orderId, DeliveryStatus newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("주문을 찾을 수 없습니다."));
+        order.setDeliveryStatus(newStatus);
     }
 }

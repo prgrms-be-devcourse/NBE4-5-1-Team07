@@ -103,28 +103,33 @@ export default function ClientLayout({
             <Menubar>
               {!isLoggedIn && (
                 <MenubarMenu>
-                  <MenubarTrigger>
+                  <MenubarTrigger className="hover:bg-gray-200 cursor-pointer">
                     <Link href="/user/login">로그인</Link>
                   </MenubarTrigger>
                 </MenubarMenu>
               )}
               {!isLoggedIn && (
                 <MenubarMenu>
-                  <MenubarTrigger>
+                  <MenubarTrigger className="hover:bg-gray-200 cursor-pointer">
                     <Link href="/user/signup">회원가입</Link>
                   </MenubarTrigger>
                 </MenubarMenu>
               )}
               {isLoggedIn && (
                 <MenubarMenu>
-                  <MenubarTrigger onClick={handleLogout}>
+                  <MenubarTrigger
+                    className="hover:bg-gray-200 cursor-pointer"
+                    onClick={handleLogout}
+                  >
                     로그아웃
                   </MenubarTrigger>
                 </MenubarMenu>
               )}
               {isLoggedIn && (
                 <MenubarMenu>
-                  <MenubarTrigger>My Page</MenubarTrigger>
+                  <MenubarTrigger className="hover:bg-gray-200 cursor-pointer">
+                    My Page
+                  </MenubarTrigger>
                   <MenubarContent>
                     <MenubarItem>
                       <Link href="/my/home">My Page</Link>
@@ -141,7 +146,7 @@ export default function ClientLayout({
                 </MenubarMenu>
               )}
               <MenubarMenu>
-                <MenubarTrigger>
+                <MenubarTrigger className="hover:bg-gray-200 cursor-pointer">
                   <Link href="/cart">장바구니</Link>
                 </MenubarTrigger>
               </MenubarMenu>

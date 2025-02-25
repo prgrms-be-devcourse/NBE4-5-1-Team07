@@ -88,9 +88,15 @@ export default function AdminLayout({
             </MenubarItem>
             <MenubarSeparator />
             <MenubarItem>
-              <Link href="/admin/reviewByItems">상품별 리뷰</Link>
+              <Link href="/admin/reviewManagement">리뷰 관리</Link>
             </MenubarItem>
           </MenubarContent>
+        </MenubarMenu>
+
+        <MenubarMenu>
+          <MenubarTrigger className="hover:bg-gray-200 cursor-pointer">
+            <Link href="/admin/login">로그인</Link>
+          </MenubarTrigger>
         </MenubarMenu>
 
         {/* 로그아웃 메뉴 추가 */}
