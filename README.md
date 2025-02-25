@@ -66,7 +66,11 @@
 
 
 # 🛠️ Tech
-##
+## 
+
+## ERD
+![image](https://github.com/user-attachments/assets/1d3ff56d-15c2-4d0c-b704-0621ff537285)
+
 
 ## 브랜치 전략
 **GitHub Flow** 전략 사용
