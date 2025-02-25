@@ -22,7 +22,6 @@ interface OrderDetailDto {
     deliveryStatus: string;
 }
 
-
 export default function OrderDetailPage({ params }: {
     params: Promise<{ orderId: string }>
 }) {
