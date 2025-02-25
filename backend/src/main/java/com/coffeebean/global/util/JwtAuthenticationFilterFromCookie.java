@@ -55,6 +55,12 @@ public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
                     throw new JwtException("유효하지 않은 토큰입니다.");
                 }
 
+                // 관리자면 패스
+                if (claims.containsKey("role")) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
                 // 4. 사용자 정보 조회 (클레임 추출)
                 Long userId = ((Number)claims.get("id")).longValue();
                 String email = (String)claims.get("email");
