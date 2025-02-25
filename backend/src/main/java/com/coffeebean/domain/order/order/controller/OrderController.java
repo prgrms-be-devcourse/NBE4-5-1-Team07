@@ -2,21 +2,21 @@ package com.coffeebean.domain.order.order.controller;
 
 import com.coffeebean.domain.order.order.OrderDetailDto;
 import com.coffeebean.domain.order.order.OrderDto;
+import com.coffeebean.domain.order.order.dto.OrderListDto;
+import com.coffeebean.domain.order.order.dto.OrderListResponseDto;
 import com.coffeebean.domain.order.order.service.OrderService;
 import com.coffeebean.domain.user.user.dto.EmailVerificationRequest;
 import com.coffeebean.domain.user.user.service.EmailVerificationService;
-import com.coffeebean.domain.user.user.service.UserService;
 import com.coffeebean.global.annotation.Login;
 import com.coffeebean.global.dto.RsData;
 import com.coffeebean.global.exception.DataNotFoundException;
 import com.coffeebean.global.exception.ServiceException;
+import com.coffeebean.global.security.annotations.AdminOnly;
 import com.coffeebean.global.util.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -108,12 +108,41 @@ public class OrderController {
         }
         return ResponseEntity.ok(order);
     }
+
     @PutMapping("/v1/non-user/orders/{orderId}/cancel")
     public ResponseEntity<?> cancelNonUserOrder(@PathVariable("orderId") Long orderId) {
         orderService.cancelOrder(orderId);
         return ResponseEntity.noContent().build();
     }
+
+    // 관리자 - 주문 전체 조회
+    @AdminOnly
+    @GetMapping("/v1/orders/list")
+    public RsData<OrderListResponseDto> getOrderList() {
+        List<OrderListDto> orders = orderService.getAllOrder();
+
+        return new RsData<>(
+                "200-1",
+                "주문 전체 조회 완료",
+                new OrderListResponseDto(orders)
+        );
+    }
+
+
+    // 관리자 - 주문 상세 보기
+    @AdminOnly
+    @GetMapping("/v1/orders/list/{id}")
+    public RsData<OrderDetailDto> getOrderItem(@PathVariable long id) {
+        OrderDetailDto orderDetail = orderService.getOrderDetailById(id);
+
+        if (orderDetail == null) {
+            throw new ServiceException("400-1", "해당 주문 번호를 찾을 수 없습니다.");
+        }
+
+        return new RsData<>(
+                "200-2",
+                "주문 상세 조회 완료",
+                orderDetail
+        );
+    }
 }
-
-
-

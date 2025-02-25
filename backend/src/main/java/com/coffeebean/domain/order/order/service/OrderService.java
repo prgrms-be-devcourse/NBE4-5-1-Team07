@@ -1,11 +1,14 @@
 package com.coffeebean.domain.order.order.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.coffeebean.domain.order.order.OrderDetailDto;
 import com.coffeebean.domain.order.order.OrderDto;
+import com.coffeebean.domain.order.order.dto.OrderListDto;
 import com.coffeebean.domain.order.orderItem.entity.OrderItem;
 import com.coffeebean.domain.user.user.service.MailService;
+import com.coffeebean.global.exception.DataNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +56,7 @@ public class OrderService {
     }
 
     // 최신 3건만 보여 주는 용도
+    @Transactional
     public List<OrderDto> getRecentOrdersByEmail(String email) {
         List<Order> orders = orderRepository.findTop3ByEmailOrderByOrderDateDesc(email);
         return convertToDtoList(orders);
@@ -173,6 +177,10 @@ public class OrderService {
         }
     }
 
-
-
+    // 모든 주문 조회
+    public List<OrderListDto> getAllOrder() {
+        return orderRepository.findAllOrdersWithItems().stream()
+                .map(OrderListDto::new)
+                .toList();
+    }
 }

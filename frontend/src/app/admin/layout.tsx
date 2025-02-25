@@ -40,7 +40,7 @@ export default function AdminLayout({
         </MenubarMenu>
         <MenubarMenu>
           <MenubarTrigger>
-            <Link href="/admin/OrderManagement">주문 관리</Link>
+            <Link href="/admin/orderManagement">주문 관리</Link>
           </MenubarTrigger>
         </MenubarMenu>
         <MenubarMenu>

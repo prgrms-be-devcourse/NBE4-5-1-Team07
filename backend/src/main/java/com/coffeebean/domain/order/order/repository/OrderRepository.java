@@ -22,4 +22,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // 특정 배송 상태에 해당되는 주문 조회
     List<Order> findByDeliveryStatusIn(List<DeliveryStatus> deliveryStatuses);
+
+    // 전체 조회
+    @Query("SELECT o FROM Order o " +
+            "JOIN FETCH o.orderItems oi " +
+            "JOIN FETCH oi.item")
+    List<Order> findAllOrdersWithItems();
+
+
 }
