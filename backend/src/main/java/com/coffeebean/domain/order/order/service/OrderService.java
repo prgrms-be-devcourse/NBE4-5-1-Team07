@@ -53,7 +53,6 @@ public class OrderService {
     }
 
     // 최신 3건만 보여 주는 용도
-    @Transactional
     public List<OrderDto> getRecentOrdersByEmail(String email) {
         List<Order> orders = orderRepository.findTop3ByEmailOrderByOrderDateDesc(email);
         return convertToDtoList(orders);
@@ -93,12 +92,6 @@ public class OrderService {
      * @param email
      * @return
      */
-
-    // 주문 상세 조회 (단건)
-    public Order getOrderDetail(String email) {
-        return orderRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당 주문을 찾을 수 없습니다."));
-    }
 
     // 주문 상세 조회 (단건)
     public OrderDetailDto getOrderDetailById(Long orderId) {
@@ -179,5 +172,7 @@ public class OrderService {
             }
         }
     }
+
+
 
 }

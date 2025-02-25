@@ -6,6 +6,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { CurrencyYenIcon } from "@heroicons/react/16/solid";
 import { GiftIcon } from "lucide-react";
 import { PencilIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 
 export interface MyPageResponse {
   userName: string;
@@ -22,91 +23,80 @@ export interface OrderDto {
   totalPrice: number;
 }
 
-export const mockMyPageResponse: MyPageResponse = {
-  userName: "홍길동",
-  totalPoints: 1500,
-  orders: [
-    {
-      orderId: 1,
-      orderDate: "2025-02-21T17:26:00",
-      itemName: "Item A",
-      orderStatus: "COMPLETED",
-      deliveryStatus: "READY",
-      totalPrice: 50000,
-    },
-    {
-      orderId: 2,
-      orderDate: "2025-02-20T14:10:00",
-      itemName: "Item B",
-      orderStatus: "ORDER",
-      deliveryStatus: "START",
-      totalPrice: 120000,
-    },
-    {
-      orderId: 3,
-      orderDate: "2025-02-18T10:00:00",
-      itemName: "Item C",
-      orderStatus: "CANCELLED",
-      deliveryStatus: "CANCELLED",
-      totalPrice: 0,
-    },
-  ],
-};
-
 export default function MyPage() {
 
-  // const data = mockMyPageResponse; // Mock 데이터를 사용
 
   const [data, setData] = useState<MyPageResponse | null>(null); // 마이페이지 데이터 상태
   const [error, setError] = useState<string | null>(null); // 에러 메시지 상태
+  const router = useRouter(); // Next.js 라우터 사용
 
   useEffect(() => {
-    // JWT 토큰 가져오기
-    // const token = localStorage.getItem("authToken"); // localStorage에서 JWT 토큰 가져오기
-
-    // 일단 토큰 직접 저장하는 방식으로 테스트 했습니다
-    const token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZW1haWwiOiJleGFtcGxlQGV4YW0uY29tIiwiaWF0IjoxNzQwMjkzNTQxLCJleHAiOjE3NDAzNzk5NDF9.n4g2tiP-k5iOf2K6FbaAQydXlQCzh7kwkTZTRtWZ7Po";
-
-    if (!token) {
-      setError("로그인이 필요합니다."); // 토큰이 없으면 에러 설정
-      return;
-    }
-
-
-    // API 요청
+    let isMounted = true;
     fetch("http://localhost:8080/api/my/home", {
       method: "GET",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        credentials: "include", // 쿠키 전송 허용
-        Authorization: `Bearer ${token}`, // 인증 토큰 추가
       },
     })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((result) => setData(result)) // 데이터를 상태에 저장
-      .catch((err) => setError(err.message)); // 에러 처리
-  }, []);
-
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>; // 에러 메시지 표시
-  }
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`로그인이 필요합니다`);
+          }
+          return response.json();
+        })
+        .then((result) => {
+          if (isMounted) setData(result);
+        })
+        .catch((err) => {
+          if (isMounted) {
+            setError(err.message);
+            if (!error) {
+              alert(err.message);
+              router.push("/user/login");
+            }
+          }
+        });
+    return () => {
+      isMounted = false;
+    };
+  }, [router, error]);
 
   if (!data) {
     return <div className="text-center">로딩 중...</div>; // 로딩 메시지 표시
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* 환영 메시지 섹션 */}
-      <div className="mb-8 space-y-2">
-        <h1 className="text-3xl font-bold">{data.userName}님, 반갑습니다!</h1>
-        <p className="text-gray-600">보유 포인트 : {data.totalPoints.toLocaleString()}원</p>
-      </div>
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* 환영 메시지 섹션 */}
+        <div className="mb-8 space-y-2">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold">{data.userName}님, 반갑습니다!</h1>
+              <p className="text-gray-600 mt-2">
+                보유 포인트 : {data.totalPoints.toLocaleString()}원
+              </p>
+            </div>
+            <button
+                onClick={() => router.push('/my/profile/edit')}
+                className="bg-white text-gray-700 px-4 py-2 rounded-lg
+                 border border-gray-300 hover:bg-gray-50
+                 transition-colors duration-200
+                 flex items-center gap-2
+                 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+              >
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+              </svg>
+              내 정보 수정
+            </button>
+          </div>
+        </div>
 
       {/* 적립금 섹션 */}
       <Link href="/my/point/history" className="group block mb-8">

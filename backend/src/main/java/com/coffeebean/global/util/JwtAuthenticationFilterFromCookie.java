@@ -15,42 +15,39 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-// @Component
+@Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
-
-    private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String requestURI = request.getRequestURI();
-
-        // 특정 경로는 필터를 타지 않도록 설정
-        if ("/api/v1/users/login".equals(requestURI)) {
+        // 리뷰, 마이 페이지만 필터 탈 수 있도록 설정
+        if (shouldNotFilter(request)) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
             // 1. 쿠키에서 JWT 추출
-            Optional<String> token = jwtUtil.getJwtFromCookies(request);
+            Optional<String> token = JwtUtil.getJwtFromCookies(request);
             log.info("JWT Token={}", token.orElse("No Token Found"));
 
             if (token.isPresent()) {
                 // 2. 페이로드 조회
-                Map<String, Object> claims = jwtUtil.getPayload(token.get());
+                Map<String, Object> claims = JwtUtil.getPayload(token.get());
                 log.info("JWT Claims={}", claims);
 
                 // 3. 필수 클레임 검증
@@ -76,15 +73,12 @@ public class JwtAuthenticationFilterFromCookie extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (JwtException | DataNotFoundException e) {
-            filterChain.doFilter(request, response);
-        } catch (Exception e) {
-            filterChain.doFilter(request, response);
+            throw new SecurityException(e.getMessage());
         }
     }
 
-//    protected boolean shouldNotFilter(HttpServletRequest request) {
-//        String path = request.getRequestURI();
-//        // ✅ 필터가 필요 없는 지점 설정 (예: /api/v1/user/login 같은 엔드포인트)
-//        return request.getRequestURI().startsWith("/api/v1");
-//    }   // 여거 때문이에요!
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // ✅ 필터가 필요 없는 지점 설정
+        return request.getRequestURI().startsWith("/api/v1");
+    }
 }
