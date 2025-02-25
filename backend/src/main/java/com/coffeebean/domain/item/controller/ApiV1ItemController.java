@@ -11,9 +11,10 @@ import com.coffeebean.global.exception.ServiceException;
 import com.coffeebean.global.security.annotations.AdminOnly;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +31,10 @@ public class ApiV1ItemController {
 
 
     record AddReqBody(
+            @NotBlank(message = "상품명을 입력하세요")
             String name,
+            @NotNull(message = "가격을 입력하세요")
+            @Min(value = 1, message = "가격은 1 이상이어야 합니다.")
             int price,
             int stockQuantity,
             String description
@@ -99,7 +103,10 @@ public class ApiV1ItemController {
     }
 
     record ModifyReqBody(
+            @NotBlank(message = "상품명을 입력하세요")
             String name,
+            @NotNull(message = "가격을 입력하세요")
+            @Min(value = 1, message = "가격은 1 이상이어야 합니다.")
             int price,
             int stockQuantity,
             String description
@@ -110,7 +117,7 @@ public class ApiV1ItemController {
     @AdminOnly
     @PutMapping("/{id}")
     @Transactional
-    public RsData<Void> modifyItem(@PathVariable long id, @RequestBody ModifyReqBody reqBody) {
+    public RsData<Void> modifyItem(@PathVariable long id, @RequestBody @Valid ModifyReqBody reqBody) {
         Item item = itemService.getItem(id).orElseThrow(
                 () -> new ServiceException("404-1", "존재하지 않는 상품입니다.")
         );
