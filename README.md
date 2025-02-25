@@ -78,6 +78,7 @@
   - 모든 기능 개발은 이 브랜치에서 이루어집니다.
 - 테스트가 완료되면, Pull Request를 생성하여 Review를 요청합니다. 이 때 타겟은 ```main``` 브랜치입니다.
 - Review가 완료되고, 피드백이 모두 반영돠면 해당 ```feature```브랜치를 ```main```브랜치로 **Merge**합니다.
+![image](https://github.com/user-attachments/assets/6eb191d6-d686-4e25-a383-6338d02675fc)
 
   
 <br/>

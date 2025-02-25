@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.coffeebean.domain.user.pointHitstory.PointHistoryDto;
 import com.coffeebean.domain.user.pointHitstory.entity.PointHistory;
 import com.coffeebean.domain.user.user.dto.SignupReqBody;
+import com.coffeebean.domain.user.user.dto.UserDto;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.repository.UserRepository;
 import com.coffeebean.global.exception.DataNotFoundException;
@@ -105,40 +106,11 @@ public class UserService {
 		return result;
 	}
 
-	public User getUserByAuthToken(String token) {
-		Map<String, Object> payload = JwtUtil.getPayload(token);
-		if (payload == null) {
-			throw new IllegalArgumentException("잘못된 인증 정보입니다.");
-		}
-
-		String email = (String)payload.get("email"); // email
-
-		// 이메일만 담겨있는 User 반환
-		return User.builder()
-			.email(email)
-			.build();
-	}
-
-	public boolean isAdminByAuthToken(String token) {
-		Map<String, Object> payload = JwtUtil.getPayload(token);
-		if (payload == null) {
-			throw new IllegalArgumentException("잘못된 인증 정보입니다.");
-		}
-
-		if (payload.keySet().contains("role")) {
-			String role = (String)payload.get("role");
-			if (role.equals(ADMIN_ROLE)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public Long getUserIdFromEmail(String email) {
-		return userRepository.findByEmail(email).orElseThrow(() ->
-				new DataNotFoundException("존재하지 않는 회원입니다."))
-			.getId();
-	}
+    public Long getUserIdFromEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() ->
+                        new DataNotFoundException("존재하지 않는 회원입니다."))
+                .getId();
+    }
 
 	@Transactional(readOnly = true)
 	public List<PointHistoryDto> getPointHistories(Long userId) {
@@ -182,5 +154,11 @@ public class UserService {
 			.amount(-point)
 			.description(description)
 			.build());
+    }
+
+	@Transactional
+	public UserDto getDetails(String email) {
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("사용자를 찾을 수 없습니다."));
+		return new UserDto(user.getName(), user.getTotalPoints());
 	}
 }

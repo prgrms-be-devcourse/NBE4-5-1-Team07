@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 import javax.crypto.SecretKey;
 
+@Slf4j
 @Component
 public class JwtUtil {
     private static final String SECRET_KEY = "676e27c6-60e8-49c7-8c0f-adf8e7ecaa2e";
@@ -67,10 +69,10 @@ public class JwtUtil {
     public static void setJwtCookie(String jwt, HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("token", jwt)
                 .httpOnly(true)  // 클라이언트에서 JS로 접근 불가
-                .secure(true)    // HTTPS에서만 전달
                 .path("/")       // 모든 경로에서 사용 가능
+                .sameSite("None") // SameSite 설정 (CSRF 방어)
                 .maxAge(Duration.ofDays(1))
-                .sameSite("Strict") // SameSite 설정 (CSRF 방어)
+                .secure(true)
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
@@ -80,13 +82,16 @@ public class JwtUtil {
     public static Optional<String> getJwtFromCookies(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
 
-        if (request.getCookies() != null) {
-            Arrays.stream(request.getCookies())
-                    .forEach(cookie -> System.out.println("Cookie Name: " + cookie.getName() + ", Value: " + cookie.getValue()));
+        if (cookies == null || cookies.length == 0) { // 쿠키가 없을 경우
+            throw new SecurityException("로그인이 필요합니다: 요청에 쿠키가 없습니다.");
         }
 
-        return Arrays.stream(cookies).filter(cookie -> "token".equals(cookie.getName()))
-                .map(Cookie::getValue).findFirst();
-    }
+        Arrays.stream(cookies)
+                .forEach(cookie -> log.info("Cookie Name: {}, Value: {}", cookie.getName(), cookie.getValue()));
 
+        return Arrays.stream(cookies)
+                .filter(cookie -> "token".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst();
+    }
 }

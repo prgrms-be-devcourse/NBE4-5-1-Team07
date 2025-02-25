@@ -2,9 +2,14 @@ package com.coffeebean.global.security;
 
 import com.coffeebean.domain.user.user.repository.UserRepository;
 import com.coffeebean.global.app.AppConfig;
+
+import java.util.Arrays;
+import java.util.List;
+
 import com.coffeebean.global.util.JwtAuthenticationFilterFromCookie;
 import com.coffeebean.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,15 +23,12 @@ import org.springframework.security.web.header.writers.frameoptions.XFrameOption
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
+    private final JwtAuthenticationFilterFromCookie jwtAuthenticationFilter;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -38,14 +40,11 @@ public class SecurityConfig {
                                 .requestMatchers("/h2-console/**", "/api/v1/user/admin/login").permitAll()
                                 // "/api/v1/user/admin/**" 경로는 관리자만 접근 가능
                                 .requestMatchers("/api/v1/user/admin/**").hasAuthority("admin")
-                                .requestMatchers("/api/my/home").authenticated() // 마이 페이지는 인증 받은 회원만 접근
-                                .requestMatchers("/api/reviews/**").authenticated() // 리뷰 페이지는 인증 받은 회원만 접근
-                                .requestMatchers("/api/point/history").authenticated()
                                 // 그 외의 모든 경로는 인증 없이 접근 가능
                                 .anyRequest().permitAll()
                 )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtAuthenticationFilterFromCookie(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
                 .headers((headers) -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(
                                 XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
@@ -72,8 +71,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(Arrays.asList("*"));
         // CORS 설정을 소스에 등록
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
-        source.registerCorsConfiguration("/h2-console/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }
