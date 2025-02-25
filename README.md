@@ -71,6 +71,8 @@
 ## ERD
 ![Blue White Illustration Group Project Presentation ](https://github.com/user-attachments/assets/a95a0bdf-385c-44d2-8421-2140e5e187fe)
 
+## System Architecture
+![image](https://github.com/user-attachments/assets/51b881ad-8acc-47fb-acaf-269dff79be0b)
 
 
 ## 브랜치 전략
