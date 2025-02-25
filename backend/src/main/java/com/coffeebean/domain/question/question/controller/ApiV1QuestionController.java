@@ -164,7 +164,7 @@ public class ApiV1QuestionController {
 
 		return new RsData<>(
 				"200-1",
-				"'%d'번 공지사항이 수정 되었습니다.".formatted(modifyAnswer.getId())
+				"'%d'번 답변이 수정 되었습니다.".formatted(modifyAnswer.getId())
 		);
 
 	}
