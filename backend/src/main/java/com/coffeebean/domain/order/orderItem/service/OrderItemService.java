@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.coffeebean.domain.cart.cart.entity.Cart;
-import com.coffeebean.domain.cart.cart.repository.CartRepository;
 import com.coffeebean.domain.cart.cart.service.CartService;
-import com.coffeebean.domain.cart.cartItem.repository.CartItemRepository;
 import com.coffeebean.domain.item.entity.Item;
 import com.coffeebean.domain.item.repository.ItemRepository;
 import com.coffeebean.domain.order.order.entity.Order;
@@ -33,9 +31,11 @@ public class OrderItemService {
 	private final ItemRepository itemRepository;
 	private final UserRepository userRepository;
 	private final CartService cartService;
+	private final UserService userService;
 
 	@Transactional
-	public List<OrderItem> createOrderItem(Order order, Map<Long, Integer> items, String email, boolean isCartOrder) {
+	public List<OrderItem> createOrderItem(Order order, Map<Long, Integer> items, String email, boolean isCartOrder,
+		int point) {
 		List<OrderItem> orderItems = new ArrayList<>();
 
 		for (Long itemId : items.keySet()) {
@@ -55,12 +55,19 @@ public class OrderItemService {
 			orderItems.add(orderItem);
 		}
 
+		// 장바구니에서 구매했다면 장바구니에서 해당 상품 삭제
 		Optional<User> opActor = userRepository.findByEmail(email);
 		if (isCartOrder && opActor.isPresent()) {
 			Cart cart = cartService.getMyCart(opActor.get());
 			cart.deleteItems(orderItems.stream()
 				.map(OrderItem::getItem)
 				.collect(Collectors.toList()));
+		}
+
+		// 포인트를 사용하면 차감
+		if (point != 0 && opActor.isPresent()) {
+			User user = opActor.get();
+			userService.usePoint(user, point, "상품 결제에 적립금 사용");
 		}
 
 		return orderItems;
