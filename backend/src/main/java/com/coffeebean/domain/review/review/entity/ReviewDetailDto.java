@@ -19,4 +19,5 @@ public class ReviewDetailDto {
     private String content;
     private int rating;
     private LocalDateTime createDate;
+    private String imageUrl;
 }
