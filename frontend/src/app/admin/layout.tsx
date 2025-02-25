@@ -93,6 +93,12 @@ export default function AdminLayout({
           </MenubarContent>
         </MenubarMenu>
 
+        <MenubarMenu>
+          <MenubarTrigger className="hover:bg-gray-200 cursor-pointer">
+            <Link href="/admin/login">로그인</Link>
+          </MenubarTrigger>
+        </MenubarMenu>
+
         {/* 로그아웃 메뉴 추가 */}
         <MenubarMenu>
           <MenubarTrigger
