@@ -26,4 +26,5 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "FROM Review r JOIN r.orderItem oi JOIN oi.item i WHERE i.id = :itemId")
     List<ReviewDetailDto> findByItemId(@Param("itemId") Long itemId);
 
+    List<Review> findAllByOrderByCreateDateDesc();
 }

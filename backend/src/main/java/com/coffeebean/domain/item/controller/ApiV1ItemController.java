@@ -200,13 +200,25 @@ public class ApiV1ItemController {
         );
     }
 
-    // 상품 상세 페이지 리뷰 조회
+    // 상품 상세 페이지 상품 id로 리뷰 조회
     @GetMapping("/{id}/reviews")
     public RsData<List<ReviewDetailDto>> getReviewsByItemId(@PathVariable Long id) {
         List<ReviewDetailDto> reviews = reviewService.getReviewsByItemId(id);
         return new RsData<>(
                 "200-1",
                 "리뷰가 조회되었습니다",
+                reviews
+        );
+    }
+
+    // 리뷰 전체 조회 - 관리자
+    @GetMapping("/reviews")
+    public RsData<List<ReviewDetailDto>> getReviews() {
+        System.out.println("admin");
+        List<ReviewDetailDto> reviews = reviewService.getAllReviews();
+        return new RsData<>(
+                "200-1",
+                "리뷰 목록 조회가 완료되었습니다.",
                 reviews
         );
     }
