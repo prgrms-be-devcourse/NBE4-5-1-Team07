@@ -1,5 +1,6 @@
 package com.coffeebean.domain.order.order.controller;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -19,6 +20,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.coffeebean.domain.user.pointHitstory.entity.PointHistory;
+import com.coffeebean.domain.user.user.enitity.User;
+import com.coffeebean.domain.user.user.repository.UserRepository;
 import com.coffeebean.domain.user.user.service.UserService;
 
 import jakarta.servlet.http.Cookie;
@@ -39,6 +43,8 @@ class ApiV1OrderControllerTest {
 	private String authToken;
 	@Autowired
 	private HttpServletResponse httpServletResponse;
+	@Autowired
+	private UserRepository userRepository;
 
 	@BeforeEach
 	void setUp() {
@@ -143,6 +149,14 @@ class ApiV1OrderControllerTest {
 				.andExpect(jsonPath("$.data.deliveryStatus").value("READY"))
 				.andExpect(jsonPath("$.data.orderStatus").value("ORDER"))
 				.andExpect(jsonPath("$.data.orderDate").isNotEmpty());
+
+			User user = userRepository.findByEmail("example@exam.com").get();
+			PointHistory lastPointHistory = user.getPointHistories().getLast();
+			assertThat(lastPointHistory.getAmount()).isEqualTo(-2000);
+			assertThat(lastPointHistory.getDescription()).isEqualTo("상품 결제에 적립금 사용");
+
+			int totalPoint = user.getTotalPoints();
+			assertThat(totalPoint).isEqualTo(5000 - 2000);
 		}
 
 		@Test
