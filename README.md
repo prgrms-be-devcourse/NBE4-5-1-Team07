@@ -69,7 +69,8 @@
 ## 
 
 ## ERD
-![image](https://github.com/user-attachments/assets/1d3ff56d-15c2-4d0c-b704-0621ff537285)
+![Blue White Illustration Group Project Presentation ](https://github.com/user-attachments/assets/a95a0bdf-385c-44d2-8421-2140e5e187fe)
+
 
 
 ## 브랜치 전략
