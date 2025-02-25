@@ -31,7 +31,7 @@ export default function MyPage() {
   const router = useRouter(); // Next.js 라우터 사용
 
   useEffect(() => {
-    // API 요청
+    let isMounted = true;
     fetch("http://localhost:8080/api/my/home", {
       method: "GET",
       credentials: "include",
@@ -45,13 +45,22 @@ export default function MyPage() {
           }
           return response.json();
         })
-        .then((result) => setData(result)) // 데이터를 상태에 저장
+        .then((result) => {
+          if (isMounted) setData(result);
+        })
         .catch((err) => {
-          alert(err.message); // 팝업 창에 에러 메시지 표시
-          router.push("/user/login"); // /login 페이지로 리다이렉트
-          setError(err.message); // 에러 메시지 상태 업데이트
+          if (isMounted) {
+            setError(err.message);
+            if (!error) {
+              alert(err.message);
+              router.push("/user/login");
+            }
+          }
         });
-  }, [router]);
+    return () => {
+      isMounted = false;
+    };
+  }, [router, error]);
 
   if (!data) {
     return <div className="text-center">로딩 중...</div>; // 로딩 메시지 표시
