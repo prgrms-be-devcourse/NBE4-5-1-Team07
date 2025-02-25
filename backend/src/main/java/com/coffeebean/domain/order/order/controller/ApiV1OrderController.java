@@ -60,6 +60,9 @@ public class ApiV1OrderController {
 		// Order의 세부 상품 항목들 OderItem 저장
 		List<OrderItem> orderItems = orderItemService.createOrderItem(order, orderCreateRequest.getItems(), email,
 			orderCreateRequest.getCartOrder(), orderCreateRequest.getPoint());
+
+		orderService.sendOrderMail(order);
+
 		return new RsData<>(
 			"201-1",
 			"주문이 등록되었습니다.",

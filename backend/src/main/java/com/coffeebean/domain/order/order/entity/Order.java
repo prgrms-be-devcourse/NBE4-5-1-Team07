@@ -33,48 +33,59 @@ import static jakarta.persistence.CascadeType.ALL;
 @EntityListeners(AuditingEntityListener.class)
 public class Order {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "order_id")
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "order_id")
+    private Long id;
 
-	@Email
-	@Column(nullable = false)
-	private String email;    // 주문자 이메일
+    @Email
+    @Column(nullable = false)
+    private String email;    // 주문자 이메일
 
-	@Embedded
-	private Address deliveryAddress; // 배송 주소
+    @Embedded
+    private Address deliveryAddress; // 배송 주소
 
-	@Enumerated(EnumType.STRING)
-	private DeliveryStatus deliveryStatus; // 배송 상태
+    @Enumerated(EnumType.STRING)
+    private DeliveryStatus deliveryStatus; // 배송 상태
 
-	@Enumerated(EnumType.STRING)
-	private OrderStatus orderStatus; // 주문 상태
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus; // 주문 상태
 
-	@CreatedDate
-	@Setter(AccessLevel.PRIVATE)
-	private LocalDateTime orderDate; // 주문 시간
+    @CreatedDate
+    @Setter(AccessLevel.PRIVATE)
+    private LocalDateTime orderDate; // 주문 시간
 
-	@OneToMany(mappedBy = "order")
-	@Builder.Default
-	private List<OrderItem> orderItems = new ArrayList<>();
+    @OneToMany(mappedBy = "order")
+    @Builder.Default
+    private List<OrderItem> orderItems = new ArrayList<>();
 
-	/**
-	 * 비즈니스 로직 추가: 주문 취소
-	 */
-	public void cancel() {
-		if (orderStatus != OrderStatus.ORDER || deliveryStatus != DeliveryStatus.READY) {
-			throw new IllegalArgumentException("주문을 취소할 수 없는 상태입니다.");
-		}
-		orderStatus = OrderStatus.CANCELED;
-		deliveryStatus = DeliveryStatus.CANCELLED;
-	}
+    /**
+     * 비즈니스 로직 추가: 주문 취소
+     */
+    public void cancel() {
+        if (orderStatus != OrderStatus.ORDER || deliveryStatus != DeliveryStatus.READY) {
+            throw new IllegalArgumentException("주문을 취소할 수 없는 상태입니다.");
+        }
+        orderStatus = OrderStatus.CANCELED;
+        deliveryStatus = DeliveryStatus.CANCELLED;
+    }
 
-	// 배송 상태 변경
-	public void setDeliveryStatus(DeliveryStatus deliveryStatus) {
-		if (this.deliveryStatus == DeliveryStatus.DONE) {
-			throw new IllegalStateException("배송 완료 상태에서는 변경할 수 없습니다.");
-		}
-		this.deliveryStatus = deliveryStatus;
-	}
+    // 배송 상태 변경
+    public void setDeliveryStatus(DeliveryStatus deliveryStatus) {
+        if (this.deliveryStatus == DeliveryStatus.DONE) {
+            throw new IllegalStateException("배송 완료 상태에서는 변경할 수 없습니다.");
+        }
+        this.deliveryStatus = deliveryStatus;
+    }
+
+    // 주문 상태 변경
+    public void setOrderStatus(OrderStatus orderStatus) {
+        if (this.orderStatus == OrderStatus.COMPLETED || this.orderStatus == OrderStatus.CANCELED) {
+            throw new IllegalStateException("배송 완료 또는 취소된 상태에서는 변경할 수 없습니다.");
+        }
+        if (this.orderStatus == orderStatus) {
+            return; // 동일한 상태로 변경하지 않음
+        }
+        this.orderStatus = orderStatus;
+    }
 }
