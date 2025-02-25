@@ -11,21 +11,27 @@ interface Product {
 }
 
 export default function PaymentPage() {
+  const [cartOrder, setCartOrder] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
   const [street, setStreet] = useState("");
   const [zipcode, setZipcode] = useState("");
-  const [isMember, setIsMember] = useState(false); // 회원 여부 추가
+  const [isMember, setIsMember] = useState(false);
+  const [stockMap, setStockMap] = useState<{ [key: number]: number }>({}); // 재고량 저장
   const router = useRouter();
 
   // localStorage에서 데이터 가져오기
   useEffect(() => {
     const storedProducts = localStorage.getItem("checkoutItems");
+    const storedCartOrder = localStorage.getItem("cartOrder");
 
     if (storedProducts) {
       setProducts(JSON.parse(storedProducts));
+    }
+    if (storedCartOrder && storedCartOrder === "true") {
+      setCartOrder(true);
     }
   }, []);
 
@@ -38,11 +44,40 @@ export default function PaymentPage() {
     setTotalPrice(total);
   }, [products]);
 
+  // 각 상품의 재고량 조회
+  useEffect(() => {
+    const fetchStock = async () => {
+      const stockData: { [key: number]: number } = {};
+      await Promise.all(
+        products.map(async (product) => {
+          try {
+            const res = await fetch(
+              `http://localhost:8080/api/v1/items/${product.id}`
+            );
+            const data = await res.json();
+            if (res.ok) {
+              stockData[product.id] = data.data.stockQuantity;
+            } else {
+              stockData[product.id] = 0; // 오류 발생 시 기본값 0 설정
+            }
+          } catch (error) {
+            stockData[product.id] = 0;
+          }
+        })
+      );
+      setStockMap(stockData);
+    };
+
+    if (products.length > 0) {
+      fetchStock();
+    }
+  }, [products]);
+
   // 회원 정보 가져오기
   useEffect(() => {
     fetch("http://localhost:8080/api/my/info", {
       method: "GET",
-      credentials: "include", // 쿠키 인증 정보 포함
+      credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => {
@@ -51,12 +86,10 @@ export default function PaymentPage() {
           setCity(data.data.address.city);
           setStreet(data.data.address.street);
           setZipcode(data.data.address.zipcode);
-          setIsMember(true); // 회원이면 true 설정
+          setIsMember(true);
         }
       })
-      .catch(() => {
-        // 비회원이면 입력칸 유지 (isMember = false)
-      });
+      .catch(() => {});
   }, []);
 
   const handlePayment = async () => {
@@ -66,6 +99,7 @@ export default function PaymentPage() {
     }
 
     const orderData = {
+      cartOrder: cartOrder,
       email,
       address: { city, street, zipcode },
       items: products.map(({ id, quantity }) => ({
@@ -85,13 +119,12 @@ export default function PaymentPage() {
       });
 
       const result = await response.json();
-      if (response.ok) {
+      if (result.code === "400-3") {
+        alert(result.msg);
+      } else if (response.ok) {
         alert("결제가 완료되었습니다.");
-
-        // 주문 데이터를 sessionStorage에 저장
+        localStorage.removeItem("selectedCartItems");
         sessionStorage.setItem("orderData", JSON.stringify(result.data));
-
-        // 결제 완료 페이지로 리디렉션
         router.push(`/orders/complete`);
       } else {
         alert(result.msg || "결제 실패");
@@ -108,15 +141,30 @@ export default function PaymentPage() {
       {/* 상품 목록 */}
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">상품 목록</h3>
-        {products.map((product) => (
-          <div key={product.id} className="flex justify-between p-2 border-b">
-            <span>{product.name}</span>
-            <span>
-              {product.price.toLocaleString()}원{" "}
-              <span className="text-gray-500">({product.quantity}개)</span>
-            </span>
-          </div>
-        ))}
+        {products.map((product) => {
+          const stock = stockMap[product.id] ?? 0; // 기본값 0
+          const isOutOfStock = product.quantity > stock; // 초과 여부
+
+          return (
+            <div key={product.id} className="flex justify-between p-2 border-b">
+              <span>{product.name}</span>
+              <span>
+                {product.price.toLocaleString()}원{" "}
+                <span className="text-gray-500">({product.quantity}개)</span>
+                {"   "}
+                <span
+                  className={
+                    isOutOfStock
+                      ? "text-red-600 font-bold text-sm"
+                      : "text-gray-600 text-sm"
+                  }
+                >
+                  {stock}개 남음
+                </span>
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       {/* 총 가격 */}
@@ -133,7 +181,7 @@ export default function PaymentPage() {
           onChange={(e) => setEmail(e.target.value)}
           className="w-full p-2 border rounded"
           placeholder="이메일 입력"
-          disabled={isMember} // 회원이면 수정 불가
+          disabled={isMember}
         />
       </div>
 

@@ -43,6 +43,9 @@ export default function ClinetLayout({
       // ✅ 클라이언트에서 쿠키 삭제
       document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
+      // 장바구니 선택 데이터 삭제
+      localStorage.removeItem("selectedCartItems");
+
       alert("로그아웃 되었습니다.");
       router.push("/"); // ✅ 기본 메인 페이지로 이동
     } catch (error) {

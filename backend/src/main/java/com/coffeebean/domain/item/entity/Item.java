@@ -1,5 +1,7 @@
 package com.coffeebean.domain.item.entity;
 
+import com.coffeebean.global.exception.ServiceException;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,4 +32,11 @@ public class Item {
 	@Lob
 	@Column(columnDefinition = "TEXT")
 	private String description;    // 상품 설명
+
+	public void reduceStock(int count) {
+		if (stockQuantity < count) {
+			throw new ServiceException("400-3", "재고가 충분하지 않습니다. 상품 수량을 확인하세요.");
+		}
+		stockQuantity -= count;
+	}
 }

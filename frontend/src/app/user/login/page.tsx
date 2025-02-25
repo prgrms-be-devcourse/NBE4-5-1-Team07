@@ -33,6 +33,10 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
+
+      // 장바구니 선택 데이터 삭제
+      localStorage.removeItem("selectedCartItems");
+
       alert(`${data.msg}`); // ✅ 로그인 성공 메시지 출력
       router.push("/"); // ✅ 홈으로 이동
     } catch (err) {

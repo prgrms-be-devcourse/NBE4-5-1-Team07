@@ -1,12 +1,17 @@
 package com.coffeebean.domain.item.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.coffeebean.domain.item.entity.Item;
 import com.coffeebean.domain.item.repository.ItemRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import com.coffeebean.global.exception.DataNotFoundException;
 
-import java.util.List;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -59,4 +64,19 @@ public class ItemService {
         item.setStockQuantity(newStockQuntity);
         itemRepository.save(item);
     }
+
+    @Transactional(readOnly = true)
+	public boolean isStockSufficient(Map<Long, Integer> items) {
+        for (Long itemId : items.keySet()) {
+            int count = items.get(itemId);
+            int quantity = itemRepository.findById(itemId)
+                .orElseThrow(() -> new DataNotFoundException("존재하지 않는 상품이 포함되었습니다."))
+                .getStockQuantity();
+
+            if (quantity < count) {
+                return false;
+            }
+        }
+        return true;
+	}
 }

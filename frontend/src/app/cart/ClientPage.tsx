@@ -78,6 +78,7 @@ export default function Cart() {
       selectedItems.includes(item.id)
     );
     localStorage.setItem("checkoutItems", JSON.stringify(selectedProducts));
+    localStorage.setItem("cartOrder", "true");
 
     router.push("/orders/payment");
   };

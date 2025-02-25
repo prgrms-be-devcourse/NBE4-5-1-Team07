@@ -177,6 +177,7 @@ export default function ClientPage({ id }: { id: number }) {
     ];
 
     localStorage.setItem("checkoutItems", JSON.stringify(checkoutItems));
+    localStorage.removeItem("cartOrder");
 
     // 결제 페이지로 이동
     router.push("/orders/payment");
