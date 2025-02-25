@@ -1,30 +1,27 @@
 package com.coffeebean.domain.user.user.service;
 
-import com.coffeebean.domain.user.pointHitstory.PointHistoryDto;
-import com.coffeebean.domain.user.pointHitstory.entity.PointHistory;
-import com.coffeebean.domain.user.user.dto.SignupReqBody;
-import com.coffeebean.domain.user.user.enitity.User;
-import com.coffeebean.domain.user.user.repository.UserRepository;
-import com.coffeebean.global.exception.ServiceException;
-import com.coffeebean.global.exception.DataNotFoundException;
-import com.coffeebean.global.util.JwtUtil;
-
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.RequiredArgsConstructor;
-
-import lombok.extern.slf4j.Slf4j;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import com.coffeebean.domain.user.pointHitstory.PointHistoryDto;
+import com.coffeebean.domain.user.pointHitstory.entity.PointHistory;
+import com.coffeebean.domain.user.user.dto.SignupReqBody;
+import com.coffeebean.domain.user.user.enitity.User;
+import com.coffeebean.domain.user.user.repository.UserRepository;
+import com.coffeebean.global.exception.DataNotFoundException;
+import com.coffeebean.global.exception.ServiceException;
+import com.coffeebean.global.util.JwtUtil;
+
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -175,7 +172,7 @@ public class UserService {
 	// 적립금을 사용하고 적립금 사용 내역을 저장
 	@Transactional
 	public void usePoint(User user, int point, String description) {
-		if (user.isTotalPointAvailable(point)) {
+		if (!user.isTotalPointAvailable(point)) {
 			throw new ServiceException("400-5", "적립금이 부족합니다.");
 		}
 		// 적립금 사용
