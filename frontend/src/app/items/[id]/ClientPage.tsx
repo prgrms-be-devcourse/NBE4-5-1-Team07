@@ -39,6 +39,13 @@ interface QuestionDto {
   answer: AnswerDto | null;
 }
 
+interface ReviewDto {
+  reviewId: number;
+  content: string;
+  rating: number;
+  createDate: string;
+}
+
 export default function ClientPage({ id }: { id: number }) {
   const [item, setItem] = useState<ItemDto | null>(null);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
@@ -50,6 +57,7 @@ export default function ClientPage({ id }: { id: number }) {
   >("info"); // 선택된 탭 상태
   const [questions, setQuestions] = useState<QuestionDto[]>([]);
   const router = useRouter();
+  const [reviews, setReviews] = useState<ReviewDto[]>([]);
 
   useEffect(() => {
     setLoading(true);
@@ -86,6 +94,25 @@ export default function ClientPage({ id }: { id: number }) {
         .catch((error) => {
           console.error("Error fetching questions:", error);
           setError("질문 목록을 불러올 수 없습니다.");
+        });
+    }
+  }, [id, selectedTab]);
+
+  useEffect(() => {
+    if (selectedTab === "review") {
+      fetch(`http://localhost:8080/api/v1/items/${id}/reviews`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("리뷰를 불러오는 데 실패했습니다.");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setReviews(data.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching reviews:", error);
+          setError("리뷰를 불러올 수 없습니다.");
         });
     }
   }, [id, selectedTab]);
@@ -199,10 +226,9 @@ export default function ClientPage({ id }: { id: number }) {
             height={300}
           />
         </div>
-        <div className="border-l-2 border-blue-300 p-6 w-[50vw] h-[70vh] flex flex-col justify-around gap-4 font-bold text-2xl">
+        <div className="border-l-2 border-gray-500 p-6 w-[50vw] h-[70vh] flex flex-col justify-around gap-4 font-bold text-2xl">
           <div>
             {item.name} <br />
-            리뷰 몇개
           </div>
           <hr className="border-2 border-black" />
           <div>가격 : {item.price} </div>
@@ -291,14 +317,48 @@ export default function ClientPage({ id }: { id: number }) {
       <div className="p-6">
         {selectedTab === "info" && (
           <div className="text-2xl h-[50vh]">
-            <h2>상품 정보</h2>
+            <h2 className="font-bold">상품 정보</h2> <br />
             <div dangerouslySetInnerHTML={{ __html: item.description }} />
           </div>
         )}
         {selectedTab === "review" && (
           <div className="text-2xl h-[50vh]">
-            <h2>리뷰</h2>
-            <p>여기에 리뷰 목록이 들어갑니다.</p>
+            <h2 className="font-bold">리뷰 {reviews.length}개</h2> <br />
+            {reviews.length > 0 ? (
+              <ul>
+                {reviews.map((review) => (
+                  <li
+                    key={review.reviewId}
+                    className="p-4 border rounded-lg shadow"
+                  >
+                    <p className="text-lg font-semibold">"{review.content}"</p>
+                    <div className="flex items-center">
+                      {/* 별을 표시하는 부분 */}
+                      {[...Array(5)].map((_, index) => (
+                        <svg
+                          key={index}
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill={index < review.rating ? "yellow" : "gray"} // rating 값에 맞춰 색 변경
+                          className="mr-1"
+                        >
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                      ))}
+                      {review.rating}/5
+                    </div>
+                    {/* <p className="text-yellow-500">⭐ {review.rating} / 5</p> */}
+                    <p className="text-sm text-gray-500">
+                      작성일: {new Date(review.createDate).toLocaleString()}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>등록된 리뷰가 없습니다.</p>
+            )}
           </div>
         )}
         {selectedTab === "question" && (
