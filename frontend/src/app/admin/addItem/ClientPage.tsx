@@ -9,6 +9,7 @@ export default function ClientPage() {
     price: "",
     stockQuantity: "",
     description: "",
+    image: null as File | null, // 이미지 파일 추가
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,6 +18,13 @@ export default function ClientPage() {
   // 입력 값 변경 핸들러
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  // 이미지 파일 변경 핸들러
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setForm({ ...form, image: e.target.files[0] });
+    }
   };
 
   // 상품 등록 요청
@@ -33,11 +41,21 @@ export default function ClientPage() {
       description: form.description,
     };
 
+    const formData = new FormData();
+    formData.append("name", formattedData.name);
+    formData.append("price", String(formattedData.price));
+    formData.append("stockQuantity", String(formattedData.stockQuantity));
+    formData.append("description", formattedData.description);
+
+    // 이미지 파일이 선택되었으면 FormData에 추가
+    if (form.image) {
+      formData.append("image", form.image);
+    }
+
     try {
       const response = await fetch("http://localhost:8080/api/v1/items", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formattedData),
+        body: formData,
         credentials: "include",
       });
 
@@ -48,7 +66,13 @@ export default function ClientPage() {
       alert("상품이 성공적으로 등록되었습니다!");
 
       // 입력 필드 초기화 후 목록 페이지로 이동
-      setForm({ name: "", price: "", stockQuantity: "", description: "" });
+      setForm({
+        name: "",
+        price: "",
+        stockQuantity: "",
+        description: "",
+        image: null,
+      });
       router.push("/admin/modifyItems");
     } catch (error) {
       console.error("상품 등록 중 오류 발생:", error);
@@ -99,6 +123,16 @@ export default function ClientPage() {
           className="border p-3 rounded"
           required
         />
+
+        {/* 이미지 첨부 칸 */}
+        <input
+          type="file"
+          name="image"
+          onChange={handleImageChange}
+          className="border p-3 rounded"
+          accept="image/*" // 이미지 파일만 허용
+        />
+
         {error && <p className="text-red-500">{error}</p>}
         <button
           type="submit"

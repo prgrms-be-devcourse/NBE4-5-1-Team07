@@ -11,6 +11,7 @@ interface ItemDto {
   price: number;
   stockQuantity: number;
   description: string;
+  imageUrl: string;
 }
 
 // NoticeDto 객체 인터페이스 정의
@@ -149,11 +150,33 @@ export default function ItemsPage() {
           <ul className="grid grid-cols-4 gap-6 px-4 w-11/12 mx-auto">
             {items.map((item) => (
               <Link href={`/items/${item.id}`} key={item.id}>
-                <li className="border-2 border-gray-400 p-2 rounded-2xl  h-[200px] hover:bg-gray-100 flex flex-col items-center justify-center">
-                  <div>상품번호-{item.id}.</div>
-                  <div> 상품명-{item.name}</div>
-                  <div> 가격-{item.price}원</div>
-                  <div>재고수량-{item.stockQuantity}</div>
+                <li className="border-2 border-gray-300 p-4 rounded-2xl h-[300px] hover:bg-gray-50 flex flex-col items-center justify-between relative">
+                  {/* 상품 이미지 */}
+                  <img
+                    src={item.imageUrl}
+                    alt={item.name}
+                    className="w-full h-48 object-cover rounded-lg mb-4 shadow-lg"
+                  />
+
+                  <div className="flex flex-col items-center text-center space-y-2 w-full">
+                    <div className="text-lg font-bold text-black-900">
+                      {item.name}
+                    </div>
+                    <div className="text-gray-600">{item.price}원</div>
+
+                    {/* 품절 상태 */}
+                    {item.stockQuantity === 0 && (
+                      <div className="absolute top-2 right-2 bg-red-500 text-white text-sm font-semibold px-2 py-1 rounded-md">
+                        품절
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute bottom-4 left-4 text-sm text-gray-600">
+                    No. {item.id}
+                  </div>
+                  <div className="absolute bottom-4 right-4 text-sm text-gray-600">
+                    {item.stockQuantity}개 남음
+                  </div>
                 </li>
               </Link>
             ))}

@@ -153,7 +153,7 @@ export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
       <h1 className="text-xl font-bold mb-4">상품 변경</h1>
       <div className="border rounded p-4">
         {item.imageUrl && (
-          <Image
+          <img
             src={item.imageUrl}
             alt={item.name}
             width={128}

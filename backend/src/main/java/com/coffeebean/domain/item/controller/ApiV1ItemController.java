@@ -23,7 +23,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -35,28 +40,37 @@ public class ApiV1ItemController {
     private final ItemService itemService;
     private final QuestionService questionService;
 
-
-    record AddReqBody(
-            @NotBlank(message = "상품명을 입력하세요")
-            String name,
-            @NotNull(message = "가격을 입력하세요")
-            @Min(value = 1, message = "가격은 1 이상이어야 합니다.")
-            int price,
-            int stockQuantity,
-            String description
-    ) {
-    }
-
-    // 상품 등록
+    // 상품 등록 (선택적 이미지 파일 업로드)
     @AdminOnly
     @PostMapping
-    public RsData<Item> addItem(@RequestBody @Valid AddReqBody reqBody) {
-        Item item = itemService.addItem(reqBody.name(), reqBody.price(), reqBody.stockQuantity(), reqBody.description());
+    public RsData<Item> addItem(@NotBlank(message = "상품명을 입력하세요") @RequestParam("name") String name,
+        @NotNull(message = "가격을 입력하세요") @Min(value = 1, message = "가격은 1 이상이어야 합니다.") @RequestParam("price") int price,
+        @RequestParam("stockQuantity") int stockQuantity,
+        @RequestParam("description") String description,
+        @RequestParam("image") MultipartFile image) throws IOException {
+
+        String fileName = null;
+
+        if (!image.isEmpty()) {
+            String uploadDir = "src/main/resources/static/";
+            File uploadDirFile = new File(uploadDir);
+
+            if (!uploadDirFile.exists()) {
+                uploadDirFile.mkdirs();
+            }
+
+            fileName = image.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir + fileName);
+
+            image.transferTo(filePath);
+        }
+
+        Item item = itemService.addItem(name, price, stockQuantity, description, fileName);
 
         return new RsData<>(
-                "200-1",
-                "'%s' 상품이 정상적으로 등록되었습니니다.".formatted(item.getName()),
-                item
+            "200-1",
+            "'%s' 상품이 정상적으로 등록되었습니다.".formatted(item.getName()),
+            item
         );
     }
 
