@@ -119,6 +119,18 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/orders/list")
+    public RsData<OrderListResponseDto> getOrderList() {
+        List<OrderListDto> orders = orderService.getAllOrder();
+
+        return new RsData<>(
+                "200-1",
+                "주문 전체 조회 완료",
+                new OrderListResponseDto(orders)
+        );
+    }
+}
+
     // 관리자 - 주문 전체 조회
     @AdminOnly
     @GetMapping("/orders/list")
