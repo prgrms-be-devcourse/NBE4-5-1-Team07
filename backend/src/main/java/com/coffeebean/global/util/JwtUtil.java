@@ -1,15 +1,5 @@
 package com.coffeebean.global.util;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseCookie;
-import org.springframework.stereotype.Component;
-
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
@@ -17,6 +7,17 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.crypto.SecretKey;
+
+import org.springframework.http.ResponseCookie;
+import org.springframework.stereotype.Component;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -31,11 +32,11 @@ public class JwtUtil {
         Date expiration = new Date(issuedAt.getTime() + EXPIRATION_TIME);
 
         return Jwts.builder()
-                .setClaims(claims) // 추가적인 claims 포함
-                .setIssuedAt(issuedAt)
-                .setExpiration(expiration)
-                .signWith(secretKey, SignatureAlgorithm.HS256)
-                .compact();
+            .setClaims(claims) // 추가적인 claims 포함
+            .setIssuedAt(issuedAt)
+            .setExpiration(expiration)
+            .signWith(secretKey, SignatureAlgorithm.HS256)
+            .compact();
     }
 
     // JWT 유효성 검사
@@ -44,9 +45,9 @@ public class JwtUtil {
             SecretKey secretKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
             Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parse(token);
+                .verifyWith(secretKey)
+                .build()
+                .parse(token);
 
             return true;
         } catch (Exception e) {
@@ -59,21 +60,21 @@ public class JwtUtil {
         SecretKey secretKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
         return (Map<String, Object>) Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parse(token)
-                .getPayload();
+            .verifyWith(secretKey)
+            .build()
+            .parse(token)
+            .getPayload();
     }
 
     // JWT를 쿠키에 저장
     public static void setJwtCookie(String jwt, HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("token", jwt)
-                .httpOnly(true)  // 클라이언트에서 JS로 접근 불가
-                .path("/")       // 모든 경로에서 사용 가능
-                .sameSite("None") // SameSite 설정 (CSRF 방어)
-                .maxAge(Duration.ofDays(1))
-                .secure(true)
-                .build();
+            .httpOnly(true)  // 클라이언트에서 JS로 접근 불가
+            .path("/")       // 모든 경로에서 사용 가능
+            .sameSite("Strict") // SameSite 설정 (CSRF 방어)
+            .maxAge(Duration.ofDays(1))
+            .secure(true)
+            .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
     }
@@ -83,15 +84,15 @@ public class JwtUtil {
         Cookie[] cookies = request.getCookies();
 
         if (cookies == null || cookies.length == 0) { // 쿠키가 없을 경우
-            throw new SecurityException("로그인이 필요합니다: 요청에 쿠키가 없습니다.");
+            return Optional.empty();
         }
 
         Arrays.stream(cookies)
-                .forEach(cookie -> log.info("Cookie Name: {}, Value: {}", cookie.getName(), cookie.getValue()));
+            .forEach(cookie -> log.info("Cookie Name: {}, Value: {}", cookie.getName(), cookie.getValue()));
 
         return Arrays.stream(cookies)
-                .filter(cookie -> "token".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst();
+            .filter(cookie -> "token".equals(cookie.getName()))
+            .map(Cookie::getValue)
+            .findFirst();
     }
 }

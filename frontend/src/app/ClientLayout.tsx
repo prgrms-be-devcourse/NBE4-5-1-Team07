@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import {
   Menubar,
@@ -22,9 +23,33 @@ export default function ClientLayout({
   fontVariable: string;
   fontClassName: string;
 }>) {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
   const pathname = usePathname(); // 현재 경로를 가져옵니다
   const isAdminPage = pathname.startsWith("/admin"); // 관리자 페이지 확인
+
+  // 로그인 상태 확인
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/my/info", {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await res.json();
+
+        if (res.ok && data.code === "200-1") {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+        }
+      } catch (error) {
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -40,6 +65,8 @@ export default function ClientLayout({
         throw new Error("로그아웃 실패");
       }
 
+      setIsLoggedIn(false); // 메뉴 표시를 바꾸기 위해 상태 변경
+
       // ✅ 클라이언트에서 쿠키 삭제
       document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
@@ -48,6 +75,7 @@ export default function ClientLayout({
 
       alert("로그아웃 되었습니다.");
       router.push("/"); // ✅ 기본 메인 페이지로 이동
+      router.refresh();
     } catch (error) {
       console.error("🔴 로그아웃 중 오류 발생:", error);
       alert("로그아웃 실패");
@@ -73,35 +101,45 @@ export default function ClientLayout({
               </Link>
             </div>
             <Menubar>
-              <MenubarMenu>
-                <MenubarTrigger>
-                  <Link href="/user/login">로그인</Link>
-                </MenubarTrigger>
-              </MenubarMenu>
-              <MenubarMenu>
-                <MenubarTrigger>
-                  <Link href="/user/signup">회원가입</Link>
-                </MenubarTrigger>
-              </MenubarMenu>
-              <MenubarMenu>
-                <MenubarTrigger onClick={handleLogout}>로그아웃</MenubarTrigger>
-              </MenubarMenu>
-              <MenubarMenu>
-                <MenubarTrigger>My Page</MenubarTrigger>
-                <MenubarContent>
-                  <MenubarItem>
-                    <Link href="/my/home">My Page</Link>
-                  </MenubarItem>
-                  <MenubarSeparator />
-                  <MenubarItem>
-                    <Link href="/my/orders">주문 조회</Link>
-                  </MenubarItem>
-                  <MenubarSeparator />
-                  <MenubarItem>
-                    <Link href="/my/review">리뷰 조회</Link>
-                  </MenubarItem>
-                </MenubarContent>
-              </MenubarMenu>
+              {!isLoggedIn && (
+                <MenubarMenu>
+                  <MenubarTrigger>
+                    <Link href="/user/login">로그인</Link>
+                  </MenubarTrigger>
+                </MenubarMenu>
+              )}
+              {!isLoggedIn && (
+                <MenubarMenu>
+                  <MenubarTrigger>
+                    <Link href="/user/signup">회원가입</Link>
+                  </MenubarTrigger>
+                </MenubarMenu>
+              )}
+              {isLoggedIn && (
+                <MenubarMenu>
+                  <MenubarTrigger onClick={handleLogout}>
+                    로그아웃
+                  </MenubarTrigger>
+                </MenubarMenu>
+              )}
+              {isLoggedIn && (
+                <MenubarMenu>
+                  <MenubarTrigger>My Page</MenubarTrigger>
+                  <MenubarContent>
+                    <MenubarItem>
+                      <Link href="/my/home">My Page</Link>
+                    </MenubarItem>
+                    <MenubarSeparator />
+                    <MenubarItem>
+                      <Link href="/my/orders">주문 조회</Link>
+                    </MenubarItem>
+                    <MenubarSeparator />
+                    <MenubarItem>
+                      <Link href="/my/review">리뷰 조회</Link>
+                    </MenubarItem>
+                  </MenubarContent>
+                </MenubarMenu>
+              )}
               <MenubarMenu>
                 <MenubarTrigger>
                   <Link href="/cart">장바구니</Link>
