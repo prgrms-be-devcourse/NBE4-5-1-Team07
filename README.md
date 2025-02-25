@@ -66,7 +66,30 @@
 
 
 # 🛠️ Tech
-## 
+## 기술 스택
+### 언어
+- JAVA   23
+- TypeScript
+
+### 프레임워크 및 라이브러리
+- Spring   3.4.2
+- Spring  Security
+- React   19.0.0
+- Next.js   15.1.7
+- ShadCN/UI
+  
+### IED 및 개발 도구
+- IntelliJ IDEA
+- Visual Studio Code
+
+### 버전 관리 및 협업 도구
+- Git
+- GitHub
+- Slack
+- Notion
+
+## UML
+![image](https://github.com/user-attachments/assets/621c2429-04f2-4f0c-bf84-0df7d1dde2f7)
 
 ## ERD
 ![Blue White Illustration Group Project Presentation ](https://github.com/user-attachments/assets/a95a0bdf-385c-44d2-8421-2140e5e187fe)
@@ -87,7 +110,8 @@
 - Review가 완료되고, 피드백이 모두 반영돠면 해당 ```feature```브랜치를 ```main```브랜치로 **Merge**합니다.
 ![image](https://github.com/user-attachments/assets/6eb191d6-d686-4e25-a383-6338d02675fc)
 
-  
+## API 명세서
+[API 명세서](https://peaceful-acorn-daf.notion.site/API-193d9ae0b864813fa94aea1a6645edbf?pvs=4)
 <br/>
 <br/>
 
