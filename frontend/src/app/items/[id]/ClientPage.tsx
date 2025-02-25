@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -13,6 +12,7 @@ interface ItemDto {
   price: number;
   stockQuantity: number;
   description: string;
+  imageUrl: string;
 }
 
 interface CartItem {
@@ -188,12 +188,13 @@ export default function ClientPage({ id }: { id: number }) {
   if (!item)
     return <div className="text-center p-6">상품 정보를 찾을 수 없습니다.</div>;
 
+  console.log(item.imageUrl);
   return (
     <>
       <div className="flex flex-row gap-4 justify-center py-4">
         <div className="p-2 rounded-2xl w-[50vw] h-[70vh] flex justify-center items-center">
-          <Image
-            src="/images/columbia.jpg" // public 폴더 기준 경로
+          <img
+            src={item.imageUrl} // 이미지 URL
             alt="커피빈 로고"
             width={500}
             height={300}
