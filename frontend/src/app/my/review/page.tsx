@@ -3,7 +3,7 @@
 import {useState, useEffect} from "react";
 import {motion} from "framer-motion";
 import {PencilIcon, TrashIcon} from "@heroicons/react/24/solid";
-import { Rating } from '@smastrom/react-rating';
+import {Rating} from '@smastrom/react-rating';
 
 // 리뷰 내역 간단 조회 DTO
 interface ReviewDetailDto {
@@ -68,6 +68,11 @@ export default function ReviewsPage() {
         setReviewRating(1); // 별점 초기화
     };
 
+    // 별점 변경 핸들러
+    const handleRatingChange = (rate: number) => {
+        setTempRating(rate / 20); // 라이브러리는 0~100 범위를 반환하므로 1~5로 변환
+    };
+
     // API 요청 함수
     const fetchData = async () => {
         try {
@@ -87,9 +92,20 @@ export default function ReviewsPage() {
                 },
             });
 
-            if (!response.ok) throw new Error("데이터를 불러오는 데 실패했습니다.");
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error("요청한 데이터를 찾을 수 없습니다.");
+                } else if (response.status === 500) {
+                    throw new Error("서버에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
+                } else {
+                    throw new Error("데이터를 불러오는 데 실패했습니다.");
+                }
+            }
 
-            const data = await response.json();
+            // 응답 본문이 비어 있는 경우 처리
+            const text = await response.text(); // 응답을 텍스트로 가져옴
+            const data = text ? JSON.parse(text) : []; // 비어 있으면 빈 배열로
+
             if (activeTab === "pending") {
                 setPendingReviews(data);
             } else {
@@ -102,7 +118,7 @@ export default function ReviewsPage() {
         }
     };
 
-    // 탭 변경 시 데이터 가져오기
+// 탭 변경 시 데이터 가져오기
     useEffect(() => {
         fetchData();
     }, [activeTab]);
@@ -177,7 +193,6 @@ export default function ReviewsPage() {
         setEditingReviewId(null);
         setTempContent("");
         setTempRating(1);
-        setTempFile(null); // 파일 초기화
     };
 
     const updateReview = async (reviewId: number) => {
@@ -200,7 +215,12 @@ export default function ReviewsPage() {
             setWrittenReviews(prev =>
                 prev.map(review =>
                     review.reviewId === reviewId
-                        ? {...review, content: tempContent, rating: tempRating, imageUrl: tempFile ? URL.createObjectURL(tempFile) : review.imageUrl}
+                        ? {
+                            ...review,
+                            content: tempContent,
+                            rating: tempRating,
+                            imageUrl: tempFile ? URL.createObjectURL(tempFile) : review.imageUrl
+                        }
                         : review
                 )
             );
@@ -230,6 +250,7 @@ export default function ReviewsPage() {
     };
 
     return (
+
         <div className="max-w-4xl mx-auto px-4 py-8">
             {/* 탭 전환 */}
             <motion.div
@@ -314,7 +335,8 @@ export default function ReviewsPage() {
                                             alt={item.itemName}
                                             className="rounded-lg object-cover"
                                         />*/}
-                                        <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <div
+                                            className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
                                             <span className="text-xs text-gray-400">상품 이미지</span>
                                         </div>
 
@@ -332,7 +354,8 @@ export default function ReviewsPage() {
                                                 })}
                                                 </p>
                                                 <p className="text-sm text-blue-600 font-medium">
-                                                    리뷰 작성 기한: {new Date( new Date(item.orderDate).getTime() + (9 * 24 * 60 * 60 * 1000)).toLocaleDateString('ko-KR', {
+                                                    리뷰 작성
+                                                    기한: {new Date(new Date(item.orderDate).getTime() + (9 * 24 * 60 * 60 * 1000)).toLocaleDateString('ko-KR', {
                                                     year: 'numeric',
                                                     month: 'long',
                                                     day: 'numeric'
@@ -402,7 +425,8 @@ export default function ReviewsPage() {
                                         items={5}
                                         className="w-full h-8 [&>svg]:w-10 [&>svg]:h-10"
                                         itemStyles={{
-                                            itemShapes: <path d="M12 2L14.5 8H21L16 12L18 18L12 15L6 18L8 12L3 8H9.5L12 2Z" />,
+                                            itemShapes: <path
+                                                d="M12 2L14.5 8H21L16 12L18 18L12 15L6 18L8 12L3 8H9.5L12 2Z"/>,
                                             activeFillColor: '#f59e0b',
                                             inactiveFillColor: '#e5e7eb',
                                         }}
@@ -430,108 +454,181 @@ export default function ReviewsPage() {
 
 
                     {activeTab === "written" && (
-                        <motion.div className="space-y-4">
-                            {writtenReviews.map(review => (
-                                <div key={review.reviewId} className="p-4 border rounded-lg hover:bg-gray-50 group">
-                                    {editingReviewId === review.reviewId ? (
-                                        // 수정 모드 UI
-                                        <div className="space-y-4">
-                                            {/* 텍스트 입력 */}
-                                            <textarea
-                                                value={tempContent}
-                                                onChange={(e) => setTempContent(e.target.value)}
-                                                className="w-full border rounded p-2 mb-2"
-                                                rows={3}
-                                            />
+                        <>
+                            {/* 작성된 리뷰가 없는 경우 */}
+                            {writtenReviews.length === 0 && !error && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="text-center space-y-6"
+                                >
+                                    <h2 className="text-xl font-bold text-gray-800">작성한 리뷰가 없습니다</h2>
+                                    <p className="text-gray-600">
+                                        상품을 구매하고 리뷰를 작성해 보세요! 😊
+                                    </p>
+                                    <button
+                                        onClick={() => (window.location.href = "/")} // 메인 페이지로 이동
+                                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-lg"
+                                    >
+                                        메인 페이지로 이동하기
+                                    </button>
+                                </motion.div>
+                            )}
 
-                                            {/* 별점 선택 */}
-                                            <select
-                                                value={tempRating}
-                                                onChange={(e) => setTempRating(Number(e.target.value))}
-                                                className="w-full border rounded p-2 mb-2"
-                                            >
-                                                {[1, 2, 3, 4, 5].map(rating => (
-                                                    <option key={rating} value={rating}>{rating}점</option>
-                                                ))}
-                                            </select>
+                            {/* 오류 발생 시 */}
+                            {error && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="text-center space-y-6"
+                                >
+                                    <h2 className="text-xl font-bold text-red-600">오류가 발생했습니다</h2>
+                                    <p className="text-gray-600">{error}</p>
+                                    <button
+                                        onClick={fetchData} // 다시 시도 버튼
+                                        className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all shadow-lg"
+                                    >
+                                        다시 시도하기
+                                    </button>
+                                </motion.div>
+                            )}
 
-                                            {/* 이미지 업로드 */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">이미지 변경</label>
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={(e) => setTempFile(e.target.files?.[0] || null)}
-                                                    className="block w-full text-sm text-gray-500"
-                                                />
-                                                {tempFile && (
-                                                    <img
-                                                        src={URL.createObjectURL(tempFile)}
-                                                        alt="미리보기"
-                                                        className="mt-2 max-h-40 object-cover rounded border"
+                            {/* 작성된 리뷰 목록 */}
+                            {!loading && !error && writtenReviews.length > 0 && (
+                                <motion.div className="space-y-6">
+                                    {writtenReviews.map((review) => (
+                                        <div key={review.reviewId}
+                                             className="p-4 border rounded-lg hover:shadow-md transition">
+                                            {editingReviewId === review.reviewId ? (
+                                                // 수정 모드
+                                                <div className="space-y-6">
+                                                    {/* 이미지 업로드 */}
+                                                    <div
+                                                        className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={(e) => setTempFile(e.target.files?.[0] || null)}
+                                                            className="hidden"
+                                                            id={`fileInput-${review.reviewId}`}
+                                                        />
+                                                        <label
+                                                            htmlFor={`fileInput-${review.reviewId}`}
+                                                            className="block w-full px-4 py-2 text-sm text-center text-gray-600 bg-gray-50 rounded-md cursor-pointer hover:bg-gray-100 transition"
+                                                        >
+                                                            {tempFile ? "새 이미지 선택" : "이미지 변경"}
+                                                        </label>
+                                                        {tempFile ? (
+                                                            <img
+                                                                src={URL.createObjectURL(tempFile)}
+                                                                alt="새 이미지 미리보기"
+                                                                className="mt-4 h-48 w-full object-cover rounded-lg border"
+                                                            />
+                                                        ) : review.imageUrl ? (
+                                                            <img
+                                                                src={review.imageUrl}
+                                                                alt="현재 이미지"
+                                                                className="mt-4 h-48 w-full object-cover rounded-lg border"
+                                                            />
+                                                        ) : null}
+                                                    </div>
+
+                                                    {/* 리뷰 내용 입력 */}
+                                                    <textarea
+                                                        value={tempContent}
+                                                        onChange={(e) => setTempContent(e.target.value)}
+                                                        className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-transparent text-sm"
+                                                        rows={5}
+                                                        placeholder="리뷰 내용을 작성해주세요"
                                                     />
-                                                )}
-                                            </div>
 
-                                            {/* 버튼 */}
-                                            <div className="flex justify-end space-x-2">
-                                                <button
-                                                    onClick={cancelEditing}
-                                                    className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                                                >
-                                                    취소
-                                                </button>
-                                                <button
-                                                    onClick={() => updateReview(review.reviewId)}
-                                                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                                                >
-                                                    저장
-                                                </button>
-                                            </div>
+                                                    {/* 별점 선택 */}
+                                                    <div className="flex flex-col items-center mt-6">
+                                                        <label
+                                                            className="block text-sm font-medium text-gray-700 mb-2">별점</label>
+                                                        <Rating
+                                                            value={tempRating}
+                                                            onChange={setTempRating}
+                                                            items={5}
+                                                            className="[&>svg]:w-3 [&>svg]:h-3" // 별 크기를 12px로 축소
+                                                            itemStyles={{
+                                                                itemShapes: (
+                                                                    <path
+                                                                        d="M12 2L14.5 8H21L16 12L18 18L12 15L6 18L8 12L3 8H9.5L12 2Z"/>
+                                                                ),
+                                                                activeFillColor: "#f59e0b",
+                                                                inactiveFillColor: "#e5e7eb",
+                                                                itemSpacing: "0.15rem", // 간격 축소
+                                                            }}
+                                                        />
+                                                    </div>
+
+                                                    {/* 버튼 그룹 */}
+                                                    <div className="flex justify-end gap-3">
+                                                        <button
+                                                            onClick={cancelEditing}
+                                                            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                                                        >
+                                                            취소하기
+                                                        </button>
+                                                        <button
+                                                            onClick={() => updateReview(review.reviewId)}
+                                                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                                        >
+                                                            저장하기
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                // 보기 모드
+                                                <div className="flex items-start gap-6">
+                                                    {/* 이미지 영역 */}
+                                                    {review.imageUrl && (
+                                                        <img
+                                                            src={review.imageUrl}
+                                                            alt="리뷰 이미지"
+                                                            className="w-[120px] h-[120px] object-cover rounded-lg border" // 기본 보기 모드에서 이미지 크기 확대
+                                                        />
+                                                    )}
+
+                                                    {/* 텍스트 및 별점 영역 */}
+                                                    <div className="flex flex-col flex-grow space-y-2">
+                                                        <p className="text-gray-900 text-base">{review.content}</p>
+                                                        <div className="flex items-center gap-2">
+                                                            {/* 별점 텍스트로 표시 */}
+                                                            <span
+                                                                className="text-yellow-500 font-semibold">{review.rating}점</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* 수정/삭제 버튼 */}
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => startEditing(review)}
+                                                            className="p-2 text-blue-600 hover:text-blue-700"
+                                                        >
+                                                            <PencilIcon className="w-5 h-5"/>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => deleteReview(review)}
+                                                            className="p-2 text-red-600 hover:text-red-700"
+                                                        >
+                                                            <TrashIcon className="w-5 h-5"/>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    ) : (
-                                        // 기본 보기 모드
-                                        <div className="flex justify-between items-center">
-                                            <div>
-                                                {/* 기존 텍스트 정보 */}
-                                                <h3 className="font-medium">{review.content}</h3>
-                                                <p className="text-sm text-gray-500">
-                                                    ⭐ {review.rating} • {new Date(review.createDate).toLocaleDateString()}
-                                                </p>
-
-                                                {/* 이미지 표시 */}
-                                                {review.imageUrl && (
-                                                    <img
-                                                        src={review.imageUrl}
-                                                        alt="리뷰 이미지"
-                                                        className="mt-2 max-h-40 object-cover rounded border"
-                                                    />
-                                                )}
-                                            </div>
-
-                                            {/* 버튼 영역 */}
-                                            <div className="flex space-x-2">
-                                                <button
-                                                    onClick={() => startEditing(review)}
-                                                    className="p-2 text-yellow-600 hover:text-yellow-700"
-                                                >
-                                                    <PencilIcon className="w-5 h-5"/>
-                                                </button>
-                                                <button
-                                                    onClick={() => deleteReview(review)}
-                                                    className="p-2 text-red-600 hover:text-red-700"
-                                                >
-                                                    <TrashIcon className="w-5 h-5"/>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </motion.div>
+                                    ))}
+                                </motion.div>
+                            )}
+                        </>
                     )}
-                </>
-            )}
+                </>)
+            }
         </div>
-    );
+    )
 }
+
