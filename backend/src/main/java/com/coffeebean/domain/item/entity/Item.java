@@ -1,5 +1,7 @@
 package com.coffeebean.domain.item.entity;
 
+import java.net.URI;
+
 import com.coffeebean.global.exception.ServiceException;
 
 import jakarta.persistence.Column;
@@ -8,7 +10,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -28,6 +35,8 @@ public class Item {
 	private int price;    // 상품 가격
 
 	private int stockQuantity;    // 상품 수량
+
+	private String imageUrl; // 상품 이미지
 
 	@Lob
 	@Column(columnDefinition = "TEXT")

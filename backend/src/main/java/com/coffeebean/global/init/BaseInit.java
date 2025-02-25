@@ -1,5 +1,7 @@
 package com.coffeebean.global.init;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.List;
 
 import com.coffeebean.domain.cart.cart.entity.Cart;
@@ -96,6 +98,7 @@ public class BaseInit {
 							"이 제품은 사상 최대로 팔렸으며 지금도 월드 레코드를 갱신해 나가는 중입니다.<br>" +
 							"상품번호는 " + i + "입니다.<br>" +
 							"상품 문의는 문의사항에서 질문해주세요")
+						.imageUrl("http://localhost:8080/%d.webp".formatted(i))
 						.name(i + "상품")
 						.build());
 				}
