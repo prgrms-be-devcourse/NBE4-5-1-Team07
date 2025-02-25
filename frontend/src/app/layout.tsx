@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import ClinetLayout from "./ClientLayout";
 import localFont from "next/font/local";
+import '@smastrom/react-rating/style.css'
 
 export const metadata: Metadata = {
   title: "Create Next App",
