@@ -21,6 +21,8 @@ public class OrderCreateRequest {
 	private AddressBody address;
 	@NotBlank(message = "이메일은 필수입니다.") @Email(message = "잘못된 이메일 형식입니다.")
 	private String email;
+	@Min(value = 0, message = "적립금은 0원 이상이어야 합니다.")
+	private int point;
 	@JsonProperty("cartOrder")
 	private Boolean cartOrder;
 

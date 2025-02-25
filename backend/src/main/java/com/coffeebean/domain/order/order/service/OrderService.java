@@ -1,11 +1,14 @@
 package com.coffeebean.domain.order.order.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.coffeebean.domain.order.order.OrderDetailDto;
 import com.coffeebean.domain.order.order.OrderDto;
+import com.coffeebean.domain.order.order.dto.OrderListDto;
 import com.coffeebean.domain.order.orderItem.entity.OrderItem;
 import com.coffeebean.domain.user.user.service.MailService;
+import com.coffeebean.global.exception.DataNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,12 +98,6 @@ public class OrderService {
      */
 
     // 주문 상세 조회 (단건)
-    public Order getOrderDetail(String email) {
-        return orderRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당 주문을 찾을 수 없습니다."));
-    }
-
-    // 주문 상세 조회 (단건)
     public OrderDetailDto getOrderDetailById(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 주문을 찾을 수 없습니다."));
@@ -180,4 +177,10 @@ public class OrderService {
         }
     }
 
+    // 모든 주문 조회
+    public List<OrderListDto> getAllOrder() {
+        return orderRepository.findAllOrdersWithItems().stream()
+                .map(OrderListDto::new)
+                .toList();
+    }
 }

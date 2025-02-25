@@ -68,4 +68,8 @@ public class User {
 		this.totalPoints -= amount; // 총 포인트 차감
 		this.pointHistories.add(new PointHistory(-amount, "포인트 사용")); // 내역 추가
 	}
+
+	public boolean isTotalPointAvailable(int point) {
+		return point <= totalPoints;
+	}
 }

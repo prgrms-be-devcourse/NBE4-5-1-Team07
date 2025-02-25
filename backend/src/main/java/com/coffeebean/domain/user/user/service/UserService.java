@@ -1,27 +1,28 @@
 package com.coffeebean.domain.user.user.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.coffeebean.domain.user.pointHitstory.PointHistoryDto;
 import com.coffeebean.domain.user.pointHitstory.entity.PointHistory;
 import com.coffeebean.domain.user.user.dto.SignupReqBody;
+import com.coffeebean.domain.user.user.dto.UserDto;
 import com.coffeebean.domain.user.user.enitity.User;
 import com.coffeebean.domain.user.user.repository.UserRepository;
-import com.coffeebean.global.exception.ServiceException;
 import com.coffeebean.global.exception.DataNotFoundException;
+import com.coffeebean.global.exception.ServiceException;
 import com.coffeebean.global.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -105,57 +106,59 @@ public class UserService {
 		return result;
 	}
 
-	public User getUserByAuthToken(String token) {
-		Map<String, Object> payload = JwtUtil.getPayload(token);
-		if (payload == null) {
-			throw new IllegalArgumentException("잘못된 인증 정보입니다.");
-		}
-
-		String email = (String)payload.get("email"); // email
-
-		// 이메일만 담겨있는 User 반환
-		return User.builder()
-			.email(email)
-			.build();
-	}
-
-	public boolean isAdminByAuthToken(String token) {
-		Map<String, Object> payload = JwtUtil.getPayload(token);
-		if (payload == null) {
-			throw new IllegalArgumentException("잘못된 인증 정보입니다.");
-		}
-
-		if (payload.keySet().contains("role")) {
-			String role = (String)payload.get("role");
-			if (role.equals(ADMIN_ROLE)) {
-				return true;
-			}
-		}
-		return false;
-	}
     public Long getUserIdFromEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() ->
                         new DataNotFoundException("존재하지 않는 회원입니다."))
                 .getId();
     }
 
-    @Transactional(readOnly = true)
-    public List<PointHistoryDto> getPointHistories(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new DataNotFoundException("사용자를 찾을 수 없습니다."));
-        log.info("user={}", user);
+	@Transactional(readOnly = true)
+	public List<PointHistoryDto> getPointHistories(Long userId) {
+		User user = userRepository.findById(userId).orElseThrow(() ->
+			new DataNotFoundException("사용자를 찾을 수 없습니다."));
+		log.info("user={}", user);
 
-        User userWithHistories = userRepository.findByIdWithPointHistories(userId).orElse(user);
-        List<PointHistory> pointHistories = userWithHistories.getPointHistories();
-        log.info("pointHistories={}", pointHistories);
+		User userWithHistories = userRepository.findByIdWithPointHistories(userId).orElse(user);
+		List<PointHistory> pointHistories = userWithHistories.getPointHistories();
+		log.info("pointHistories={}", pointHistories);
 
-        if (userWithHistories.getPointHistories().isEmpty()) {
-            throw new DataNotFoundException("포인트 적립 내역이 없습니다.");
-        }
+		if (userWithHistories.getPointHistories().isEmpty()) {
+			throw new DataNotFoundException("포인트 적립 내역이 없습니다.");
+		}
 
-        return pointHistories.stream().map(pointHistory -> new PointHistoryDto(
-                pointHistory.getAmount(),
-                pointHistory.getDescription(),
-                pointHistory.getCreateDate())).toList();
+		return pointHistories.stream().map(pointHistory -> new PointHistoryDto(
+			pointHistory.getAmount(),
+			pointHistory.getDescription(),
+			pointHistory.getCreateDate())).toList();
+	}
+
+	public boolean isPointAvailable(String email, int point) {
+		Optional<User> opActor = userRepository.findByEmail(email);
+		if (opActor.isEmpty()) {
+			return false;
+		}
+		User actor = opActor.get();
+		return actor.isTotalPointAvailable(point);
+	}
+
+	// 적립금을 사용하고 적립금 사용 내역을 저장
+	@Transactional
+	public void usePoint(User user, int point, String description) {
+		if (!user.isTotalPointAvailable(point)) {
+			throw new ServiceException("400-5", "적립금이 부족합니다.");
+		}
+		// 적립금 사용
+		user.setTotalPoints(user.getTotalPoints() - point);
+		// 적립금 사용 내역 추가
+		user.getPointHistories().add(PointHistory.builder()
+			.amount(-point)
+			.description(description)
+			.build());
     }
+
+	@Transactional
+	public UserDto getDetails(String email) {
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new DataNotFoundException("사용자를 찾을 수 없습니다."));
+		return new UserDto(user.getName(), user.getTotalPoints());
+	}
 }
