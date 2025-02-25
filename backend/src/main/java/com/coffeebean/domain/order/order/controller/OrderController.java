@@ -191,7 +191,6 @@ public class OrderController {
     }
 
     // 관리자 - 주문 상세 보기
-    @AdminOnly
     @GetMapping("/orders/list/{id}")
     public RsData<OrderDetailDto> getOrderItem(@PathVariable long id) {
         OrderDetailDto orderDetail = orderService.getOrderDetailById(id);
