@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.coffeebean.domain.user.user.service.UserService;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Transactional
@@ -66,9 +67,11 @@ class ApiV1OrderControllerTest {
 						    "zipcode": "23578"
 						  },
 						  "email": "example@exam.com",
-						  "authToken": "%s"
+						  "cartOrder": false,
+						  "point": 0
 						}
-						""".formatted(authToken).trim().stripIndent())
+						""".trim().stripIndent())
+					.cookie(new Cookie("token", authToken))
 					.contentType(
 						new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
 					)
@@ -112,7 +115,8 @@ class ApiV1OrderControllerTest {
 						    "zipcode": "23578"
 						  },
 						  "email": "example@exam.com",
-						  "authToken": null
+						  "cartOrder": false,
+						  "point": 0
 						}
 						""".trim().stripIndent())
 					.contentType(
