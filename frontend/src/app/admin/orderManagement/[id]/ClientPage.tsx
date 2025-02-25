@@ -33,13 +33,13 @@ export default function OrderDetailPage() {
       setError(null);
       try {
         const response = await fetch(
-          `http://localhost:8080/api/orders/list/${id}`, // ✅ API URL 수정
-          { credentials: "include" } // ✅ 인증된 요청
+          `http://localhost:8080/api/v1/orders/list/${id}`,
+          { credentials: "include" } // 관리자 확인
         );
         if (!response.ok)
           throw new Error("주문 정보를 불러오는 데 실패했습니다.");
         const data = await response.json();
-        setOrder(data.data); // ✅ `data` 내부의 `data` 필드 사용
+        setOrder(data.data);
       } catch (error) {
         setError("주문 정보를 불러오는 중 오류가 발생했습니다.");
       } finally {

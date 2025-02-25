@@ -21,10 +21,13 @@ export default function OrderListPage() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch("http://localhost:8080/api/orders/list", {
-          method: "GET",
-          credentials: "include",
-        });
+        const response = await fetch(
+          "http://localhost:8080/api/v1/orders/list",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
 
         if (!response.ok) {
           throw new Error("주문 목록을 불러오는 데 실패했습니다.");
