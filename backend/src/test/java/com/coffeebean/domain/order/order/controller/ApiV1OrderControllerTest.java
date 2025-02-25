@@ -98,7 +98,7 @@ class ApiV1OrderControllerTest {
 	class PointUse {
 
 		@Test
-		@DisplayName("회원은 적립금이 사용 가능한 경우, 적립금을 사용할 수 있다")
+		@DisplayName("성공 - 회원은 적립금이 사용 가능한 경우, 적립금을 사용할 수 있다")
 		void createOrderByUser_usePoint() throws Exception {
 			ResultActions resultActions = mvc.perform(
 					post("/api/v1/orders")
@@ -146,7 +146,7 @@ class ApiV1OrderControllerTest {
 		}
 
 		@Test
-		@DisplayName("회원이 사용하려는 적립금이 보유 적립금보다 많으면 실패한다")
+		@DisplayName("실패 - 회원이 사용하려는 적립금이 보유 적립금보다 많으면 실패한다")
 		void createOrderByUser_usePoint_fail() throws Exception {
 			ResultActions resultActions = mvc.perform(
 					post("/api/v1/orders")
@@ -173,6 +173,47 @@ class ApiV1OrderControllerTest {
 						}
 						""".trim().stripIndent())
 						.cookie(new Cookie("token", authToken))
+						.contentType(
+							new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+						)
+				)
+				.andDo(print());
+
+			resultActions
+				.andExpect(status().isBadRequest())
+				.andExpect(handler().handlerType(ApiV1OrderController.class))
+				.andExpect(handler().methodName("createOrder"))
+				.andExpect(jsonPath("$.code").value("400-5"))
+				.andExpect(jsonPath("$.msg").value("적립금을 사용할 수 없습니다."));
+		}
+
+		@Test
+		@DisplayName("실패 - 비회원은 적립금을 사용할 수 없다")
+		void createOrderByNonUser_usePoint_fail() throws Exception {
+			ResultActions resultActions = mvc.perform(
+					post("/api/v1/orders")
+						.content("""
+						{
+						  "items": [
+						    {
+						      "id": 1,
+						      "count": 2
+						    },
+						    {
+						      "id": 2,
+						      "count": 3
+						    }
+						  ],
+						  "address": {
+						    "city": "서울",
+						    "street": "원두아파트 100동 1201호",
+						    "zipcode": "23578"
+						  },
+						  "email": "nonuser@exam.com",
+						  "cartOrder": false,
+						  "point": 1000
+						}
+						""".trim().stripIndent())
 						.contentType(
 							new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
 						)
