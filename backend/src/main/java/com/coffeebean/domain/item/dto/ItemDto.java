@@ -18,11 +18,14 @@ public class ItemDto {
 
     private String description; // 상품 설명
 
+    private String imageUrl;
+
     public ItemDto(Item item) {
         this.id = item.getId();
         this.name = item.getName();
         this.price = item.getPrice();
         this.stockQuantity = item.getStockQuantity();
         this.description = item.getDescription();
+        this.imageUrl = item.getImageUrl();
     }
 }
