@@ -82,6 +82,8 @@
 ## System Architecture
 ![image](https://github.com/user-attachments/assets/51b881ad-8acc-47fb-acaf-269dff79be0b)
 
+## Flow Chart
+[🗃️ Flow Chart](https://github.com/prgrms-be-devcourse/NBE4-5-1-Team07/wiki/%F0%9F%97%83%EF%B8%8F-Flow-Chart)
 
 ## 브랜치 전략
 **GitHub Flow** 전략 사용
