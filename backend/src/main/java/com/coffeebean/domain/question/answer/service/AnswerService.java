@@ -39,4 +39,8 @@ public class AnswerService {
 		answer.setContent(content);
 		return answerRepository.save(answer);
 	}
+
+	public Answer findByQuestion(Question question) {
+		return answerRepository.findByQuestion(question);
+	}
 }

@@ -156,7 +156,9 @@ public class ApiV1QuestionController {
 	@PutMapping("/{id}/answers")
 	@Transactional
 	public RsData<Void> modifyAnswer(@PathVariable long id, @RequestBody WriteAnswerReqBody reqBody) {
-		Answer answer = answerService.findByAnswerId(id);
+
+		Question question = questionService.findQuestionById(id);
+		Answer answer = answerService.findByQuestion(question);
 
 		Answer modifyAnswer = answerService.modifyAnswer(answer, reqBody.content());
 
