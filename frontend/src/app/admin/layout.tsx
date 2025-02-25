@@ -88,7 +88,7 @@ export default function AdminLayout({
             </MenubarItem>
             <MenubarSeparator />
             <MenubarItem>
-              <Link href="/admin/reviewByItems">상품별 리뷰</Link>
+              <Link href="/admin/reviewManagement">리뷰 관리</Link>
             </MenubarItem>
           </MenubarContent>
         </MenubarMenu>

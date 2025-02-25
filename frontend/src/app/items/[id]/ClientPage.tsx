@@ -332,24 +332,7 @@ export default function ClientPage({ id }: { id: number }) {
                     className="p-4 border rounded-lg shadow"
                   >
                     <p className="text-lg font-semibold">"{review.content}"</p>
-                    <div className="flex items-center">
-                      {/* 별을 표시하는 부분 */}
-                      {[...Array(5)].map((_, index) => (
-                        <svg
-                          key={index}
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill={index < review.rating ? "yellow" : "gray"} // rating 값에 맞춰 색 변경
-                          className="mr-1"
-                        >
-                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                        </svg>
-                      ))}
-                      {review.rating}/5
-                    </div>
-                    {/* <p className="text-yellow-500">⭐ {review.rating} / 5</p> */}
+                    <p className="text-yellow-500">⭐ {review.rating} / 5</p>
                     <p className="text-sm text-gray-500">
                       작성일: {new Date(review.createDate).toLocaleString()}
                     </p>
