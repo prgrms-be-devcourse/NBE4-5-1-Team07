@@ -153,4 +153,10 @@ public class ReviewService {
 
         reviewRepository.delete(review);
     }
+
+    // 아이템 id로 리뷰 조회
+    @Transactional(readOnly = true)
+    public List<ReviewDetailDto> getReviewsByItemId(Long itemId) {
+        return reviewRepository.findByItemId(itemId);
+    }
 }
