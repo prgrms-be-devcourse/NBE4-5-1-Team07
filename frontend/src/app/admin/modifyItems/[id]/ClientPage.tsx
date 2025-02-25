@@ -67,6 +67,7 @@ export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ ...item, ...editData }),
+          credentials: "include",
         }
       );
 
@@ -91,6 +92,7 @@ export default function ModifyItemClientPage({ itemId }: { itemId: string }) {
         `http://localhost:8080/api/v1/items/${item.id}`,
         {
           method: "DELETE",
+          credentials: "include",
         }
       );
 
