@@ -1,256 +1,130 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as MenubarPrimitive from "@radix-ui/react-menubar"
-import { Check, ChevronRight, Circle } from "lucide-react"
+import * as React from "react";
+import { ShoppingCart, Coffee, User } from "lucide-react";
+import Link from "next/link";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
-import { cn } from "@/lib/utils"
-
-function MenubarMenu({
-  ...props
-}: React.ComponentProps<typeof MenubarPrimitive.Menu>) {
-  return <MenubarPrimitive.Menu {...props} />
+interface CoffeeShopMenuBarProps {
+    isLoggedIn: boolean;
+    onLogout: () => void;
 }
 
-function MenubarGroup({
-  ...props
-}: React.ComponentProps<typeof MenubarPrimitive.Group>) {
-  return <MenubarPrimitive.Group {...props} />
-}
+const MenuBar: React.FC<CoffeeShopMenuBarProps> = ({ isLoggedIn, onLogout }) => {
+    const cartItems = useSelector((state: RootState) => state.cart);
+    const isAdmin = useSelector((state: RootState) => state.auth.isAdmin);
+    const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-function MenubarPortal({
-  ...props
-}: React.ComponentProps<typeof MenubarPrimitive.Portal>) {
-  return <MenubarPrimitive.Portal {...props} />
-}
+    return (
+        <nav className="sticky top-0 z-50 bg-gradient-to-r from-sky-600 to-blue-800 text-white shadow-xl h-16">
+            <div className="container mx-auto flex h-full items-center justify-between px-6">
+                {/* 로고 */}
+                <Link href="/" className="group flex items-center gap-3 hover:text-gray-200">
+                    <Coffee className="h-7 w-7 transition-transform group-hover:rotate-12" />
+                    <span className="text-xl font-bold tracking-wide">Bean Voyage</span>
+                </Link>
 
-function MenubarRadioGroup({
-  ...props
-}: React.ComponentProps<typeof MenubarPrimitive.RadioGroup>) {
-  return <MenubarPrimitive.RadioGroup {...props} />
-}
+                {/* 데스크탑 메뉴 */}
+                <div className="flex items-center gap-8">
+                    {/* 메인 메뉴 */}
+                    <div className="hidden md:flex gap-6">
+                        {[
+                            { href: "/menu", label: "메뉴" },
+                            { href: "/beans", label: "원두" },
+                            { href: "/giftsets", label: "기프트 세트" },
+                            { href: "/events", label: "이벤트" },
+                        ].map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className="relative px-2 py-1 transition-all hover:text-white
+                         after:absolute after:bottom-0 after:left-0 after:h-[2px]
+                         after:w-0 after:bg-white after:transition-all hover:after:w-full"
+                            >
+                                {item.label}
+                            </Link>
+                        ))}
+                    </div>
 
-function MenubarSub({
-  ...props
-}: React.ComponentProps<typeof MenubarPrimitive.Sub>) {
-  return <MenubarPrimitive.Sub data-slot="menubar-sub" {...props} />
-}
+                    {/* 우측 액션 영역 */}
+                    <div className="flex items-center gap-4 ml-6 pl-6 border-l border-white/20">
+                        {!isLoggedIn ? (
+                            <>
+                                <Link href="/user/login" className="btn-ghost btn-sm">
+                                    로그인
+                                </Link>
+                                <Link href="/user/signup" className="btn-primary btn-sm">
+                                    회원가입
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={onLogout}
+                                    className="text-sm hover:text-gray-300 transition-colors"
+                                >
+                                    로그아웃
+                                </button>
 
-const Menubar = React.forwardRef<
-  React.ElementRef<typeof MenubarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <MenubarPrimitive.Root
-    ref={ref}
-    className={cn(
-      "flex h-9 items-center space-x-1 rounded-md border bg-background p-1 shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
-Menubar.displayName = MenubarPrimitive.Root.displayName
+                                {/* 마이페이지 드롭다운 */}
+                                <div className="relative group">
+                                    <User className="h-6 w-6 cursor-pointer transition-transform group-hover:scale-110" />
+                                    <div className="absolute top-full right-0 mt-2 w-48 origin-top scale-95 opacity-0
+                              rounded-xl bg-gradient-to-b from-sky-700 to-blue-900 p-2 shadow-2xl
+                              transition-all group-hover:scale-100 group-hover:opacity-100">
+                                        <div className="space-y-1">
+                                            {[
+                                                { href: "/my/home", label: "내 정보", icon: "👤" },
+                                                { href: "/my/orders", label: "주문 조회", icon: "📦" },
+                                                { href: "/my/review", label: "리뷰 조회", icon: "⭐" },
+                                            ].map((item) => (
+                                                <Link
+                                                    key={item.href}
+                                                    href={item.href}
+                                                    className="flex items-center gap-2 rounded-lg px-3 py-2
+                                 text-sm hover:bg-white/10 transition-colors"
+                                                >
+                                                    <span>{item.icon}</span>
+                                                    {item.label}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
 
-const MenubarTrigger = React.forwardRef<
-  React.ElementRef<typeof MenubarPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Trigger>
->(({ className, ...props }, ref) => (
-  <MenubarPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "flex cursor-default select-none items-center rounded-sm px-3 py-1 text-sm font-medium outline-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
-      className
-    )}
-    {...props}
-  />
-))
-MenubarTrigger.displayName = MenubarPrimitive.Trigger.displayName
+                                {/* 관리자 페이지 */}
+                                {isAdmin && (
+                                    <Link
+                                        href="/admin"
+                                        className="rounded-full bg-gradient-to-r from-amber-400 to-amber-600
+                         px-4 py-1 text-sm font-bold text-blue-900 shadow-md
+                         hover:shadow-lg transition-shadow"
+                                    >
+                                        ADMIN
+                                    </Link>
+                                )}
+                            </>
+                        )}
 
-const MenubarSubTrigger = React.forwardRef<
-  React.ElementRef<typeof MenubarPrimitive.SubTrigger>,
-  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.SubTrigger> & {
-    inset?: boolean
-  }
->(({ className, inset, children, ...props }, ref) => (
-  <MenubarPrimitive.SubTrigger
-    ref={ref}
-    className={cn(
-      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
-      inset && "pl-8",
-      className
-    )}
-    {...props}
-  >
-    {children}
-    <ChevronRight className="ml-auto h-4 w-4" />
-  </MenubarPrimitive.SubTrigger>
-))
-MenubarSubTrigger.displayName = MenubarPrimitive.SubTrigger.displayName
+                        {/* 장바구니 with 수량 배지 */}
+                        <div className="relative">
+                            <Link href="/cart" className="relative inline-block">
+                                <ShoppingCart className="h-6 w-6 cursor-pointer hover:text-gray-300 transition-transform hover:scale-110" />
+                                {totalQuantity > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white
+                             rounded-full h-5 w-5 flex items-center justify-center
+                             text-xs shadow-md animate-pulse">
+                    {totalQuantity}
+                  </span>
+                                )}
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    );
+};
 
-const MenubarSubContent = React.forwardRef<
-  React.ElementRef<typeof MenubarPrimitive.SubContent>,
-  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.SubContent>
->(({ className, ...props }, ref) => (
-  <MenubarPrimitive.SubContent
-    ref={ref}
-    className={cn(
-      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      className
-    )}
-    {...props}
-  />
-))
-MenubarSubContent.displayName = MenubarPrimitive.SubContent.displayName
-
-const MenubarContent = React.forwardRef<
-  React.ElementRef<typeof MenubarPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Content>
->(
-  (
-    { className, align = "start", alignOffset = -4, sideOffset = 8, ...props },
-    ref
-  ) => (
-    <MenubarPrimitive.Portal>
-      <MenubarPrimitive.Content
-        ref={ref}
-        align={align}
-        alignOffset={alignOffset}
-        sideOffset={sideOffset}
-        className={cn(
-          "z-50 min-w-[12rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-          className
-        )}
-        {...props}
-      />
-    </MenubarPrimitive.Portal>
-  )
-)
-MenubarContent.displayName = MenubarPrimitive.Content.displayName
-
-const MenubarItem = React.forwardRef<
-  React.ElementRef<typeof MenubarPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Item> & {
-    inset?: boolean
-  }
->(({ className, inset, ...props }, ref) => (
-  <MenubarPrimitive.Item
-    ref={ref}
-    className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      inset && "pl-8",
-      className
-    )}
-    {...props}
-  />
-))
-MenubarItem.displayName = MenubarPrimitive.Item.displayName
-
-const MenubarCheckboxItem = React.forwardRef<
-  React.ElementRef<typeof MenubarPrimitive.CheckboxItem>,
-  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.CheckboxItem>
->(({ className, children, checked, ...props }, ref) => (
-  <MenubarPrimitive.CheckboxItem
-    ref={ref}
-    className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      className
-    )}
-    checked={checked}
-    {...props}
-  >
-    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-      <MenubarPrimitive.ItemIndicator>
-        <Check className="h-4 w-4" />
-      </MenubarPrimitive.ItemIndicator>
-    </span>
-    {children}
-  </MenubarPrimitive.CheckboxItem>
-))
-MenubarCheckboxItem.displayName = MenubarPrimitive.CheckboxItem.displayName
-
-const MenubarRadioItem = React.forwardRef<
-  React.ElementRef<typeof MenubarPrimitive.RadioItem>,
-  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.RadioItem>
->(({ className, children, ...props }, ref) => (
-  <MenubarPrimitive.RadioItem
-    ref={ref}
-    className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      className
-    )}
-    {...props}
-  >
-    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-      <MenubarPrimitive.ItemIndicator>
-        <Circle className="h-4 w-4 fill-current" />
-      </MenubarPrimitive.ItemIndicator>
-    </span>
-    {children}
-  </MenubarPrimitive.RadioItem>
-))
-MenubarRadioItem.displayName = MenubarPrimitive.RadioItem.displayName
-
-const MenubarLabel = React.forwardRef<
-  React.ElementRef<typeof MenubarPrimitive.Label>,
-  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Label> & {
-    inset?: boolean
-  }
->(({ className, inset, ...props }, ref) => (
-  <MenubarPrimitive.Label
-    ref={ref}
-    className={cn(
-      "px-2 py-1.5 text-sm font-semibold",
-      inset && "pl-8",
-      className
-    )}
-    {...props}
-  />
-))
-MenubarLabel.displayName = MenubarPrimitive.Label.displayName
-
-const MenubarSeparator = React.forwardRef<
-  React.ElementRef<typeof MenubarPrimitive.Separator>,
-  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Separator>
->(({ className, ...props }, ref) => (
-  <MenubarPrimitive.Separator
-    ref={ref}
-    className={cn("-mx-1 my-1 h-px bg-muted", className)}
-    {...props}
-  />
-))
-MenubarSeparator.displayName = MenubarPrimitive.Separator.displayName
-
-const MenubarShortcut = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLSpanElement>) => {
-  return (
-    <span
-      className={cn(
-        "ml-auto text-xs tracking-widest text-muted-foreground",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-MenubarShortcut.displayname = "MenubarShortcut"
-
-export {
-  Menubar,
-  MenubarMenu,
-  MenubarTrigger,
-  MenubarContent,
-  MenubarItem,
-  MenubarSeparator,
-  MenubarLabel,
-  MenubarCheckboxItem,
-  MenubarRadioGroup,
-  MenubarRadioItem,
-  MenubarPortal,
-  MenubarSubContent,
-  MenubarSubTrigger,
-  MenubarGroup,
-  MenubarSub,
-  MenubarShortcut,
-}
+export default MenuBar;

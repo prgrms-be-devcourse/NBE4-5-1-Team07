@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FiCheck, FiMail, FiLock, FiUser, FiMapPin, FiClock, FiAlertCircle } from "react-icons/fi";
 
 const API_BASE_URL = "http://localhost:8080"; // 백엔드 서버 주소
 
@@ -23,6 +21,10 @@ export default function SignupPage() {
     const [error, setError] = useState<string>("");
     const [timer, setTimer] = useState<number>(900); // 15분 (900초)
     const router = useRouter();
+    const [currentStep, setCurrentStep] = useState(1);
+    const steps = ['기본 정보', '이메일 인증', '추가 정보', '완료'];
+
+    const progressWidth = `${((currentStep - 1) / (steps.length - 1)) * 100}%`;
 
     useEffect(() => {
         let countdown: NodeJS.Timeout;
@@ -158,107 +160,207 @@ export default function SignupPage() {
     };
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-100">
-            <Card className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-                <CardHeader>
-                    <CardTitle className="text-center text-xl font-bold">
-                        회원가입
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {error && (
-                        <p className="text-red-500 text-sm text-center mb-4">{error}</p>
-                    )}
-                    <div className="space-y-4">
-                        <Input
-                            type="text"
-                            placeholder="이름"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4 sm:p-8">
+            <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-300">
+                {/* 단계별 프로그레스 바 */}
+                <div className="px-8 pt-8">
+                    <div className="relative pt-4">
+                        <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 transform -translate-y-1/2" />
+                        <div
+                            className="absolute top-1/2 left-0 h-1 bg-blue-600 transition-all duration-500 ease-out"
+                            style={{ width: progressWidth }}
                         />
-                        <div className="flex gap-2">
-                            <Input
-                                type="email"
-                                placeholder="이메일"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                        <div className="flex justify-between relative">
+                            {steps.map((step, index) => (
+                                <div
+                                    key={index}
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                        currentStep > index + 1 ? 'bg-blue-600' : 'bg-white border-2 border-blue-600'
+                                    }`}
+                                >
+                                    {currentStep > index + 1 ? (
+                                        <FiCheck className="text-white text-sm" />
+                                    ) : (
+                                        <span className={`text-sm ${currentStep === index + 1 ? 'text-blue-600' : 'text-gray-400'}`}>
+                      {index + 1}
+                    </span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-8 space-y-8">
+                    <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                        회원가입
+                    </h1>
+
+                    {error && (
+                        <div className="p-4 bg-red-100 text-red-700 rounded-lg flex items-center animate-fade-in">
+                            <FiAlertCircle className="mr-2 text-xl" />
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="space-y-6">
+                        {/* 이름 입력 */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700 flex items-center">
+                                <FiUser className="mr-2 text-blue-600" />
+                                이름
+                            </label>
+                            <input
+                                type="text"
+                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 transition-all pl-10"
+                                placeholder="홍길동"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
                             />
-                            <Button
-                                onClick={handleRequestEmailVerification}
-                                className="bg-blue-600 text-white"
-                                disabled={verificationRequested} // 버튼 비활성화 (15분 제한)
-                            >
-                                {verificationRequested
-                                    ? `제한시간: ${Math.floor(timer / 60)}:${(timer % 60)
-                                        .toString()
-                                        .padStart(2, "0")}`
-                                    : "인증 요청"}
-                            </Button>
                         </div>
 
-                        {/* 인증 요청 후 인증번호 입력창 표시 */}
-                        {showVerificationInput && (
-                            <div className="flex gap-2 mt-2">
-                                <Input
-                                    type="text"
-                                    placeholder="인증번호 입력"
-                                    value={emailCode}
-                                    onChange={(e) => setEmailCode(e.target.value)}
+                        {/* 이메일 인증 섹션 */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700 flex items-center">
+                                <FiMail className="mr-2 text-blue-600" />
+                                이메일
+                            </label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="email"
+                                    className="flex-1 px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 pl-10"
+                                    placeholder="example@domain.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 />
-                                <Button
-                                    onClick={handleVerifyEmail}
-                                    className="bg-green-600 text-white"
+                                <button
+                                    onClick={handleRequestEmailVerification}
+                                    className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                                        verificationRequested
+                                            ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                    }`}
+                                    disabled={verificationRequested}
                                 >
-                                    인증 확인
-                                </Button>
+                                    {verificationRequested ? (
+                                        <div className="flex items-center">
+                                            <FiClock className="mr-2 animate-pulse" />
+                                            {Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, "0")}
+                                        </div>
+                                    ) : (
+                                        '인증요청'
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* 인증번호 입력 */}
+                        {showVerificationInput && (
+                            <div className="animate-slide-down">
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        className="flex-1 px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-green-500 pl-10"
+                                        placeholder="인증번호 6자리"
+                                        value={emailCode}
+                                        onChange={(e) => setEmailCode(e.target.value)}
+                                    />
+                                    <button
+                                        onClick={handleVerifyEmail}
+                                        className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center"
+                                    >
+                                        <FiCheck className="mr-2" />
+                                        확인
+                                    </button>
+                                </div>
                             </div>
                         )}
 
-                        {emailVerified && (
-                            <p className="text-green-600 text-sm">인증이 완료되었습니다.</p>
-                        )}
+                        {/* 비밀번호 입력 */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700 flex items-center">
+                                    <FiLock className="mr-2 text-blue-600" />
+                                    비밀번호
+                                </label>
+                                <input
+                                    type="password"
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 pl-10"
+                                    placeholder="8자리 이상 입력"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700 flex items-center">
+                                    <FiLock className="mr-2 text-blue-600" />
+                                    비밀번호 확인
+                                </label>
+                                <input
+                                    type="password"
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 pl-10"
+                                    placeholder="비밀번호 재입력"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                />
+                            </div>
+                        </div>
 
-                        <Input
-                            type="password"
-                            placeholder="비밀번호 (8자 이상)"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                        <Input
-                            type="password"
-                            placeholder="비밀번호 확인"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                        />
-                        <Input
-                            type="text"
-                            placeholder="도시"
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                        />
-                        <Input
-                            type="text"
-                            placeholder="거리"
-                            value={street}
-                            onChange={(e) => setStreet(e.target.value)}
-                        />
-                        <Input
-                            type="text"
-                            placeholder="우편번호"
-                            value={zipcode}
-                            onChange={(e) => setZipcode(e.target.value)}
-                        />
+                        {/* 주소 입력 */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                                <FiMapPin className="mr-2 text-blue-600" />
+                                배송지 정보
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-700">도시</label>
+                                    <input
+                                        type="text"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500"
+                                        value={city}
+                                        onChange={(e) => setCity(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-700">거리</label>
+                                    <input
+                                        type="text"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500"
+                                        value={street}
+                                        onChange={(e) => setStreet(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-700">우편번호</label>
+                                    <input
+                                        type="text"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500"
+                                        value={zipcode}
+                                        onChange={(e) => setZipcode(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
 
-                        <Button
+                        {/* 회원가입 버튼 */}
+                        <button
                             onClick={handleSignup}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                            className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-transform hover:scale-[1.02] flex items-center justify-center disabled:opacity-50"
                             disabled={!emailVerified}
                         >
-                            회원가입
-                        </Button>
+                            {emailVerified ? (
+                                <>
+                                    <FiCheck className="mr-2 animate-bounce" />
+                                    회원가입 완료
+                                </>
+                            ) : (
+                                '이메일 인증 필요'
+                            )}
+                        </button>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 }
