@@ -42,3 +42,6 @@ spring:
       enabled: true
       max-file-size: 10MB
       max-request-size: 10MB
+
+file:
+  upload-dir: ${user.dir}/upload/  # 프로젝트 루트 기준 절대 경로
