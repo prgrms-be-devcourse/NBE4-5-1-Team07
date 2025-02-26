@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { StarIcon } from "@heroicons/react/24/solid";
+import { motion } from "framer-motion";
+import { Disclosure } from "@headlessui/react";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 // ItemDto 인터페이스 정의
 interface ItemDto {
@@ -48,7 +52,6 @@ interface ReviewDto {
 
 export default function ClientPage({ id }: { id: number }) {
   const [item, setItem] = useState<ItemDto | null>(null);
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [quantity, setQuantity] = useState(1); // 수량 상태 관리
@@ -216,186 +219,191 @@ export default function ClientPage({ id }: { id: number }) {
     return <div className="text-center p-6">상품 정보를 찾을 수 없습니다.</div>;
 
   console.log(item.imageUrl);
+
   return (
-    <>
-      <div className="flex flex-row gap-4 justify-center py-4">
-        <div className="p-2 rounded-2xl w-[50vw] h-[70vh] flex justify-center items-center">
-          <img
-            src={item.imageUrl} // 이미지 URL
-            alt="커피빈 로고"
-            width={500}
-            height={300}
-          />
-        </div>
-        <div className="border-l-2 border-gray-500 p-6 w-[50vw] h-[70vh] flex flex-col justify-around gap-4 font-bold text-2xl">
-          <div>
-            {item.name} <br />
-          </div>
-          <hr className="border-2 border-black" />
-          <div>가격 : {item.price} </div>
-          <div>재고수량 : {item.stockQuantity}</div>
-
-          {/* 수량 선택 UI */}
-          <div className="flex items-center gap-4">
-            <Button
-              className="w-[40px] bg-gray-200 text-black hover:bg-gray-300"
-              onClick={decreaseQuantity}
-            >
-              -
-            </Button>
-            <input
-              type="number"
-              value={quantity}
-              min="1"
-              max={item.stockQuantity}
-              onChange={handleQuantityChange}
-              className="w-[60px] text-center border-2 border-gray-400 rounded-lg"
+      <>
+        <div className="flex gap-8 justify-center py-8 bg-gray-50">
+          {/* 이미지 섹션 */}
+          <motion.div
+              className="group relative p-4 bg-white rounded-2xl shadow-xl w-[600px] h-[600px] overflow-hidden"
+              whileHover={{ scale: 1.02 }}
+          >
+            <img
+                src={item.imageUrl}
+                alt={item.name}
+                className="object-contain w-full h-full transition-transform duration-500 group-hover:scale-105"
             />
-            <Button
-              className="w-[40px] bg-gray-200 text-black hover:bg-gray-300"
-              onClick={increaseQuantity}
-            >
-              +
-            </Button>
-          </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          </motion.div>
 
-          <div className="flex flex-row gap-4 justify-center">
-            <div>
-              <Button
-                className="border-2 border-blue-500 w-[200px] bg-white text-black hover:bg-gray-400"
-                onClick={handleAddToCart} // 추가
-              >
-                장바구니 담기
-              </Button>
+          {/* 상품 정보 섹션 */}
+          <div className="bg-white p-8 rounded-2xl shadow-xl w-[600px] space-y-8">
+            <h1 className="text-4xl font-bold text-gray-900">{item.name}</h1>
+
+            <div className="p-4 bg-blue-50 rounded-xl animate-pulse">
+            <span className="text-4xl font-bold text-blue-600">
+              {item.price.toLocaleString()}원
+            </span>
+              <span className="ml-4 text-xl line-through text-gray-400">
+              149,000원
+            </span>
             </div>
-            <div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="text-lg text-gray-600">재고:</span>
+                <span className="text-xl font-semibold text-green-600">
+                {item.stockQuantity}개 남음
+              </span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <Button
+                    className="w-12 h-12 hover:scale-110 transition-all bg-blue-100 text-blue-600 text-2xl"
+                    onClick={decreaseQuantity}
+                >
+                  ➖
+                </Button>
+                <input
+                    type="number"
+                    value={quantity}
+                    onChange={handleQuantityChange}
+                    className="w-20 text-center border-2 border-blue-200 rounded-lg text-xl font-bold"
+                />
+                <Button
+                    className="w-12 h-12 hover:scale-110 transition-all bg-blue-100 text-blue-600 text-2xl"
+                    onClick={increaseQuantity}
+                >
+                  ➕
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
               <Button
-                className="bg-blue-500 w-[200px] hover:bg-gray-500 "
-                onClick={handleCheckout} // 결제
+                  className="flex-1 h-14 bg-white border-2 border-blue-500 text-blue-600 hover:bg-blue-50
+              text-xl font-bold transition-all hover:shadow-lg"
+                  onClick={handleAddToCart}
               >
-                바로구매 {`>`}
+                🛒 장바구니 담기
+              </Button>
+              <Button
+                  className="flex-1 h-14 bg-blue-600 hover:bg-blue-700 text-white
+              text-xl font-bold transition-all hover:shadow-lg"
+                  onClick={handleCheckout}
+              >
+                💳 바로구매
               </Button>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 탭 UI */}
-      <div className="flex justify-center space-x-4 py-4 border-b-2">
-        <Button
-          onClick={() => setSelectedTab("info")}
-          className={
-            selectedTab === "info"
-              ? "bg-blue-500 text-white"
-              : "bg-gray-200 text-black"
-          }
-        >
-          상품 정보
-        </Button>
-        <Button
-          onClick={() => setSelectedTab("review")}
-          className={
-            selectedTab === "review"
-              ? "bg-blue-500 text-white"
-              : "bg-gray-200 text-black"
-          }
-        >
-          리뷰
-        </Button>
-        <Button
-          onClick={() => setSelectedTab("question")}
-          className={
-            selectedTab === "question"
-              ? "bg-blue-500 text-white"
-              : "bg-gray-200 text-black"
-          }
-        >
-          상품 문의
-        </Button>
-      </div>
+        {/* 탭 메뉴 */}
+        <div className="flex justify-center space-x-4 py-6 border-b-2 bg-white">
+          {(["info", "review", "question"] as const).map((tab) => (
+              <Button
+                  key={tab}
+                  onClick={() => setSelectedTab(tab)}
+                  className={`px-8 py-3 text-lg font-semibold rounded-full transition-all ${
+                      selectedTab === tab
+                          ? "bg-blue-600 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+              >
+                {{
+                  info: "📦 상품정보",
+                  review: "⭐ 리뷰",
+                  question: "❓ 문의",
+                }[tab]}
+              </Button>
+          ))}
+        </div>
 
-      {/* 선택된 탭에 따라 내용 표시 */}
-      <div className="p-6">
-        {selectedTab === "info" && (
-          <div className="text-2xl h-[50vh]">
-            <h2 className="font-bold">상품 정보</h2> <br />
-            <div dangerouslySetInnerHTML={{ __html: item.description }} />
-          </div>
-        )}
-        {selectedTab === "review" && (
-          <div className="text-2xl h-[50vh]">
-            <h2 className="font-bold">리뷰 {reviews.length}개</h2> <br />
-            {reviews.length > 0 ? (
-              <ul>
+        {/* 탭 내용 */}
+        <div className="p-8 bg-gray-50">
+          {selectedTab === "info" && (
+              <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="prose max-w-none bg-white p-8 rounded-xl shadow"
+              >
+                <h2 className="text-3xl font-bold mb-6">상품 상세정보</h2>
+                <div dangerouslySetInnerHTML={{ __html: item.description }} />
+              </motion.div>
+          )}
+
+          {selectedTab === "review" && (
+              <div className="space-y-6">
+                <h2 className="text-3xl font-bold">🧑💻 구매자 리뷰 ({reviews.length})</h2>
                 {reviews.map((review) => (
-                  <li
-                    key={review.reviewId}
-                    className="p-4 border rounded-lg shadow"
-                  >
-                    <p className="text-lg font-semibold">"{review.content}"</p>
-                    <p className="text-yellow-500">⭐ {review.rating} / 5</p>
-                    <p className="text-sm text-gray-500">
-                      작성일: {new Date(review.createDate).toLocaleString()}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>등록된 리뷰가 없습니다.</p>
-            )}
-          </div>
-        )}
-        {selectedTab === "question" && (
-          <div className="">
-            <div className="flex justify-center pb-4">
-              <Link href={`/questions/new?itemId=${item.id}`}>
-                <Button className="border-2 border-blue-500 w-[100px] bg-white text-black hover:bg-gray-400 ">
-                  질문 작성
-                </Button>
-              </Link>
-            </div>
-            {questions.length > 0 ? (
-              <ul>
-                {questions.map((question) => (
-                  <li
-                    key={question.id}
-                    className="p-4 border rounded-lg shadow"
-                  >
-                    <Link href={`/questions/${question.id}`} className="block">
-                      <h2 className="text-lg font-semibold">
-                        {question.subject}
-                      </h2>
-                      <p className="text-gray-600">작성자: {question.name}</p>
-                      <p className="text-sm text-gray-500">
-                        작성일: {new Date(question.createDate).toLocaleString()}
-                      </p>
-                      <p className="mt-2">{question.content}</p>
-                    </Link>
-                    {question.answer ? (
-                      <div className="mt-4 p-3 border-l-4 border-blue-500 bg-blue-50">
-                        <p className="font-semibold">답변:</p>
-                        <p>{question.answer.content}</p>
-                        <p className="text-xs text-gray-500">
-                          작성일:{" "}
-                          {new Date(
-                            question.answer.createDate
-                          ).toLocaleString()}
-                        </p>
+                    <motion.div
+                        key={review.reviewId}
+                        initial={{ y: 10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        className="bg-white p-6 rounded-xl shadow"
+                    >
+                      <div className="flex items-center gap-2 mb-4">
+                        {[...Array(5)].map((_, i) => (
+                            <StarIcon
+                                key={i}
+                                className={`h-6 w-6 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                            />
+                        ))}
                       </div>
-                    ) : (
-                      <p className="mt-4 text-gray-500">
-                        아직 답변이 없습니다.
+                      <p className="text-lg text-gray-800">"{review.content}"</p>
+                      <p className="text-sm text-gray-500 mt-4">
+                        {new Date(review.createDate).toLocaleDateString()}
                       </p>
-                    )}
-                  </li>
+                    </motion.div>
                 ))}
-              </ul>
-            ) : (
-              <p>등록된 질문이 없습니다.</p>
-            )}
-          </div>
-        )}
-      </div>
-    </>
+              </div>
+          )}
+
+          {selectedTab === "question" && (
+              <div className="space-y-6">
+                <div className="text-right">
+                  <Link href={`/questions/new?itemId=${item.id}`}>
+                    <Button className="bg-white border-2 border-blue-500 text-blue-600
+                hover:bg-blue-50 px-6 py-3 text-lg">
+                      ✏️ 새 질문 작성
+                    </Button>
+                  </Link>
+                </div>
+
+                {questions.map((question) => (
+                    <Disclosure key={question.id} as="div" className="bg-white rounded-xl shadow">
+                      {({ open }) => (
+                          <>
+                            <Disclosure.Button className="flex justify-between items-center w-full px-6 py-4
+                    text-lg font-semibold hover:bg-gray-50">
+                              <span>{question.subject}</span>
+                              <ChevronDownIcon className={`${open ? 'transform rotate-180' : ''} 
+                      h-6 w-6 text-blue-600 transition-transform`} />
+                            </Disclosure.Button>
+
+                            <Disclosure.Panel className="px-6 py-4 border-t">
+                              <p className="text-gray-600 mb-4">{question.content}</p>
+                              {question.answer ? (
+                                  <div className="bg-blue-50 p-4 rounded-lg">
+                                    <div className="flex items-center gap-2 text-blue-600 mb-2">
+                                      <span className="font-semibold">📢 답변:</span>
+                                      <span className="text-sm">
+                              {new Date(question.answer.createDate).toLocaleDateString()}
+                            </span>
+                                    </div>
+                                    <p className="text-gray-800">{question.answer.content}</p>
+                                  </div>
+                              ) : (
+                                  <div className="text-gray-500">⏳ 답변 대기 중입니다</div>
+                              )}
+                            </Disclosure.Panel>
+                          </>
+                      )}
+                    </Disclosure>
+                ))}
+              </div>
+          )}
+        </div>
+      </>
   );
 }
