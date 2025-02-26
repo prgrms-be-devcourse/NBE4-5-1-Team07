@@ -1,16 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { PencilIcon } from "@heroicons/react/24/outline"; // 연필 아이콘 추가
 
 export default function ChangePasswordPage() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [email, setEmail] = useState<string | null>(null); // 이메일 상태 추가
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const passwordsMatch = newPassword === confirmPassword && newPassword !== "";
+
+  // 현재 로그인된 유저 이메일 가져오기
+  useEffect(() => {
+    fetch("http://localhost:8080/api/my/info", {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.data?.email) {
+          setEmail(result.data.email);
+        }
+      })
+      .catch((error) => console.error("이메일 가져오기 실패:", error));
+  }, []);
 
   // ✅ 비밀번호 변경 후 로그아웃 함수
   const handleLogout = async () => {
@@ -48,6 +66,10 @@ export default function ChangePasswordPage() {
       alert("새 비밀번호가 일치하지 않습니다.");
       return;
     }
+    if (!email) {
+      alert("로그인 정보를 불러오지 못했습니다.");
+      return;
+    }
     setLoading(true);
 
     try {
@@ -57,7 +79,7 @@ export default function ChangePasswordPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            email: "example@exam.com",
+            email, // 현재 로그인된 이메일 포함
             oldPassword,
             newPassword,
           }),
@@ -78,8 +100,11 @@ export default function ChangePasswordPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h1 className="text-2xl font-bold text-center mb-6">비밀번호 변경</h1>
+    <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
+      {/* 아이콘과 제목을 함께 배치 */}
+      <h1 className="text-2xl font-bold text-center mb-6 flex justify-center items-center gap-2">
+        <PencilIcon className="w-6 h-6 text-gray-600" /> 비밀번호 변경
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="password"
@@ -113,7 +138,7 @@ export default function ChangePasswordPage() {
         <button
           type="submit"
           className="w-full bg-blue-500 text-white py-2 rounded-md"
-          disabled={!passwordsMatch || loading}
+          disabled={!passwordsMatch || loading || !email}
         >
           {loading ? "변경 중..." : "비밀번호 변경"}
         </button>
