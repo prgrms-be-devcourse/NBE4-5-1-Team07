@@ -9,7 +9,7 @@
 |                                           문권이                                           |                                          신동우                                           |                                                        최지선                                                        |                                          엄현수                                           |                                                        김경래                                                        
 |:---------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------:|
 | <img src="https://avatars.githubusercontent.com/u/102517739?v=4" alt="문권이" width="150"> | <img src="https://avatars.githubusercontent.com/u/58596222?v=4" alt="신동우" width="150"> | <img src="https://avatars.githubusercontent.com/u/192316487?v=4" alt="최지선" width="150"> | <img src="https://avatars.githubusercontent.com/u/55376152?v=4" alt="엄현수" width="150"> | <img src="https://avatars.githubusercontent.com/u/15260002?v=4" alt="김경래" width="150"> |
-|                                          PM                                         |                                           FE                                           |                                                        FE                                                         |                                           FE                                           |                                                        FE                                                         |
+|                                         PM/TL                                         |                                           TM                                          |                                                        TM                                                         |                                           TM                                          |                                                       TM                                                         |
 |                          [GitHub](https://github.com/M00NPANG)                          |                         [GitHub](https://github.com/socra167)                          |                                        [GitHub](https://github.com/wesawth3sun)                                        |                         [GitHub](https://github.com/sameom1048)                          |                                                    [GitHub](https://github.com/GODAOS)                                                     |
 
 <br/>
@@ -32,46 +32,58 @@
 <br/>
 
 ## 3. 주요 기능
-- **회원가입**:
-    - 회원가입 시 DB에 유저정보가 등록됩니다.
-- **로그인**:
-    - 사용자 인증 정보를 통해 로그인합니다.
-- **상품 주문**
-  - 고객은 상품의 상세 정보를 확인하고, 장바구니 담기/바로 구매를 선택하여 상품 주문을 할 수 있습니다.
-- **상품 관리**
-  - 관리자는 상품 추가, 수정, 삭제 기능을 사용할 수 있습니다.
-- **주문 관리**
-  - 관리자는 오전 2시부터 오후 2시까지의 주문을 일괄 배송 처리한다.
-  - 고객의 주문을 취소한다.
-- **리뷰/질문/답변**
-  - 고객은 상품을 구매 후 리뷰를 달 수 있다.
-  - 고객은 상품에 대한 질문은 남길 수 있다.
-  - 관리자는 질문에 대한 답변을 남길 수 있다.
-- **장바구니**
-  - 고객은 장바구니를 통해 원하는 물건을 담아 계산할 수 있다.
+![image](https://github.com/user-attachments/assets/efe5962a-57c2-4059-a27e-54422b831ad6)
+
 
 <br/>
 
 ## 4. 작업 및 역할 분담
    |     |                                                                                         |                                                                                                  |
    |-----|-----------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-   | 문권이 | <img src="https://avatars.githubusercontent.com/u/102517739?v=4" alt="문권이" width="100"> | <ul><li>프로젝트 계획 및 관리</li><li>팀 리딩 및 커뮤니케이션</li><li>회원가입/로그인 페이지 개발</li><li>토큰/세션/시큐리티</li></ul> |
-   | 신동우 | <img src="https://avatars.githubusercontent.com/u/58596222?v=4" alt="신동우" width="100">  | <ul><li>메인 페이지 개발</li><li>상품 주문 페이지 개발</li><li>장바구니 페이지 개발</li></ul>|
-   | 최지선 | <img src="https://avatars.githubusercontent.com/u/192316487?v=4" alt="최지선" width="100"> | <ul><li>사용자 페이지 개발</li><li>사용자 기능 개발</li></ul>|
-   | 엄현수 | <img src="https://avatars.githubusercontent.com/u/55376152?v=4" alt="엄현수" width="100">  | <ul><li>메인 페이지 개발</li><li>상품 주문 페이지 개발</li><li>장바구니 페이지 개발</li></ul>|
-   | 김경래 | <img src="https://avatars.githubusercontent.com/u/15260002?v=4" alt="김경래" width="100">                                                      | <ul><li>관리자 관리 페이지 개발</li><li>관리자 기능 개발 </li></ul> |
+   | 문권이 | <img src="https://avatars.githubusercontent.com/u/102517739?v=4" alt="문권이" width="100"> | <ul><li>프로젝트 관리 및 문서화</li><li>팀 리딩 및 커뮤니케이션</li><li>회원가입/로그인</li><li>토큰/세션/시큐리티</li><li>회원 정보 수정</li></ul> |
+   | 신동우 | <img src="https://avatars.githubusercontent.com/u/58596222?v=4" alt="신동우" width="100">  | <ul><li>메인 페이지</li><li>장바구니</li><li>주문 관리</li><li>질문 관리</li><li>결제</li></ul>|
+   | 최지선 | <img src="https://avatars.githubusercontent.com/u/192316487?v=4" alt="최지선" width="100"> | <ul><li>마이페이지</li><li>주문/배송 관리</li><li>주문/배송 관리</li><li>비회원 주문/배송 관리</li><li>리뷰 및 포인트 관리</li></ul>|
+   | 엄현수 | <img src="https://avatars.githubusercontent.com/u/55376152?v=4" alt="엄현수" width="100">  | <ul><li>메인페이지</li><li>장바구니</li><li>주문 관리</li><li>공지사항</li><li>세부 상품 조회</li></ul>|
+   | 김경래 | <img src="https://avatars.githubusercontent.com/u/15260002?v=4" alt="김경래" width="100">  | <ul><li>관리자 관리 페이지</li><li>관리자 상품 관리</li><li>관리자 주문 관리</li><li>오후 2시 일괄 배송</li></ul> |
 
 <br/>
 <br/>
 
 
 # 🛠️ Tech
-## 
+## 기술 스택
+### 언어
+- JAVA   23
+- TypeScript
+
+### 프레임워크 및 라이브러리
+- Spring   3.4.2
+- Spring  Security
+- React   19.0.0
+- Next.js   15.1.7
+- ShadCN/UI
+  
+### IED 및 개발 도구
+- IntelliJ IDEA
+- Visual Studio Code
+
+### 버전 관리 및 협업 도구
+- Git
+- GitHub
+- Slack
+- Notion
+
+## UML
+![image](https://github.com/user-attachments/assets/621c2429-04f2-4f0c-bf84-0df7d1dde2f7)
 
 ## ERD
 ![Blue White Illustration Group Project Presentation ](https://github.com/user-attachments/assets/a95a0bdf-385c-44d2-8421-2140e5e187fe)
 
+## System Architecture
+![image](https://github.com/user-attachments/assets/51b881ad-8acc-47fb-acaf-269dff79be0b)
 
+## Flow Chart
+[🗃️ Flow Chart](https://github.com/prgrms-be-devcourse/NBE4-5-1-Team07/wiki/%F0%9F%97%83%EF%B8%8F-Flow-Chart)
 
 ## 브랜치 전략
 **GitHub Flow** 전략 사용
@@ -85,7 +97,8 @@
 - Review가 완료되고, 피드백이 모두 반영돠면 해당 ```feature```브랜치를 ```main```브랜치로 **Merge**합니다.
 ![image](https://github.com/user-attachments/assets/6eb191d6-d686-4e25-a383-6338d02675fc)
 
-  
+## API 명세서
+[📝 API 명세서](https://peaceful-acorn-daf.notion.site/API-193d9ae0b864813fa94aea1a6645edbf?pvs=4)
 <br/>
 <br/>
 
