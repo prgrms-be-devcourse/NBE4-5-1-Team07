@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { TrashIcon, PlusIcon, MinusIcon } from "@heroicons/react/24/outline";
+import { CheckCircleIcon } from "@heroicons/react/24/solid";
 
 interface CartItem {
   id: number;
@@ -163,88 +166,149 @@ export default function Cart() {
     .reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">장바구니</h1>
-        <button onClick={clearCart} className="text-red-500 hover:text-red-700">
-          전체 삭제
-        </button>
-      </div>
-
-      {cartItems.length === 0 ? (
-        <p className="text-gray-500">장바구니가 비어 있습니다.</p>
-      ) : (
-        <ul className="space-y-4">
-          {cartItems.map((item) => (
-            <li
-              key={item.id}
-              className="flex items-center p-4 border rounded-lg shadow-md gap-4"
-            >
-              <input
-                type="checkbox"
-                checked={selectedItems.includes(item.id)}
-                onChange={() => toggleSelectItem(item.id)}
-                className="w-5 h-5"
-              />
-              <div className="flex-1">
-                <p className="font-semibold">{item.name}</p>
-                <p className="text-gray-500">{item.price.toLocaleString()}원</p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() =>
-                    handleQuantityChange(item.id, item.quantity - 1)
-                  }
-                  className="px-2 py-1 border rounded bg-gray-200 hover:bg-gray-300"
-                >
-                  ▼
-                </button>
-                <input
-                  type="number"
-                  value={item.quantity}
-                  onChange={(e) =>
-                    handleQuantityChange(item.id, Number(e.target.value))
-                  }
-                  className="w-12 text-center border rounded"
-                  min="1"
-                />
-                <button
-                  onClick={() =>
-                    handleQuantityChange(item.id, item.quantity + 1)
-                  }
-                  className="px-2 py-1 border rounded bg-gray-200 hover:bg-gray-300"
-                >
-                  ▲
-                </button>
-              </div>
-              <button
-                onClick={() => handleRemove(item.id)}
-                className="text-red-500 hover:text-red-700 ml-4"
-              >
-                삭제
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {cartItems.length > 0 && (
-        <div className="mt-6 p-4 border-t text-right font-semibold text-lg">
-          총 가격:{" "}
-          <span className="text-blue-600">{totalPrice.toLocaleString()}원</span>
-          <button
-            onClick={handleCheckout}
-            className={`ml-4 px-4 py-2 rounded ${
-              selectedItems.length > 0
-                ? "bg-blue-500 hover:bg-blue-600 text-white"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
-            disabled={selectedItems.length === 0}
+      <div className="p-6 max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <motion.h1
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-3xl font-bold flex items-center gap-2"
           >
-            결제하기
-          </button>
+            🛍️ 내 장바구니
+          </motion.h1>
+          <motion.button
+              whileHover={{ scale: 1.05 }}
+              onClick={clearCart}
+              className="flex items-center gap-1 text-red-500 hover:text-red-700"
+          >
+            <TrashIcon className="h-5 w-5" />
+            <span>전체 비우기</span>
+          </motion.button>
         </div>
-      )}
-    </div>
+
+        <AnimatePresence>
+          {cartItems.length === 0 ? (
+              <motion.div
+                  key="empty-cart"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-20 space-y-4"
+              >
+                <div className="text-6xl">🛒</div>
+                <p className="text-gray-500 text-lg">장바구니가 비어있어요</p>
+              </motion.div>
+          ) : (
+              <ul className="space-y-3">
+                <AnimatePresence>
+                  {cartItems.map((item) => (
+                      <motion.li
+                          key={item.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-center gap-4">
+                          <motion.div
+                              whileHover={{ scale: 1.05 }}
+                              className="flex items-center"
+                          >
+                            <input
+                                type="checkbox"
+                                checked={selectedItems.includes(item.id)}
+                                onChange={() => toggleSelectItem(item.id)}
+                                className="hidden"
+                                id={`checkbox-${item.id}`}
+                            />
+                            <label
+                                htmlFor={`checkbox-${item.id}`}
+                                className={`w-6 h-6 rounded-md border-2 flex items-center justify-center cursor-pointer transition-colors
+                          ${selectedItems.includes(item.id)
+                                    ? 'bg-blue-500 border-blue-500'
+                                    : 'bg-white border-gray-300'}`}
+                            >
+                              {selectedItems.includes(item.id) && (
+                                  <CheckCircleIcon className="h-4 w-4 text-white" />
+                              )}
+                            </label>
+                          </motion.div>
+
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg">{item.name}</h3>
+                            <p className="text-gray-600">
+                              {item.price.toLocaleString()}원
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center border rounded-full bg-gray-50">
+                              <motion.button
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                                  className="p-2 hover:bg-gray-200 rounded-l-full"
+                              >
+                                <MinusIcon className="h-4 w-4" />
+                              </motion.button>
+                              <input
+                                  type="number"
+                                  value={item.quantity}
+                                  onChange={(e) =>
+                                      handleQuantityChange(item.id, Number(e.target.value))
+                                  }
+                                  className="w-12 text-center bg-transparent focus:outline-none"
+                                  min="1"
+                              />
+                              <motion.button
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                  className="p-2 hover:bg-gray-200 rounded-r-full"
+                              >
+                                <PlusIcon className="h-4 w-4" />
+                              </motion.button>
+                            </div>
+
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                onClick={() => handleRemove(item.id)}
+                                className="text-red-400 hover:text-red-600 p-2"
+                            >
+                              <TrashIcon className="h-5 w-5" />
+                            </motion.button>
+                          </div>
+                        </div>
+                      </motion.li>
+                  ))}
+                </AnimatePresence>
+              </ul>
+          )}
+        </AnimatePresence>
+
+        {cartItems.length > 0 && (
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="sticky bottom-0 bg-white border-t mt-6 p-4 shadow-lg rounded-xl"
+            >
+              <div className="flex justify-between items-center">
+                <div className="space-y-1">
+                  <div className="text-gray-600">총 선택 상품 {selectedItems.length}개</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {totalPrice.toLocaleString()}원
+                  </div>
+                </div>
+                <motion.button
+                    whileHover={{ scale: 1.03 }}
+                    onClick={handleCheckout}
+                    className={`px-6 py-3 rounded-xl text-lg font-semibold transition-all flex items-center gap-2
+                ${selectedItems.length > 0
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                    disabled={selectedItems.length === 0}
+                >
+                  💳 결제 진행하기
+                </motion.button>
+              </div>
+            </motion.div>
+        )}
+      </div>
   );
 }

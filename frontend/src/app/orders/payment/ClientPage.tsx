@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { ShoppingCartIcon, CurrencyYenIcon, MapPinIcon, EnvelopeIcon, CreditCardIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 interface Product {
   id: number;
@@ -23,7 +25,6 @@ export default function PaymentPage() {
   const [totalPoints, setTotalPoints] = useState(0);
   const [usedPoints, setUsedPoints] = useState(0);
   const [finalPrice, setFinalPrice] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false); // ✅ 결제 진행 상태 추가
   const router = useRouter();
 
   useEffect(() => {
@@ -103,8 +104,6 @@ export default function PaymentPage() {
       return;
     }
 
-    setIsProcessing(true); // ✅ 결제 진행 중 상태 활성화
-
     const orderData = {
       cartOrder,
       email,
@@ -132,126 +131,187 @@ export default function PaymentPage() {
       }
     } catch {
       alert("결제 처리 중 오류가 발생했습니다.");
-    } finally {
-      setIsProcessing(false); // ✅ 결제 진행 상태 해제
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">결제</h2>
-
-      {/* 상품 목록 */}
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">상품 목록</h3>
-        {products.map((product) => {
-          const stock = stockMap[product.id] ?? 0; // 기본값 0
-          const isOutOfStock = product.quantity > stock; // 초과 여부
-
-          return (
-            <div key={product.id} className="flex justify-between p-2 border-b">
-              <span>{product.name}</span>
-              <span>
-                {product.price.toLocaleString()}원{" "}
-                <span className="text-gray-500">({product.quantity}개)</span>
-                {"   "}
-                <span
-                  className={
-                    isOutOfStock
-                      ? "text-red-600 font-bold text-sm ml-2"
-                      : "text-gray-600 text-sm ml-2"
-                  }
-                >
-                  {stock}개 남음
-                </span>
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* 총 가격 & 적립금 */}
-      <div className="flex justify-between items-center mb-6">
-        <span className="text-lg font-semibold">
-          총 가격: {totalPrice.toLocaleString()}원
-        </span>
-        {isMember && (
-          <div className="text-right">
-            <span className="block text-sm text-gray-600">
-              보유 적립금: {totalPoints.toLocaleString()}원
-            </span>
-            <input
-              type="text"
-              value={usedPoints.toLocaleString()}
-              onChange={handleUsedPoints}
-              className="w-32 p-1 border rounded text-right"
-              placeholder="사용할 적립금"
-            />
-          </div>
-        )}
-      </div>
-
-      {/* 최종 결제 금액 */}
-      <div className="text-lg font-semibold mb-6">
-        결제 금액: {finalPrice.toLocaleString()}원
-      </div>
-
-      {/* 주문자 정보 입력 */}
-      <div className="mb-4">
-        <label className="block font-semibold mb-1">이메일</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border rounded"
-          disabled={isMember}
-        />
-      </div>
-
-      {/* 배송지 입력 */}
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">배송지 정보</h3>
-        <input
-          type="text"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          className="w-full p-2 border rounded mb-2"
-          placeholder="기본주소"
-        />
-        <input
-          type="text"
-          value={street}
-          onChange={(e) => setStreet(e.target.value)}
-          className="w-full p-2 border rounded mb-2"
-          placeholder="상세주소"
-        />
-        <input
-          type="text"
-          value={zipcode}
-          onChange={(e) => setZipcode(e.target.value.replace(/[^0-9]/g, ""))}
-          className="w-full p-2 border rounded"
-          placeholder="우편번호"
-        />
-      </div>
-
-      <div className="flex justify-between items-center mb-6">
-        <span className="text-lg font-semibold">
-          * 당일 오후 2시 이후의 주문은 다음날 배송을 시작합니다.
-        </span>
-      </div>
-
-      {/* 결제 버튼 */}
-      <button
-        onClick={handlePayment}
-        className={`w-full text-white p-3 rounded-lg transition ${
-          isProcessing
-            ? "bg-gray-500 cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-700"
-        }`}
-        disabled={isProcessing} // ✅ 결제 중이면 버튼 비활성화
+      <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-xl"
       >
-        {isProcessing ? "결제 중..." : "결제하기"}
-      </button>
-    </div>
+        <h1 className="text-3xl font-bold flex items-center gap-3 mb-8 text-blue-600">
+          <CreditCardIcon className="h-8 w-8" />
+          결제 진행
+        </h1>
+
+        {/* 상품 목록 섹션 */}
+        <motion.div
+            initial={{ x: -20 }}
+            animate={{ x: 0 }}
+            className="mb-8 bg-gray-50 p-6 rounded-xl"
+        >
+          <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
+            <ShoppingCartIcon className="h-6 w-6" />
+            주문 상품
+          </h3>
+          <div className="space-y-4">
+            {products.map((product) => {
+              const stock = stockMap[product.id] ?? 0;
+              const isOutOfStock = product.quantity > stock;
+
+              return (
+                  <div
+                      key={product.id}
+                      className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <span className="font-medium">{product.name}</span>
+                    <div className="flex items-center gap-4">
+                  <span className="text-gray-600">
+                    {product.price.toLocaleString()}원
+                  </span>
+                      <div className="flex items-center gap-2">
+                    <span className="text-sm bg-gray-100 px-2 py-1 rounded">
+                      {product.quantity}개
+                    </span>
+                        <div
+                            className={`flex items-center gap-1 text-sm ${
+                                isOutOfStock ? "text-red-600" : "text-gray-500"
+                            }`}
+                        >
+                          <ExclamationTriangleIcon className="h-4 w-4" />
+                          <span>{stock}개 남음</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* 가격 정보 섹션 */}
+        <motion.div
+            initial={{ x: 20 }}
+            animate={{ x: 0 }}
+            className="mb-8 bg-blue-50 p-6 rounded-xl"
+        >
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+            <span className="flex items-center gap-2">
+              <CurrencyYenIcon className="h-5 w-5" />
+              총 상품 금액
+            </span>
+              <span className="text-lg font-semibold">
+              {totalPrice.toLocaleString()}원
+            </span>
+            </div>
+
+            {isMember && (
+                <div className="flex flex-col gap-2">
+                  <label className="flex items-center gap-2">
+                    <span className="text-sm">적립금 사용</span>
+                    <span className="text-xs text-gray-500">
+                  (보유: {totalPoints.toLocaleString()}원)
+                </span>
+                  </label>
+                  <div className="relative">
+                    <input
+                        type="text"
+                        value={usedPoints.toLocaleString()}
+                        onChange={handleUsedPoints}
+                        className="w-full pl-8 pr-4 py-2 border rounded-lg bg-white"
+                        placeholder="사용할 금액 입력"
+                    />
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
+                  ₩
+                </span>
+                  </div>
+                </div>
+            )}
+
+            <div className="border-t pt-4">
+              <div className="flex justify-between items-center">
+                <span className="font-bold">최종 결제 금액</span>
+                <span className="text-2xl font-bold text-blue-600">
+                {finalPrice.toLocaleString()}원
+              </span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* 주문 정보 입력 섹션 */}
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mb-8 bg-gray-50 p-6 rounded-xl"
+        >
+          <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
+            <MapPinIcon className="h-6 w-6" />
+            배송 정보
+          </h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">이메일</label>
+              <div className="relative">
+                <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-8 pr-4 py-2 border rounded-lg"
+                    disabled={isMember}
+                />
+                <EnvelopeIcon className="h-4 w-4 absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">기본주소</label>
+                <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-lg"
+                    placeholder="시/도"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">상세주소</label>
+                <input
+                    type="text"
+                    value={street}
+                    onChange={(e) => setStreet(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-lg"
+                    placeholder="상세 주소"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">우편번호</label>
+                <input
+                    type="text"
+                    value={zipcode}
+                    onChange={(e) => setZipcode(e.target.value.replace(/[^0-9]/g, ""))}
+                    className="w-full px-4 py-2 border rounded-lg"
+                    placeholder="우편번호"
+                    maxLength={5}
+                />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* 결제 버튼 */}
+        <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handlePayment}
+            className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors"
+        >
+          <CreditCardIcon className="h-6 w-6" />
+          {finalPrice.toLocaleString()}원 결제하기
+        </motion.button>
+      </motion.div>
   );
 }
