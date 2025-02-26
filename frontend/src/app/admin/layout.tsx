@@ -8,7 +8,7 @@ import {
   MenubarMenu,
   MenubarSeparator,
   MenubarTrigger,
-} from "@/components/ui/menubar";
+} from "@/components/menubar";
 import { useRouter } from "next/navigation";
 
 export default function AdminLayout({
