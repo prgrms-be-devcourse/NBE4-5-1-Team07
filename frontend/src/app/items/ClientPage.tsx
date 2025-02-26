@@ -108,9 +108,7 @@ export default function ItemsPage() {
       <div className="flex flex-col gap-4">
         <div className="p-4">
           <div className="flex flex-row justify-between items-center pb-4">
-            <div className="pb-4">
-              상품 목록입니다. 상품을 누르면 상세 페이지로 이동합니다.
-            </div>
+            <div className="pb-4"></div>
 
             <div>
               {/* 정렬 버튼 */}
