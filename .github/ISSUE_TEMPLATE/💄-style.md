@@ -2,7 +2,7 @@
 name: "\U0001F484 Style"
 about: 신규 페이지 작성시 사용하는 템플릿입니다.
 title: "[Style]"
-labels: ''
+labels: "\U0001F308 frontend, \U0001F484 style"
 assignees: ''
 
 ---

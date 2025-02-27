@@ -2,7 +2,7 @@
 name: "⚡️Feature"
 about: 기능 관련 이슈 발생시 사용하는 템플릿입니다.
 title: "[FEAT]"
-labels: ''
+labels: "\U0001F525 backend, ✨ feat"
 assignees: ''
 
 ---
